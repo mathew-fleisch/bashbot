@@ -40,9 +40,37 @@ export ECS_REGION=xxxxxxxxxxxxx
 ### Sample config.json
 [sample-config.json](sample-config.json)
 
+### Setup (bare metal)
+
+```
+# Log in as root
+sudo -i
+
+# Install dependencies
+apt update
+apt upgrade -y
+apt install -y zip wget iputils-ping curl jq build-essential libssl-dev ssh python python-pip python3 python3-pip openssl file libgcrypt-dev git redis-server sudo build-essential libssl-dev awscli vim
+
+# Clone bashbot
+git clone https://github.com/eaze/bashbot.git /app
+
+# Create .env file
+touch /app/.env
+# add secrets/tokens
+
+# Copy Sample Config
+cp /app/sample-config.json /app/config.json
+
+# Create Admin Config
+touch /app/admin.json
+# add personal user id and channel id for public/private channels
+
+./start.sh
+```
+
 ### Setup (Docker)
 
-  - Fork bashbot to your organization
+  - clone bashbot locally
   - Create public and private s3 buckets to setup aws and store secrets
   - Define a .env file for environment variables save to private bucket and root of bashbot
   - Define a config.json and admin.json file and save to private bucket and root of bashbot
@@ -59,7 +87,7 @@ docker run -it bashbot:latest
 
 ### Setup (ECS)
 
-  - Fork bashbot to your organization
+  - clone bashbot locally
   - Create public and private s3 buckets to setup aws and store secrets
   - Setup ecs cluster, task definition, service and repository
   - Define a .env file for environment variables save to private bucket
