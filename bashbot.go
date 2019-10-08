@@ -15,7 +15,6 @@ import (
   "time"
   "unicode"
 
-  "github.com/go-redis/redis"
   strip "github.com/grokify/html-strip-tags-go"
   "github.com/joho/godotenv"
   "github.com/nlopes/slack"
@@ -24,11 +23,13 @@ import (
 var specials []func(event *slack.MessageEvent) bool
 
 // Slacking off with global vars
-var db *redis.Client
+// "github.com/go-redis/redis"
+// var db *redis.Client
 var api *slack.Client
 var rtm *slack.RTM
 var channelsByName map[string]string
-var yellkey string
+
+// var yellkey string
 var countkey string
 var emojiPattern *regexp.Regexp
 var slackUserPattern *regexp.Regexp
@@ -110,15 +111,15 @@ type Topic struct {
   LastSet int    `json:"last_set"`
 }
 
-func makeRedis() (r *redis.Client) {
-  address, found := os.LookupEnv("REDIS_ADDRESS")
-  if !found {
-    address = "127.0.0.1:6379"
-  }
-  log.Printf("using redis @ %s to store our data", address)
-  client := redis.NewClient(&redis.Options{Addr: address})
-  return client
-}
+// func makeRedis() (r *redis.Client) {
+//   address, found := os.LookupEnv("REDIS_ADDRESS")
+//   if !found {
+//     address = "127.0.0.1:6379"
+//   }
+//   log.Printf("using redis @ %s to store our data", address)
+//   client := redis.NewClient(&redis.Options{Addr: address})
+//   return client
+// }
 
 func makeChannelMap() {
   var admin Admin = getAdmin()
@@ -411,24 +412,24 @@ func shellOut(cmdArgs []string) string {
   return out
 }
 
-func yourBasicShout(event *slack.MessageEvent) bool {
-  // log.Printf("event.Text: ")
-  // log.Printf(event.Text)
-  if !isLoud(event.Text) {
-    return false
-  }
+// func yourBasicShout(event *slack.MessageEvent) bool {
+//   // log.Printf("event.Text: ")
+//   // log.Printf(event.Text)
+//   if !isLoud(event.Text) {
+//     return false
+//   }
 
-  // Your basic shout.
-  rejoinder, err := db.SRandMember(yellkey).Result()
-  if err != nil {
-    log.Printf("error selecting array: %s", err)
-    return false
-  }
-  yell(event.Channel, rejoinder)
-  // db.Incr(fmt.Sprintf("%s:count", countkey)).Result()
-  // db.SAdd(yellkey, event.Text).Result()
-  return true
-}
+//   // Your basic shout.
+//   rejoinder, err := db.SRandMember(yellkey).Result()
+//   if err != nil {
+//     log.Printf("error selecting array: %s", err)
+//     return false
+//   }
+//   yell(event.Channel, rejoinder)
+//   // db.Incr(fmt.Sprintf("%s:count", countkey)).Result()
+//   // db.SAdd(yellkey, event.Text).Result()
+//   return true
+// }
 
 // End special handlers
 
@@ -443,22 +444,22 @@ func stripWhitespace(str string) string {
   return b.String()
 }
 
-func isLoud(msg string) bool {
-  // log.Printf("msg: ")
-  // log.Printf(msg)
-  // strip tags & emoji
-  input := stripWhitespace(msg)
-  input = emojiPattern.ReplaceAllLiteralString(input, "")
-  input = slackUserPattern.ReplaceAllLiteralString(input, "")
-  input = puncPattern.ReplaceAllLiteralString(input, "")
-  input = strip.StripTags(input)
-  // log.Printf("input: ")
-  // log.Printf(input)
-  if len(input) < 3 {
-    return false
-  }
-  return strings.Contains(input, "pirate")
-}
+// func isLoud(msg string) bool {
+//   // log.Printf("msg: ")
+//   // log.Printf(msg)
+//   // strip tags & emoji
+//   input := stripWhitespace(msg)
+//   input = emojiPattern.ReplaceAllLiteralString(input, "")
+//   input = slackUserPattern.ReplaceAllLiteralString(input, "")
+//   input = puncPattern.ReplaceAllLiteralString(input, "")
+//   input = strip.StripTags(input)
+//   // log.Printf("input: ")
+//   // log.Printf(input)
+//   if len(input) < 3 {
+//     return false
+//   }
+//   return strings.Contains(input, "pirate")
+// }
 
 func yell(channel string, msg string) {
   var admin Admin = getAdmin()
@@ -605,21 +606,21 @@ func main() {
   // log.Printf("Admin Config: %+v\n", admin)
   var matchTrigger string = fmt.Sprintf("^%s", admin.Trigger)
 
-  rprefix, found := os.LookupEnv("REDIS_PREFIX")
-  if !found {
-    rprefix = "PB"
-  }
+  // rprefix, found := os.LookupEnv("REDIS_PREFIX")
+  // if !found {
+  //   rprefix = "PB"
+  // }
 
-  yellkey = fmt.Sprintf("%s:YELLS", rprefix)
-  countkey = fmt.Sprintf("%s:COUNT", rprefix)
+  // yellkey = fmt.Sprintf("%s:YELLS", rprefix)
+  // countkey = fmt.Sprintf("%s:COUNT", rprefix)
 
-  db = makeRedis()
-  card, err := db.SCard(yellkey).Result()
+  // db = makeRedis()
+  // card, err := db.SCard(yellkey).Result()
   if err != nil {
     // We fail NOW if we can't find our DB.
     log.Fatal(err)
   }
-  log.Printf(admin.AppName+" has %d things to say", card)
+  // log.Printf(admin.AppName+" has %d things to say", card)
 
   // Regular expressions we'll use a whole lot.
   // Should probably be in an intialization function to the side.
@@ -629,10 +630,10 @@ func main() {
   cmdPattern = regexp.MustCompile(matchTrigger)
 
   // Our special handlers. If they handled a message, they return true.
-  specials = []func(event *slack.MessageEvent) bool{
-    processCommand,
-    yourBasicShout,
-  }
+  specials = []func(event *slack.MessageEvent) bool{processCommand}
+  // processCommand,
+  // yourBasicShout,
+  // }
 
   rtm := api.NewRTM()
   go rtm.ManageConnection()
