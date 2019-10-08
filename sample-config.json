@@ -43,9 +43,9 @@
       "description": "Slap a specific user with a trout gif",
       "help": "bashbot slap [user]",
       "trigger": "slap",
-      "location": "./vendor",
+      "location": "./vendor/bashbot-scripts",
       "setup": "echo \"\"",
-      "command": "echo \"$(curl -s \"http://api.giphy.com/v1/gifs/search?q=slap+trout&limit=5&api_key=$GIPHY_API_KEY\" | jq -r '.data['$(((RANDOM%5)))'].images.original.url')\"",
+      "command": "./giphy.sh slap+trout 10",
       "parameters": [
         {
           "name": "user",
@@ -87,7 +87,7 @@
     },{
       "name": "Describe Command",
       "description": "Show the json object for a specific command",
-      "help": "bashbot describe [command]",
+      "help": "bashbot describeCommand [command]",
       "trigger": "describe",
       "location": "./vendor/bashbot-scripts",
       "setup": "echo \"\"",

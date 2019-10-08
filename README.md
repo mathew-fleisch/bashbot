@@ -51,31 +51,4 @@ ECS_REGION=xxxxxxxxxxxxx
 ```
 
 ### Sample config.json
-```
-{
-  "tools": [{
-      "name": "BashBot Help",
-      "description": "Show this message",
-      "help": "bashbot help",
-      "trigger": "help",
-      "location": "./",
-      "setup": "echo \"BashBot is a white-listed command injection tool for slack... written in go. Add this bot to the channel that you wish to carry out commands, and type \\`bashbot help\\` to see this message.\nRun \\`bashbot <command> help\\` to see whitelist of parameters.\nPossible \\`<commands>\\`:\"",
-      "command": "echo \"\\`\\`\\`\" && cat config.json | jq -r -c '.tools[] | \"\\(.help) - \\(.description)\"' && echo \"\\`\\`\\`\"",
-      "parameters": [],
-      "log": false,
-      "ephemeral": false,
-      "response": "text",
-      "permissions": ["all"]
-    }
-  ],
-  "dependencies": [
-    {
-      "name": "BashBot scripts Scripts",
-      "source": "https://$GIT_TOKEN@github.com/eaze/bashbot-scripts.git",
-      "install": "git clone ${source}",
-      "setup": "echo \"\""
-    }
-  ]
-}
-
-```
+[sample-config.json](sample-config.json)
