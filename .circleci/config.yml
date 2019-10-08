@@ -78,7 +78,7 @@ jobs:
             aws s3 cp $REMOTE_CONFIG_BUCKET/.env .env
             source .env
             $(aws ecr get-login --region ${ECS_REGION})
-            TASK_ARN=$(aws ecs list-tasks --cluster \$ECS_CLUSTER --service-name \$ECS_SERVICE --output text --query taskArns[0])
+            TASK_ARN=$(aws ecs list-tasks --cluster ${ECS_CLUSTER} --service-name ${ECS_SERVICE} --output text --query taskArns[0])
             echo "TASK_ARN = ${TASK_ARN}"
             if [ -z "${TASK_ARN}" ]; then
               echo "No existing task to restart"
