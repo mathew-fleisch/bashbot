@@ -13,7 +13,6 @@ import (
   "strconv"
   "strings"
   "time"
-  "unicode"
 
   "github.com/joho/godotenv"
   "github.com/nlopes/slack"
@@ -22,9 +21,6 @@ import (
 var specials []func(event *slack.MessageEvent) bool
 
 // Slacking off with global vars
-// "github.com/go-redis/redis"
-// strip "github.com/grokify/html-strip-tags-go"
-// var db *redis.Client
 var api *slack.Client
 var rtm *slack.RTM
 var channelsByName map[string]string
@@ -111,16 +107,6 @@ type Topic struct {
   LastSet int    `json:"last_set"`
 }
 
-// func makeRedis() (r *redis.Client) {
-//   address, found := os.LookupEnv("REDIS_ADDRESS")
-//   if !found {
-//     address = "127.0.0.1:6379"
-//   }
-//   log.Printf("using redis @ %s to store our data", address)
-//   client := redis.NewClient(&redis.Options{Addr: address})
-//   return client
-// }
-
 func makeChannelMap() {
   var admin Admin = getAdmin()
   log.Println("CONNECTED; ACQUIRING TARGETING DATA")
@@ -170,6 +156,38 @@ func getChannelNames(channelIds []string) []string {
     names = append(names, "all")
   }
   return names
+}
+
+func getAdmin() Admin {
+  jsonFile, err := os.Open("admin.json")
+  if err != nil {
+    fmt.Println(err)
+  }
+  defer jsonFile.Close()
+  byteValue, _ := ioutil.ReadAll(jsonFile)
+  var Admins Admins
+  json.Unmarshal(byteValue, &Admins)
+  return Admins.Admins[0]
+}
+
+func stringInSlice(a string, list []string) bool {
+  for _, b := range list {
+    if b == a {
+      return true
+    }
+  }
+  return false
+}
+
+func truncateString(str string, num int) string {
+  bnoden := str
+  if len(str) > num {
+    if num > 3 {
+      num -= 3
+    }
+    bnoden = str[0:num] + "..."
+  }
+  return bnoden
 }
 
 // Slack Command Processing
@@ -284,6 +302,7 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
   if authorized == false {
     unauthorized := ":redalert: You are not authorized to use this command in this channel.\nAllowed in: [" + strings.Join(allowedChannels, ", ") + "]"
     yell(channel, unauthorized)
+    yell(channel, cmdHelp)
     chatOpsLog(channel, user, thisTool.Trigger+" "+strings.Join(cmds, " "))
     chatOpsLog(channel, user, unauthorized)
     return true
@@ -368,14 +387,6 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
 func getUserChannelInfo(userid string, username string, channel string) string {
   return "export TRIGGERED_USER_ID=" + userid + " && export TRIGGERED_USER_NAME=" + username + " && export TRIGGERED_CHANNEL_ID=" + channel + " && export TRIGGERED_CHANNEL_NAME=" + strings.Join(getChannelNames([]string{channel}), "")
 }
-func stringInSlice(a string, list []string) bool {
-  for _, b := range list {
-    if b == a {
-      return true
-    }
-  }
-  return false
-}
 
 // Raw commands
 func processRawCommand(cmds []string, channel string, user string) bool {
@@ -412,55 +423,6 @@ func shellOut(cmdArgs []string) string {
   return out
 }
 
-// func yourBasicShout(event *slack.MessageEvent) bool {
-//   // log.Printf("event.Text: ")
-//   // log.Printf(event.Text)
-//   if !isLoud(event.Text) {
-//     return false
-//   }
-
-//   // Your basic shout.
-//   rejoinder, err := db.SRandMember(yellkey).Result()
-//   if err != nil {
-//     log.Printf("error selecting array: %s", err)
-//     return false
-//   }
-//   yell(event.Channel, rejoinder)
-//   // db.Incr(fmt.Sprintf("%s:count", countkey)).Result()
-//   // db.SAdd(yellkey, event.Text).Result()
-//   return true
-// }
-
-// End special handlers
-
-func stripWhitespace(str string) string {
-  var b strings.Builder
-  b.Grow(len(str))
-  for _, ch := range str {
-    if !unicode.IsSpace(ch) {
-      b.WriteRune(ch)
-    }
-  }
-  return b.String()
-}
-
-// func isLoud(msg string) bool {
-//   // log.Printf("msg: ")
-//   // log.Printf(msg)
-//   // strip tags & emoji
-//   input := stripWhitespace(msg)
-//   input = emojiPattern.ReplaceAllLiteralString(input, "")
-//   input = slackUserPattern.ReplaceAllLiteralString(input, "")
-//   input = puncPattern.ReplaceAllLiteralString(input, "")
-//   input = strip.StripTags(input)
-//   // log.Printf("input: ")
-//   // log.Printf(input)
-//   if len(input) < 3 {
-//     return false
-//   }
-//   return strings.Contains(input, "pirate")
-// }
-
 func yell(channel string, msg string) {
   var admin Admin = getAdmin()
   channelID, _, err := api.PostMessage(channel,
@@ -494,17 +456,6 @@ func whisper(channel string, user string, msg string) {
     return
   }
   log.Printf("Sent to %s: `%s`", channel, msg)
-}
-
-func truncateString(str string, num int) string {
-  bnoden := str
-  if len(str) > num {
-    if num > 3 {
-      num -= 3
-    }
-    bnoden = str[0:num] + "..."
-  }
-  return bnoden
 }
 
 func chatOpsLog(channel string, user string, msg string) {
@@ -579,18 +530,6 @@ func handleMessage(event *slack.MessageEvent) {
   }
 }
 
-func getAdmin() Admin {
-  jsonFile, err := os.Open("admin.json")
-  if err != nil {
-    fmt.Println(err)
-  }
-  defer jsonFile.Close()
-  byteValue, _ := ioutil.ReadAll(jsonFile)
-  var Admins Admins
-  json.Unmarshal(byteValue, &Admins)
-  return Admins.Admins[0]
-}
-
 func main() {
   var admin Admin = getAdmin()
   err := godotenv.Load(".env")
@@ -606,21 +545,9 @@ func main() {
   // log.Printf("Admin Config: %+v\n", admin)
   var matchTrigger string = fmt.Sprintf("^%s", admin.Trigger)
 
-  // rprefix, found := os.LookupEnv("REDIS_PREFIX")
-  // if !found {
-  //   rprefix = "PB"
-  // }
-
-  // yellkey = fmt.Sprintf("%s:YELLS", rprefix)
-  // countkey = fmt.Sprintf("%s:COUNT", rprefix)
-
-  // db = makeRedis()
-  // card, err := db.SCard(yellkey).Result()
   if err != nil {
-    // We fail NOW if we can't find our DB.
     log.Fatal(err)
   }
-  // log.Printf(admin.AppName+" has %d things to say", card)
 
   // Regular expressions we'll use a whole lot.
   // Should probably be in an intialization function to the side.
@@ -631,9 +558,6 @@ func main() {
 
   // Our special handlers. If they handled a message, they return true.
   specials = []func(event *slack.MessageEvent) bool{processCommand}
-  // processCommand,
-  // yourBasicShout,
-  // }
 
   rtm := api.NewRTM()
   go rtm.ManageConnection()
