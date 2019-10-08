@@ -42,12 +42,12 @@ jobs:
             echo "Get local .env file..."
             aws s3 cp $REMOTE_CONFIG_BUCKET/.env .env
             source .env
-            [ -z "${AWS_PUBLIC_SETUP_URL}" ] && echo "Missing aws setup file..."; exit 1;
+            [ -z "${AWS_PUBLIC_SETUP_URL}" ] && echo "Missing aws setup file..." && exit 1;
             curl $AWS_PUBLIC_SETUP_URL | bash
             echo "Global environment variables set."
             rm -rf ~/.gitconfig
-            [ -z "${GITHUB_USER}" ] && echo "Missing github env variable..."; exit 1;
-            [ -z "${GITHUB_TOKEN}" ] && echo "Missing github env variable..."; exit 1;
+            [ -z "${GITHUB_USER}" ] && echo "Missing github env variable..." && exit 1;
+            [ -z "${GITHUB_TOKEN}" ] && echo "Missing github env variable..." && exit 1;
             echo "machine github.com" >> ~/.netrc
             echo "  login $GITHUB_USER" >> ~/.netrc
             echo "  password $GITHUB_TOKEN" >> ~/.netrc
@@ -56,11 +56,11 @@ jobs:
             make
             make docker-no-sudo
             echo "Log into ecs."
-            [ -z "${ECS_REGION}" ] && echo "Missing ecs env variable [ECS_REGION]..."; exit 1;
-            [ -z "${ECS_URL}" ] && echo "Missing ecs env variable [ECS_URL]..."; exit 1;
-            [ -z "${ECS_CLUSTER}" ] && echo "Missing ecs env variable [ECS_CLUSTER]..."; exit 1;
-            [ -z "${ECS_SERVICE}" ] && echo "Missing ecs env variable [ECS_SERVICE]..."; exit 1;
-            [ -z "${ECS_REPO}" ] && echo "Missing ecs env variable [ECS_REPO]..."; exit 1;
+            [ -z "${ECS_REGION}" ] && echo "Missing ecs env variable [ECS_REGION]..." && exit 1;
+            [ -z "${ECS_URL}" ] && echo "Missing ecs env variable [ECS_URL]..." && exit 1;
+            [ -z "${ECS_CLUSTER}" ] && echo "Missing ecs env variable [ECS_CLUSTER]..." && exit 1;
+            [ -z "${ECS_SERVICE}" ] && echo "Missing ecs env variable [ECS_SERVICE]..." && exit 1;
+            [ -z "${ECS_REPO}" ] && echo "Missing ecs env variable [ECS_REPO]..." && exit 1;
             $(aws ecr get-login --region ${ECS_REGION})
             echo "Tag docker build."
             docker tag $ECS_REPO:latest $ECS_URL/$ECS_REPO:latest
