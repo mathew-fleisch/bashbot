@@ -76,6 +76,8 @@ jobs:
             export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
             echo "Get local .env file..."
             aws s3 cp $REMOTE_CONFIG_BUCKET/.env .env
+            aws s3 cp $REMOTE_CONFIG_BUCKET/config.json config.json
+            aws s3 cp $REMOTE_CONFIG_BUCKET/admin.json admin.json
             source .env
             $(aws ecr get-login --region ${ECS_REGION})
             TASK_ARN=$(aws ecs list-tasks --cluster $ECS_CLUSTER --service-name $ECS_SERVICE --output text --query taskArns[0])
