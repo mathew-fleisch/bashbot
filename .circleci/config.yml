@@ -1,0 +1,93 @@
+version: 2
+
+jobs:
+  install:
+    docker:
+      - image: golang:1.12.6
+
+    working_directory: ~/bashbot
+
+    steps:
+      - run: apt-get update
+      - run:
+          name: Install awscli
+          working_directory: /
+          command: apt-get -y -qq install awscli
+
+      - checkout
+
+      - setup_remote_docker:
+          version: 17.05.0-ce
+          docker_layer_caching: true 
+
+      - run:
+          name: Install Docker client
+          working_directory: /
+          command: |
+            set -x
+            VER="17.03.0-ce"
+            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+            mv /tmp/docker/* /usr/bin
+
+      - run:
+          name: build
+          command: |
+            echo "Starting build..."
+            export PATH="/usr/local/go/bin:$PATH"
+            export GOPATH=/opt/go/ 
+            export PATH=$PATH:$GOPATH/bin 
+            export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+            export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+            echo "Get local .env file..."
+            aws s3 cp $REMOTE_CONFIG_BUCKET/.env .env
+            source .env
+            [ -z "${AWS_PUBLIC_SETUP_URL}" ]; then echo "Missing aws setup file..."; exit 1; fi
+            curl $AWS_PUBLIC_SETUP_URL | bash
+            echo "Global environment variables set."
+            rm -rf ~/.gitconfig
+            [ -z "${GITHUB_USER}" ]; then echo "Missing github env variable..."; exit 1; fi
+            [ -z "${GITHUB_TOKEN}" ]; then echo "Missing github env variable..."; exit 1; fi
+            echo "machine github.com" >> ~/.netrc
+            echo "  login $GITHUB_USER" >> ~/.netrc
+            echo "  password $GITHUB_TOKEN" >> ~/.netrc
+            echo "Run docker build."
+            make clean
+            make
+            make docker-no-sudo
+            echo "Log into ecs."
+            [ -z "${ECS_REGION}" ]; then echo "Missing ecs env variable [ECS_REGION]..."; exit 1; fi
+            [ -z "${ECS_URL}" ]; then echo "Missing ecs env variable [ECS_URL]..."; exit 1; fi
+            [ -z "${ECS_CLUSTER}" ]; then echo "Missing ecs env variable [ECS_CLUSTER]..."; exit 1; fi
+            [ -z "${ECS_SERVICE}" ]; then echo "Missing ecs env variable [ECS_SERVICE]..."; exit 1; fi
+            [ -z "${ECS_REPO}" ]; then echo "Missing ecs env variable [ECS_REPO]..."; exit 1; fi
+            $(aws ecr get-login --region ${ECS_REGION})
+            echo "Tag docker build."
+            docker tag $ECS_REPO:latest $ECS_URL/$ECS_REPO:latest
+            echo "Push container to ecr"
+            docker push $ECS_URL/$ECS_REPO:latest
+
+      - run:
+          name: deploy
+          command: |
+            export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+            export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+            echo "Get local .env file..."
+            aws s3 cp $REMOTE_CONFIG_BUCKET/.env .env
+            source .env
+            $(aws ecr get-login --region ${ECS_REGION})
+            TASK_ARN=$(aws ecs list-tasks --cluster $ECS_CLUSTER --service-name $ECS_SERVICE --output text --query taskArns[0])
+            aws ecs stop-task --cluster $ECS_CLUSTER --task $TASK_ARN
+            echo "Fargate ecs containers automatically start up after being stopped."
+
+# WORKFLOW - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+workflows:
+  version: 2
+  build-and-deploy:     
+    jobs:
+      - install:
+          filters:
+            branches:
+              only: master
+
+
