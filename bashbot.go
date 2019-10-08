@@ -15,7 +15,6 @@ import (
   "time"
   "unicode"
 
-  strip "github.com/grokify/html-strip-tags-go"
   "github.com/joho/godotenv"
   "github.com/nlopes/slack"
 )
@@ -24,6 +23,7 @@ var specials []func(event *slack.MessageEvent) bool
 
 // Slacking off with global vars
 // "github.com/go-redis/redis"
+// strip "github.com/grokify/html-strip-tags-go"
 // var db *redis.Client
 var api *slack.Client
 var rtm *slack.RTM
