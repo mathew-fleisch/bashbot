@@ -41,6 +41,8 @@ jobs:
             export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
             echo "Get local .env file..."
             aws s3 cp $REMOTE_CONFIG_BUCKET/.env .env
+            aws s3 cp $REMOTE_CONFIG_BUCKET/config.json config.json
+            aws s3 cp $REMOTE_CONFIG_BUCKET/admin.json admin.json
             source .env
             [ -z "${AWS_PUBLIC_SETUP_URL}" ] && echo "Missing aws setup file..." && exit 1;
             curl $AWS_PUBLIC_SETUP_URL | bash
