@@ -24,11 +24,6 @@ COPY . .
 
 RUN cat /bashbot/.env >> ~/.bashrc
 RUN source ~/.bashrc
-RUN eval $(cat /bashbot/.env) && echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
-RUN echo 'registry=https://registry.npmjs.org/' >> ~/.npmrc
-
-WORKDIR /bashbot
 RUN go install -v ./...
-
 
 CMD ["/bin/bash", "start.sh"]
