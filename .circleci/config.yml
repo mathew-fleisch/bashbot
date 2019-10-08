@@ -77,6 +77,9 @@ jobs:
             echo "Get local .env file..."
             aws s3 cp $REMOTE_CONFIG_BUCKET/.env .env
             source .env
+            echo "ECS_REGION=${ECS_REGION}"
+            echo "ECS_CLUSTER=${ECS_CLUSTER}"
+            echo "ECS_SERVICE=${ECS_SERVICE}"
             $(aws ecr get-login --region ${ECS_REGION})
             TASK_ARN=$(aws ecs list-tasks --cluster ${ECS_CLUSTER} --service-name ${ECS_SERVICE} --output text --query taskArns[0])
             echo "TASK_ARN = ${TASK_ARN}"
