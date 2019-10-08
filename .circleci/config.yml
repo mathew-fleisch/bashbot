@@ -81,8 +81,13 @@ jobs:
             source .env
             $(aws ecr get-login --region ${ECS_REGION})
             TASK_ARN=$(aws ecs list-tasks --cluster $ECS_CLUSTER --service-name $ECS_SERVICE --output text --query taskArns[0])
-            aws ecs stop-task --cluster $ECS_CLUSTER --task $TASK_ARN
-            echo "Fargate ecs containers automatically start up after being stopped."
+            echo $TASK_ARN
+            if [ -z "${TASK_ARN}" ]; then
+              echo "No existing task to restart"
+            else
+              aws ecs stop-task --cluster $ECS_CLUSTER --task $TASK_ARN
+              echo "Fargate ecs containers automatically start up after being stopped."
+            fi
 
 # WORKFLOW - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 workflows:
