@@ -46,6 +46,16 @@ type Admin struct {
   LogChannelId     string   `json:"logChannelId"`
 }
 
+type Messages struct {
+  Messages []Message `json:"messages"`
+}
+
+type Message struct {
+  Active bool   `json:"active"`
+  Name   string `json:"name"`
+  Text   string `json:"text"`
+}
+
 type Tools struct {
   Tools []Tool `json:"tools"`
 }
@@ -122,7 +132,7 @@ func makeChannelMap() {
 
   address, found := os.LookupEnv("WELCOME_CHANNEL")
   if found {
-    yell(findChannelByName(address), "Witness the power of "+admin.AppName)
+    reportToChannel(findChannelByName(address), "welcome", admin.AppName)
   }
   log.Println(admin.AppName + " IS NOW OPERATIONAL")
 }
@@ -206,7 +216,6 @@ func processCommand(event *slack.MessageEvent) bool {
   var triggered string
   var thisTool Tool
   var cmd []string
-  // fmt.Println(words, len(words))
 
   for index, element := range words {
     log.Printf(fmt.Sprintf("%s:%s", index, element))
@@ -219,7 +228,6 @@ func processCommand(event *slack.MessageEvent) bool {
   if err != nil {
     fmt.Println(err)
   }
-  // fmt.Println("Successfully Opened config.json")
   defer jsonFile.Close()
 
   byteValue, _ := ioutil.ReadAll(jsonFile)
@@ -235,13 +243,13 @@ func processCommand(event *slack.MessageEvent) bool {
 
   switch words[1] {
   case triggered:
-    yell(event.Channel, ":bender: Processing command...")
+    reportToChannel(event.Channel, "processing_command", "")
     return processWhitelistedCommand(cmd, thisTool, event.Channel, event.User)
   case "cmd":
-    yell(event.Channel, ":cat_typing: Processing raw command...")
+    reportToChannel(event.Channel, "processing_raw_command", "")
     return processRawCommand(cmd, event.Channel, event.User)
   default:
-    yell(event.Channel, ":thinkspin: Command not found...")
+    reportToChannel(event.Channel, "command_not_found", "")
     return false
 
   }
@@ -292,7 +300,6 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
   if len(cmds) > 0 {
     for j := 0; j < len(cmds); j++ {
       if cmds[j] == "help" {
-        // fmt.Println(cmdHelp)
         yell(channel, cmdHelp)
         return true
       }
@@ -300,11 +307,9 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
   }
 
   if authorized == false {
-    unauthorized := ":redalert: You are not authorized to use this command in this channel.\nAllowed in: [" + strings.Join(allowedChannels, ", ") + "]"
-    yell(channel, unauthorized)
+    reportToChannel(channel, "unauthorized", strings.Join(allowedChannels, ", "))
     yell(channel, cmdHelp)
     chatOpsLog(channel, user, thisTool.Trigger+" "+strings.Join(cmds, " "))
-    chatOpsLog(channel, user, unauthorized)
     return true
   }
 
@@ -335,8 +340,7 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
   if len(thisTool.Parameters) > 0 {
     // fmt.Println("Passed cmds: " + strconv.Itoa(len(cmds)) + " ?= " + strconv.Itoa(len(thisTool.Parameters)))
     if len(cmds) != len(thisTool.Parameters) {
-      yell(channel, "Incorrect number of parameters")
-      // fmt.Println(cmdHelp)
+      reportToChannel(channel, "incorrect_parameters", "")
       yell(channel, cmdHelp)
       return true
     }
@@ -358,7 +362,7 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
   for x := 0; x < len(cmds); x++ {
     // fmt.Println("cmd[" + strconv.Itoa(x) + "]: " + cmds[x] + " -> " + strconv.FormatBool(validParams[x]))
     if validParams[x] == false {
-      yell(channel, "Invalid parameter value: "+thisTool.Parameters[x].Name)
+      reportToChannel(channel, "invalid_parameter", thisTool.Parameters[x].Name)
       return false
     }
     re := regexp.MustCompile(`\${` + thisTool.Parameters[x].Name + `}`)
@@ -369,12 +373,11 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
   fmt.Printf("%q\n", buildCmd)
 
   tmpCmd := []string{"bash", "-c", buildCmd}
-  // chatOpsLog(channel, user, strings.Join(tmpCmd, " "))
 
   ret := splitOut(shellOut(tmpCmd), thisTool.Response)
 
   if thisTool.Ephemeral == true {
-    yell(channel, "Message only shown to user who triggered it.")
+    reportToChannel(channel, "ephemeral", "")
     whisper(channel, user, ret)
   } else {
     yell(channel, ret)
@@ -400,9 +403,9 @@ func processRawCommand(cmds []string, channel string, user string) bool {
     chatOpsLog(channel, user, ret)
     return true
   } else {
-    yell(channel, ":redalert: Unauthorized!")
+    reportToChannel(channel, "unauthorized", "")
     chatOpsLog(channel, user, strings.Join(cmds, " "))
-    chatOpsLog(channel, user, ":redalert: Unauthorized!")
+    chatOpsLog(channel, user, "Unauthorized raw command!!!")
     return true
   }
 }
@@ -421,6 +424,38 @@ func shellOut(cmdArgs []string) string {
   out := string(cmdOut)
   fmt.Println(cmdName, out)
   return out
+}
+func reportToChannel(channel string, message string, passalong string) {
+  jsonFile, err := os.Open("messages.json")
+  if err != nil {
+    fmt.Println(err)
+  }
+  defer jsonFile.Close()
+
+  byteValue, _ := ioutil.ReadAll(jsonFile)
+  var Messages Messages
+  json.Unmarshal(byteValue, &Messages)
+
+  isActive := true
+  retMessage := message
+
+  for i := 0; i < len(Messages.Messages); i++ {
+    fmt.Printf(Messages.Messages[i].Name)
+    if Messages.Messages[i].Name == message {
+      isActive = Messages.Messages[i].Active
+      if len(passalong) > 0 {
+        retMessage = fmt.Sprintf(Messages.Messages[i].Text, passalong)
+      } else {
+        retMessage = Messages.Messages[i].Text
+      }
+    }
+  }
+  if isActive {
+    yell(channel, retMessage)
+  } else {
+    log.Printf("Message suppressed by configuration:\n%s\n", retMessage)
+  }
+
 }
 
 func yell(channel string, msg string) {
