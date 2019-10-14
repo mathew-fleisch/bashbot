@@ -28,14 +28,14 @@ run: install
 
 docker-no-sudo:
 	go mod vendor
-	docker build -t bashbot .
+	docker build -t eazedoutbot .
 
 docker:
 	go mod vendor
-	docker build -t bashbot .
+	docker build -t eazedoutbot .
 
 docker-run: docker
-	docker run bashbot:latest
+	docker run eazedoutbot:latest
 
 test:
 	go test -cover $(PKGS)
