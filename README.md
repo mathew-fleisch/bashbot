@@ -2,7 +2,6 @@
 
 BashBot is a whitelisted command injection tool for slack. A [config.json](sample-config.json) file defines the possible commands that can be run as well as all of the parameters that can be passed to those commands. This bot uses circleci to build a docker container, that is pushed to AWS ECR and is run in ECS. Sensitive commands can be restricted to specific slack channels. Import other repositories like [bashbot-scripts](https://github.com/eaze/bashbot-scripts) to extend functionality, and reduce clutter in the configuration file.
 
-
 ### Sample .env file
 ```
 # GitHub credentials
@@ -67,7 +66,6 @@ touch /app/admin.json
 
 ./start.sh
 ```
-
 ### Setup (Docker)
 
   - clone bashbot locally

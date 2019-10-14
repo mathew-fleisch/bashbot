@@ -21,6 +21,7 @@ ENV PATH $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
 WORKDIR /bashbot
 COPY . .
+RUN mkdir -p vendor
 
 RUN cat /bashbot/.env >> ~/.bashrc
 RUN source ~/.bashrc
