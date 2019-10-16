@@ -40,6 +40,8 @@ jobs:
             export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
             export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
             echo "Get local .env file..."
+            cp sample-config.json config.json
+            cp sample-messages.json messages.json
             aws s3 cp $REMOTE_CONFIG_BUCKET/.env .env
             aws s3 cp $REMOTE_CONFIG_BUCKET/config.json config.json
             aws s3 cp $REMOTE_CONFIG_BUCKET/messages.json messages.json
