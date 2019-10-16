@@ -39,6 +39,9 @@ export ECS_REGION=xxxxxxxxxxxxx
 ### Sample config.json
 [sample-config.json](sample-config.json)
 
+### Sample messages.json
+[messages-config.json](messages-config.json)
+
 ### Setup (bare metal)
 
 ```
