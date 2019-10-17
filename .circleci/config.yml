@@ -10,8 +10,15 @@ jobs:
           name: Do Nothing
           command: ls -la
 # This section requires aws access to a private s3 bucket, and an 
-#   ecs cluster+repository+task-definition+ecs-service already set up.
-# The s3 bucket must contain the following files: .env, admin.config, config.json, messages.json
+# ecs cluster, repository, task-definition and ecs-service already set up.
+# The s3 bucket must contain the following files:
+#   - .env, admin.config, config.json, messages.json
+# Required Environment Variables:
+#   - AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,
+#     REMOTE_CONFIG_BUCKET, AWS_PUBLIC_SETUP_URL,
+#     ECS_REPO, ECS_SERVICE, ECS_CLUSTER, ECS_REGION,
+#     GITHUB_TOKEN, GITHUB_USER
+#
 # See the read-me for content guidelines
   ecs_deploy:
     docker:
@@ -49,9 +56,9 @@ jobs:
             export PATH=$PATH:$GOPATH/bin 
             export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
             export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-            echo "Get local .env file..."
             cp sample-config.json config.json
             cp sample-messages.json messages.json
+            echo "Get local .env file, and config files..."
             aws s3 cp $REMOTE_CONFIG_BUCKET/.env .env
             aws s3 cp $REMOTE_CONFIG_BUCKET/config.json config.json
             aws s3 cp $REMOTE_CONFIG_BUCKET/messages.json messages.json

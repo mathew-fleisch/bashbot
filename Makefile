@@ -9,6 +9,11 @@ $(TARGET): $(SRC)
 	@echo "compiling $(TARGET)"
 	@go build $(LDFLAGS) -o $(TARGET)
 
+check-env:
+	ifndef ECS_REPO
+		$(error ECS_REPO is undefined)
+	endif
+
 build: $(TARGET)
 	@true
 
@@ -28,14 +33,14 @@ run: install
 
 docker-no-sudo:
 	go mod vendor
-	docker build -t bashbot .
+	docker build -t $(ECS_REPO) .
 
 docker:
 	go mod vendor
-	docker build -t bashbot .
+	docker build -t $(ECS_REPO) .
 
 docker-run: docker
-	docker run bashbot:latest
+	docker run $(ECS_REPO):latest
 
 test:
 	go test -cover $(PKGS)
