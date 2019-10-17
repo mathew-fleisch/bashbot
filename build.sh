@@ -29,8 +29,8 @@ Usage: ./build.sh [arguments]
     --type           [ecs,docker]
       type[ecs]
           --config-bucket       [s3-bucket]
-          --circle-token      [circle-token]
-          --circle-project    [circle-organization-fork]
+          --circle-token        [circle-token]
+          --circle-project      [circle-organization-fork]
       type[docker]
           --config-bucket       [s3-bucket]
 EOF
@@ -41,14 +41,13 @@ EOF
 echo "Building: $BUILD_TYPE"
 if [ "$BUILD_TYPE" == "ecs" ]; then
     [ -z "$REMOTE_CONFIG_BUCKET" ] && echo "Missing remote config s3 bucket." && exit 1;
-    [ -z "$CIRCLE_TOKEN" ] && echo "Missing circleci token." && exit 1;
-    [ -z "$CIRCLE_PROJECT" ] && echo "Missing circleci project (organization/fork)." && exit 1;
+    [ -z "$CIRCLE_TOKEN" ] && echo "Missing circle token." && exit 1;
+    [ -z "$CIRCLE_PROJECT" ] && echo "Missing circle project (organization/fork)." && exit 1;
 
     CIRCLE_URL="https://circleci.com/gh/$CIRCLE_PROJECT"
     BUILD_URL="https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT/tree/master?circle-token=$CIRCLE_TOKEN"
     json=$(jq -c -r -n '{"build_parameters":{"CIRCLE_JOB":"ecs_deploy","REMOTE_CONFIG_BUCKET":"'$REMOTE_CONFIG_BUCKET'"}}')
     response=$(curl -s -X POST --data $json --header "Content-Type:application/json" --url "$BUILD_URL")
-    echo "$response"
     echo "$CIRCLE_URL/$(echo $response | jq -r -c '.build_num')"
 fi
 
@@ -59,7 +58,7 @@ if [ "$BUILD_TYPE" == "docker" ]; then
     aws s3 cp $REMOTE_CONFIG_BUCKET/config.json config.json
     aws s3 cp $REMOTE_CONFIG_BUCKET/messages.json messages.json
     aws s3 cp $REMOTE_CONFIG_BUCKET/admin.json admin.json
-    
+
     docker build -t bashbot .
     echo "Run: docker run -it bashbot:latest"
 fi
