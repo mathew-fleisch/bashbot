@@ -40,7 +40,7 @@ export ECS_REGION=xxxxxxxxxxxxx
 [sample-config.json](sample-config.json)
 
 ### Sample messages.json
-[messages-config.json](messages-config.json)
+[sample-messages.json](sample-messages.json)
 
 ### Setup (bare metal)
 
@@ -63,6 +63,9 @@ touch /app/.env
 # Copy Sample Config
 cp /app/sample-config.json /app/config.json
 
+# Copy Sample Messages Config
+cp /app/sample-messages.json /app/messages.json
+
 # Create Admin Config
 touch /app/admin.json
 # add personal user id and channel id for public/private channels
@@ -74,10 +77,10 @@ touch /app/admin.json
   - clone bashbot locally
   - Create public and private s3 buckets to setup aws and store secrets
   - Define a .env file for environment variables save to private bucket and root of bashbot
-  - Define a config.json and admin.json file and save to private bucket and root of bashbot
+  - Define a config.json, messages.json and admin.json file and save to private bucket and root of bashbot
 
 ```
-# Create .env, config.json and admin.json
+# Create .env, config.json, messages.json and admin.json
 
 # Build Docker Container
 docker build -t bashbot .
@@ -92,7 +95,7 @@ docker run -it bashbot:latest
   - Create public and private s3 buckets to setup aws and store secrets
   - Setup ecs cluster, task definition, service and repository
   - Define a .env file for environment variables save to private bucket
-  - Define a config.json and admin.json file and save to private bucket
+  - Define a config.json, messages.json and admin.json file and save to private bucket
 
 ### CircleCi Environment Variables
 ```
