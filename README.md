@@ -54,20 +54,20 @@ apt upgrade -y
 apt install -y zip wget iputils-ping curl jq build-essential libssl-dev ssh python python-pip python3 python3-pip openssl file libgcrypt-dev git redis-server sudo build-essential libssl-dev awscli vim
 
 # Clone bashbot
-git clone https://github.com/eaze/bashbot.git /app
+git clone https://github.com/eaze/bashbot.git /bashbot
 
 # Create .env file
-touch /app/.env
+touch /bashbot/.env
 # add secrets/tokens
 
 # Copy Sample Config
-cp /app/sample-config.json /app/config.json
+cp /bashbot/sample-config.json /bashbot/config.json
 
 # Copy Sample Messages Config
-cp /app/sample-messages.json /app/messages.json
+cp /bashbot/sample-messages.json /bashbot/messages.json
 
 # Create Admin Config
-touch /app/admin.json
+touch /bashbot/admin.json
 # add personal user id and channel id for public/private channels
 
 ./start.sh

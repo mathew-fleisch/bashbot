@@ -1,12 +1,22 @@
 version: 2
 
 jobs:
-  install:
+  build:
     docker:
       - image: golang:1.12.6
-
     working_directory: ~/bashbot
-
+    steps:
+      - run:
+          name: Do Nothing
+          command: ls -la
+# This section requires aws access to a private s3 bucket, and an 
+#   ecs cluster+repository+task-definition+ecs-service already set up.
+# The s3 bucket must contain the following files: .env, admin.config, config.json, messages.json
+# See the read-me for content guidelines
+  ecs_deploy:
+    docker:
+      - image: golang:1.12.6
+    working_directory: ~/bashbot
     steps:
       - run: apt-get update
       - run:
@@ -96,12 +106,22 @@ jobs:
 
 # WORKFLOW - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 workflows:
-  version: 2
-  build-and-deploy:     
+  version: 2  
+  ad-hoc-build-processes:
     jobs:
-      - install:
+      - build:
           filters:
             branches:
-              only: master
+              only: never-build-this-automatically  
+      - ecs_deploy:
+          filters:
+            branches:
+              only: never-build-this-automatically     
+  # build-and-deploy:
+    # jobs:
+    #   - install:
+    #       filters:
+    #         branches:
+    #           only: master
 
 

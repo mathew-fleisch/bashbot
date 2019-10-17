@@ -77,7 +77,7 @@
       "trigger": "upgrade",
       "location": "./",
       "setup": "echo \"Pulling new configuration file, from s3.\"",
-      "command": "aws s3 cp $REMOTE_CONFIG_BUCKET/config.json config.json && rm -rf ./vendor/* && ./init.sh",
+      "command": "aws s3 cp $REMOTE_CONFIG_BUCKET/config.json config.json && rm -rf ./vendor/* && ./install-dependencies.sh",
       "parameters": [],
       "log": false,
       "ephemeral": true,
@@ -121,7 +121,7 @@
   "dependencies": [
     {
       "name": "BashBot scripts Scripts",
-      "source": "https://$GIT_TOKEN@github.com/eaze/bashbot-scripts.git",
+      "source": "https://$GITHUB_TOKEN@github.com/eaze/bashbot-scripts.git",
       "install": "git clone ${source}",
       "setup": "echo \"\""
     },

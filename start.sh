@@ -1,7 +1,13 @@
 #!/bin/bash
 
 source ~/.bashrc
-curl $AWS_PUBLIC_SETUP_URL | bash
-cd /bashbot
-./init.sh
-go run bashbot.go
+if [[ ! -z $AWS_PUBLIC_SETUP_URL ]]; then
+  curl $AWS_PUBLIC_SETUP_URL | bash
+fi
+if [[ -f bashbot.go ]]; then
+  ./install-dependencies.sh
+  go run bashbot.go
+else
+  echo "Must run start from project root."
+  exit 1
+fi
