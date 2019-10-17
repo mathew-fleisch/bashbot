@@ -81,9 +81,12 @@ touch /bashbot/admin.json
 
 ```
 # Create .env, config.json, messages.json and admin.json
+aws s3 cp .env s3://[bucket-path]/.env
+aws s3 cp admin.json s3://[bucket-path]/admin.json
+aws s3 cp config.json s3://[bucket-path]/config.json
+aws s3 cp messages.json s3://[bucket-path]/messages.json
 
-# Build Docker Container
-docker build -t bashbot .
+./build.sh --type docker --config-bucket [bucket-path]
 
 # Run Docker Container
 docker run -it bashbot:latest
@@ -96,6 +99,16 @@ docker run -it bashbot:latest
   - Setup ecs cluster, task definition, service and repository
   - Define a .env file for environment variables save to private bucket
   - Define a config.json, messages.json and admin.json file and save to private bucket
+
+```
+# Create .env, config.json, messages.json and admin.json
+aws s3 cp .env s3://[bucket-path]/.env
+aws s3 cp admin.json s3://[bucket-path]/admin.json
+aws s3 cp config.json s3://[bucket-path]/config.json
+aws s3 cp messages.json s3://[bucket-path]/messages.json
+
+./build.sh --type ecs --config-bucket [bucket-path] --circle-token [circleci-token] --circle-project [circleci-project]
+```
 
 ### CircleCi Environment Variables
 ```
