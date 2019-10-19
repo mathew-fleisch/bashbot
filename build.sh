@@ -1,19 +1,4 @@
-while [[ $# -gt 0 ]] && [[ "$1" == "--"* ]]; do
-  opt="$1";
-  shift;
-  case "$opt" in
-      "--" ) break 2;;
-      "--type" )
-         BUILD_TYPE="$1"; shift;;
-      "--config-bucket" )
-         REMOTE_CONFIG_BUCKET="$1"; shift;;
-      "--circle-token" )
-         CIRCLE_TOKEN="$1"; shift;;
-      "--circle-project" )
-         CIRCLE_PROJECT="$1"; shift;;
-      *) echo >&2 "Invalid option: $@"; exit 1;;
-  esac
-done
+#!/bin/bash
 
 IFS='' read -r -d '' help <<"EOF"
 ---------------------------------------
@@ -35,6 +20,22 @@ Usage: ./build.sh [arguments]
           --config-bucket       [s3-bucket]
 EOF
 
+while [[ $# -gt 0 ]] && [[ "$1" == "--"* ]]; do
+  opt="$1";
+  shift;
+  case "$opt" in
+      "--" ) break 2;;
+      "--type" )
+         BUILD_TYPE="$1"; shift;;
+      "--config-bucket" )
+         REMOTE_CONFIG_BUCKET="$1"; shift;;
+      "--circle-token" )
+         CIRCLE_TOKEN="$1"; shift;;
+      "--circle-project" )
+         CIRCLE_PROJECT="$1"; shift;;
+      *) echo >&2 "Invalid option: $@"; exit 1;;
+  esac
+done
 
 [[ ! -f "bashbot.go" ]] && echo "Must execute from project root" && exit 1;
 [ -z "$BUILD_TYPE" ] && echo "$help" && echo "Must chose a build type" && exit 1; 
