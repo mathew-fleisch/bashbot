@@ -37,6 +37,19 @@ while [[ $# -gt 0 ]] && [[ "$1" == "--"* ]]; do
   esac
 done
 
+get_s3_config () {
+    [ -z "$1" ] && echo "Missing remote config s3 bucket." && exit 1;
+    REMOTE_CONFIG_BUCKET="$1"
+    aws s3 cp $REMOTE_CONFIG_BUCKET/.env .env
+    [[ ! -f ".env" ]] && echo ".env file did not download" && exit 1;
+    aws s3 cp $REMOTE_CONFIG_BUCKET/config.json config.json
+    [[ ! -f "config.json" ]] && echo "config.json file did not download" && exit 1;
+    aws s3 cp $REMOTE_CONFIG_BUCKET/messages.json messages.json
+    [[ ! -f "messages.json" ]] && echo "messages.json file did not download" && exit 1;
+    aws s3 cp $REMOTE_CONFIG_BUCKET/admin.json admin.json
+    [[ ! -f "admin.json" ]] && echo "admin.json file did not download" && exit 1;
+}
+
 [[ ! -f "bashbot.go" ]] && echo "Must execute from project root" && exit 1;
 [ -z "$BUILD_TYPE" ] && echo "$help" && echo "Must chose a build type" && exit 1; 
 echo "Building: $BUILD_TYPE"
@@ -44,23 +57,23 @@ if [ "$BUILD_TYPE" == "ecs" ]; then
     [ -z "$REMOTE_CONFIG_BUCKET" ] && echo "Missing remote config s3 bucket." && exit 1;
     [ -z "$CIRCLE_TOKEN" ] && echo "Missing circle token." && exit 1;
     [ -z "$CIRCLE_PROJECT" ] && echo "Missing circle project (organization/fork)." && exit 1;
-
+    get_s3_config $REMOTE_CONFIG_BUCKET
     CIRCLE_URL="https://circleci.com/gh/$CIRCLE_PROJECT"
     BUILD_URL="https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT/tree/master?circle-token=$CIRCLE_TOKEN"
     json=$(jq -c -r -n '{"build_parameters":{"CIRCLE_JOB":"ecs_deploy","REMOTE_CONFIG_BUCKET":"'$REMOTE_CONFIG_BUCKET'"}}')
     response=$(curl -s -X POST --data $json --header "Content-Type:application/json" --url "$BUILD_URL")
     echo "$CIRCLE_URL/$(echo $response | jq -r -c '.build_num')"
+    exit 0
 fi
 
 
 if [ "$BUILD_TYPE" == "docker" ]; then
     [ -z "$REMOTE_CONFIG_BUCKET" ] && echo "Missing remote config s3 bucket." && exit 1;
-    aws s3 cp $REMOTE_CONFIG_BUCKET/.env .env
-    aws s3 cp $REMOTE_CONFIG_BUCKET/config.json config.json
-    aws s3 cp $REMOTE_CONFIG_BUCKET/messages.json messages.json
-    aws s3 cp $REMOTE_CONFIG_BUCKET/admin.json admin.json
-
+    get_s3_config $REMOTE_CONFIG_BUCKET
     docker build -t bashbot .
     echo "Run: docker run -it bashbot:latest"
+    exit 0
 fi
+echo "Build type not found..."
+exit 1
   

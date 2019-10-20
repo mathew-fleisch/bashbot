@@ -13,13 +13,12 @@ jobs:
 # ecs cluster, repository, task-definition and ecs-service already set up.
 # The s3 bucket must contain the following files:
 #   - .env, admin.config, config.json, messages.json
+# See the read-me for content guidelines
 # Required Environment Variables:
 #   - AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,
 #     REMOTE_CONFIG_BUCKET, AWS_PUBLIC_SETUP_URL,
 #     ECS_REPO, ECS_SERVICE, ECS_CLUSTER, ECS_REGION,
 #     GITHUB_TOKEN, GITHUB_USER
-#
-# See the read-me for content guidelines
   ecs_deploy:
     docker:
       - image: golang:1.12.6
@@ -119,16 +118,9 @@ workflows:
       - build:
           filters:
             branches:
-              only: never-build-this-automatically  
+              only: never-build-this-automatically
       - ecs_deploy:
           filters:
             branches:
-              only: never-build-this-automatically     
-  # build-and-deploy:
-    # jobs:
-    #   - install:
-    #       filters:
-    #         branches:
-    #           only: master
-
+              only: never-build-this-automatically
 
