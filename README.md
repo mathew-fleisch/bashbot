@@ -95,7 +95,7 @@ $ cat sample-config.json | jq '.tools[4]'
     }
 
 # parameters continued:
-In this example, a list of all 'trigger' values are extracted from the config.json and used as the
+# In this example, a list of all 'trigger' values are extracted from the config.json and used as the
 # parameter white-list. When the parameter list can be derived from output of another unix command,
 # it can be "piped" in using the 'source' key. The command must execute without additional stdin
 # input and consist of a newline separated list of values. The command jq is used to parse the json
