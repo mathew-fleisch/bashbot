@@ -23,6 +23,8 @@ export ECS_URL=xxxxxxxxxxxxx
 export ECS_REGION=xxxxxxxxxxxxx
 ```
 
+----------------------------------------------------------------
+
 ## admin.json
 ```
 {
@@ -36,8 +38,13 @@ export ECS_REGION=xxxxxxxxxxxxx
 }
 ```
 
+----------------------------------------------------------------
+
 ### messages.json
 [sample-messages.json](sample-messages.json)
+
+----------------------------------------------------------------
+
 
 ## config.json
 [sample-config.json](sample-config.json)
@@ -101,7 +108,7 @@ In this example, a user would type `bashbot list-commands` and that would then r
   "permissions": ["all"]
 }
 ```
-### parameters continued (1 of 2):
+#### parameters continued (1 of 2):
 There are a few ways to define parameters for a command, but the parameters passed to the bot MUST be white-listed. If the command can be triggered with no parameters, an empty array can be used as in the first example. If the command requires parameters, they can be a hard coded array of strings, or derived from another command. In this example, the hard-coded list of possible parameters is defined (random, question, answer). The `question` action essentially selects a random line in the `--questions-file` text file. The `answer` action does the same as questions, but with a greater-than sign appended to the string. Finally, the `random` action selects both, a random question and random answer from both linked text files.
 ```
 {
@@ -122,9 +129,7 @@ There are a few ways to define parameters for a command, but the parameters pass
   "permissions": ["all"]
 }
 ```
-
-
-### parameters continued (2 of 2): 
+#### parameters continued (2 of 2): 
 In this example, a list of all 'trigger' values are extracted from the config.json and used as the parameter white-list. When the parameter list can be derived from output of another unix command, it can be "piped" in using the 'source' key. The command must execute without additional stdin input and consist of a newline separated list of values. The command jq is used to parse the json file of all 'trigger' values in a newline separated list.
 ```
 {
@@ -148,6 +153,9 @@ In this example, a list of all 'trigger' values are extracted from the config.js
   "permissions": ["all"]
 }
 ```
+
+----------------------------------------------------------------
+
 
 ### Setup (bare metal)
 
@@ -179,6 +187,9 @@ touch /bashbot/admin.json
 
 ./start.sh
 ```
+
+----------------------------------------------------------------
+
 ### Setup (Docker)
 
   - clone bashbot locally
@@ -197,6 +208,9 @@ touch /bashbot/admin.json
 docker run -it bashbot:latest
 ```
 
+----------------------------------------------------------------
+
+
 ### Setup (ECS)
 
   - clone bashbot locally
@@ -212,6 +226,9 @@ docker run -it bashbot:latest
 # Run build command through circleci job
 ./bashbot.sh --action build-ecs --config-bucket [bucket-path] --circle-token [circleci-token] --circle-project [circleci-project]
 ```
+
+----------------------------------------------------------------
+
 
 ### CircleCi Environment Variables
 ```
