@@ -77,22 +77,22 @@ $ cat sample-config.json | jq '.tools[4]'
 # action does the same as questions, but with a greater-than sign appended to the string. Finally, the
 # 'random' action selects both, a random question and random answer from both linked text files.
 {
-      "name": "Cards Against Humanity",
-      "description": "Picks a random question and answer from a list.",
-      "help": "bashbot cah [random|question|answer]",
-      "trigger": "cah",
-      "location": "./vendor/bashbot-scripts",
-      "setup": "echo \"\"",
-      "command": "./cardsAgainstHumanity.sh --action ${action} --questions-file ../against-humanity/questions.txt --answers-file ../against-humanity/answers.txt",
-      "parameters": [{
-        "name": "action",
-        "allowed": ["random", "question", "answer"]
-      }],
-      "log": false,
-      "ephemeral": false,
-      "response": "text",
-      "permissions": ["all"]
-    }
+  "name": "Cards Against Humanity",
+  "description": "Picks a random question and answer from a list.",
+  "help": "bashbot cah [random|question|answer]",
+  "trigger": "cah",
+  "location": "./vendor/bashbot-scripts",
+  "setup": "echo \"\"",
+  "command": "./cardsAgainstHumanity.sh --action ${action} --questions-file ../against-humanity/questions.txt --answers-file ../against-humanity/answers.txt",
+  "parameters": [{
+    "name": "action",
+    "allowed": ["random", "question", "answer"]
+  }],
+  "log": false,
+  "ephemeral": false,
+  "response": "text",
+  "permissions": ["all"]
+}
 
 # parameters continued:
 # In this example, a list of all 'trigger' values are extracted from the config.json and used as the
