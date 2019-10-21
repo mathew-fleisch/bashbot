@@ -38,6 +38,79 @@ export ECS_REGION=xxxxxxxxxxxxx
 
 ### Sample config.json
 [sample-config.json](sample-config.json)
+```
+# Config files are defined as an array of json objects
+$ cat sample-config.json | jq '.tools[4]'
+{
+  "name": "List Commands",
+  "description": "List all of the possible commands stored in bashbot",
+  "help": "bashbot list-commands",
+  "trigger": "list-commands",
+  "location": "./",
+  "setup": "echo \"\"",
+  "command": "cat config.json | jq -r '.tools[] | .trigger' | sort",
+  "parameters": [],
+  "log": false,
+  "ephemeral": false,
+  "response": "code",
+  "permissions": ["all"]
+}
+
+# name, description and help provide human readable information about the specific command
+# trigger:      unique alphanumeric word that represents the command
+# location:     absolute or relative path to dependency directory (use "./" for no dependency)
+# setup:        command that is run before the main command. (use "echo \"\"" as a default)
+# command:      bash command using ${parameter-name} to inject white-listed parameters or environment variables
+# parameters:   array of parameter objects. (more detail below)
+# log:          define whether the command should be logged in log channel
+# ephemeral:    define if the response should be shown to all, or just the user that triggered the command
+# response:     [code,text] code displays response in a code block, text displays response as raw text
+# permissions:  array of strings. private channel ids to restrict command access to
+
+# parameters continued:
+# There are a few ways to define parameters for a command, but the parameters passed to the bot MUST be white-listed. This is an attempt to ensure security of sensitive environment variables. If the command can be triggered with no parameters, an empty array can be used as in the first example. If the command requires parameters, they can be a hard coded array of strings, or derived from another command. In this example, the hard-coded list of possible parameters is defined (random, question, answer). The 'question' action essentially selects a random line in the 'questions-file' text file. The 'answer' action does the same as questions, but with a greater-than sign appended to the string. Finally, the 'random' action selects both, a random question and random answer from both linked text files.
+{
+      "name": "Cards Against Humanity",
+      "description": "Picks a random question and answer from a list.",
+      "help": "bashbot cah [random|question|answer]",
+      "trigger": "cah",
+      "location": "./vendor/bashbot-scripts",
+      "setup": "echo \"\"",
+      "command": "./cardsAgainstHumanity.sh --action ${action} --questions-file ../against-humanity/questions.txt --answers-file ../against-humanity/answers.txt",
+      "parameters": [{
+        "name": "action",
+        "allowed": ["random", "question", "answer"]
+      }],
+      "log": false,
+      "ephemeral": false,
+      "response": "text",
+      "permissions": ["all"]
+    }
+
+# parameters continued:
+In this example, a list of slack user ids are derived from a raw api request and used as the 
+{
+  "name": "Slap User",
+  "description": "Slap a specific user with a trout gif",
+  "help": "bashbot slap [user]",
+  "trigger": "slap",
+  "location": "./vendor/bashbot-scripts",
+  "setup": "echo \"\"",
+  "command": "./giphy.sh slap+trout 10",
+  "parameters": [
+    {
+      "name": "user",
+      "allowed": [],
+      "description": "tag a slack user",
+      "source": "curl -s \"https://slack.com/api/users.list?token=$SLACK_TOKEN\" | jq -r '.members[] | select(.deleted == false) | .id' | sort | sed -e 's/\\(.*\\)/<@\\1>/g'"
+    }
+  ],
+  "log": false,
+  "ephemeral": false,
+  "response": "text",
+  "permissions": ["all"]
+}
+```
 
 ### Sample messages.json
 [sample-messages.json](sample-messages.json)
@@ -80,13 +153,11 @@ touch /bashbot/admin.json
   - Define a config.json, messages.json and admin.json file and save to private bucket and root of bashbot
 
 ```
-# Create .env, config.json, messages.json and admin.json
-aws s3 cp .env s3://[bucket-path]/.env
-aws s3 cp admin.json s3://[bucket-path]/admin.json
-aws s3 cp config.json s3://[bucket-path]/config.json
-aws s3 cp messages.json s3://[bucket-path]/messages.json
+# Create/modify .env, config.json, messages.json, admin.json and `push-configs` to config s3 bucket
+./bashbot.sh --action push-configs --config-bucket [bucket-path] 
 
-./build.sh --type docker --config-bucket [bucket-path]
+# Run build command
+./bashbot.sh --action build-docker --config-bucket [bucket-path]
 
 # Run Docker Container
 docker run -it bashbot:latest
@@ -101,13 +172,11 @@ docker run -it bashbot:latest
   - Define a config.json, messages.json and admin.json file and save to private bucket
 
 ```
-# Create .env, config.json, messages.json and admin.json
-aws s3 cp .env s3://[bucket-path]/.env
-aws s3 cp admin.json s3://[bucket-path]/admin.json
-aws s3 cp config.json s3://[bucket-path]/config.json
-aws s3 cp messages.json s3://[bucket-path]/messages.json
+# Create/modify .env, config.json, messages.json, admin.json and `push-configs` to config s3 bucket
+./bashbot.sh --action push-configs --config-bucket [bucket-path] 
 
-./build.sh --type ecs --config-bucket [bucket-path] --circle-token [circleci-token] --circle-project [circleci-project]
+# Run build command through circleci job
+./bashbot.sh --action build-ecs --config-bucket [bucket-path] --circle-token [circleci-token] --circle-project [circleci-project]
 ```
 
 ### CircleCi Environment Variables

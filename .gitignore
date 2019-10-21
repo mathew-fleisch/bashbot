@@ -18,3 +18,5 @@ vendor/*
 config.json
 admin.json
 messages.json
+
+tmp/*

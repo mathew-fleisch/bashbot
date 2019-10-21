@@ -69,7 +69,7 @@
       "log": false,
       "ephemeral": true,
       "response": "code",
-      "permissions": ["GPBDP4UPN"]
+      "permissions": ["private-channel-id"]
     },{
       "name": "BashBot upgrade",
       "description": "Pulls a fresh config file from s3 and updates dependencies",
@@ -82,15 +82,31 @@
       "log": false,
       "ephemeral": true,
       "response": "code",
-      "permissions": ["GPBDP4UPN"]
+      "permissions": ["private-channel-id"]
     },{
       "name": "Cards Against Humanity",
       "description": "Picks a random question and answer from a list.",
-      "help": "bashbot cah",
+      "help": "bashbot cah [random|question|answer]",
       "trigger": "cah",
       "location": "./vendor/bashbot-scripts",
       "setup": "echo \"\"",
-      "command": "./getRandomCards.sh ../against-humanity/questions.txt ../against-humanity/answers.txt",
+      "command": "./cardsAgainstHumanity.sh --action ${action} --questions-file ../against-humanity/questions.txt --answers-file ../against-humanity/answers.txt",
+      "parameters": [{
+        "name": "action",
+        "allowed": ["random", "question", "answer"]
+      }],
+      "log": false,
+      "ephemeral": false,
+      "response": "text",
+      "permissions": ["all"]
+    },{
+      "name": "CAT FACTS",
+      "description": "Picks a random line from a text file",
+      "help": "bashbot cat-fact",
+      "trigger": "cat-fact",
+      "location": "./vendor/bashbot-scripts",
+      "setup": "echo \"\"",
+      "command": "./cardsAgainstHumanity.sh --action question --questions-file ./cat-facts.txt",
       "parameters": [],
       "log": false,
       "ephemeral": false,
