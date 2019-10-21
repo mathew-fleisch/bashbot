@@ -418,8 +418,8 @@ func shellOut(cmdArgs []string) string {
   var cmdName string
   cmdName, cmdArgs = cmdArgs[0], cmdArgs[1:]
   if cmdOut, err = exec.Command(cmdName, cmdArgs...).CombinedOutput(); err != nil {
-    fmt.Fprintln(os.Stderr, "There be an error running that command: ", err)
-    return ":skull_and_crossbones: There be an error running that command..."
+    fmt.Fprintln(os.Stderr, "error: ", err)
+    return err
   }
   out := string(cmdOut)
   fmt.Println(cmdName, out)

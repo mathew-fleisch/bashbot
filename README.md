@@ -1,6 +1,6 @@
 # BashBot
 
-BashBot is a whitelisted command injection tool for slack. A [config.json](sample-config.json) file defines the possible commands that can be run as well as all of the parameters that can be passed to those commands. This bot uses circleci to build a docker container, that is pushed to AWS ECR and is run in ECS. Sensitive commands can be restricted to specific slack channels. Import other repositories like [bashbot-scripts](https://github.com/eaze/bashbot-scripts) to extend functionality, and reduce clutter in the configuration file.
+BashBot is a white-listed command injection tool for slack. A [config.json](sample-config.json) file defines the possible commands that can be run as well as all of the parameters that can be passed to those commands. This bot uses circleci to build a docker container, that is pushed to AWS ECR and is run in ECS. Sensitive commands can be restricted to specific slack channels. Import other repositories like [bashbot-scripts](https://github.com/eaze/bashbot-scripts) to extend functionality, and reduce clutter in the configuration file.
 
 ### Sample .env file
 ```
@@ -64,7 +64,7 @@ $ cat sample-config.json | jq '.tools[4]'
 # parameters:   array of parameter objects. (more detail below)
 # log:          define whether the command should be logged in log channel
 # ephemeral:    define if the response should be shown to all, or just the user that triggered the command
-# response:     [code,text] code displays response in a code block, text displays response as raw text
+# response:     [code|text] code displays response in a code block, text displays response as raw text
 # permissions:  array of strings. private channel ids to restrict command access to
 
 # parameters continued:
@@ -88,7 +88,7 @@ $ cat sample-config.json | jq '.tools[4]'
     }
 
 # parameters continued:
-In this example, a list of slack user ids are derived from a raw api request and used as the 
+In this example, a list of slack user ids are derived from a raw api request and used as the parameter white-list.
 {
   "name": "Slap User",
   "description": "Slap a specific user with a trout gif",

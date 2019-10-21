@@ -100,6 +100,12 @@ if [ "$ACTION" == "build-ecs" ]; then
     BUILD_URL="https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT/tree/master?circle-token=$CIRCLE_TOKEN"
     json=$(jq -c -r -n '{"build_parameters":{"CIRCLE_JOB":"ecs_deploy","REMOTE_CONFIG_BUCKET":"'$REMOTE_CONFIG_BUCKET'"}}')
     response=$(curl -s -X POST --data $json --header "Content-Type:application/json" --url "$BUILD_URL")
+    if [ -z "$(echo $response | jq -r 'keys' | grep build_num)" ]; then
+      echo "$(echo $response | jq -r '.message') - Note: The circle-token is unique to the project."
+      echo "Raw Response:"
+      echo "$response"
+      exit 1
+    fi
     echo "$CIRCLE_URL/$(echo $response | jq -r -c '.build_num')"
     exit 0
 fi
