@@ -419,7 +419,7 @@ func shellOut(cmdArgs []string) string {
   cmdName, cmdArgs = cmdArgs[0], cmdArgs[1:]
   if cmdOut, err = exec.Command(cmdName, cmdArgs...).CombinedOutput(); err != nil {
     fmt.Fprintln(os.Stderr, "error: ", err)
-    return err
+    return "error running command."
   }
   out := string(cmdOut)
   fmt.Println(cmdName, out)
