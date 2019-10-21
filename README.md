@@ -2,7 +2,7 @@
 
 BashBot is a white-listed command injection tool for slack. A [config.json](sample-config.json) file defines the possible commands that can be run as well as all of the parameters that can be passed to those commands. This bot uses circleci to build a docker container, that is pushed to AWS ECR and is run in ECS. Sensitive commands can be restricted to specific slack channels. Import other repositories like [bashbot-scripts](https://github.com/eaze/bashbot-scripts) to extend functionality, and reduce clutter in the configuration file.
 
-### Sample .env file
+## Sample .env file
 ```
 # GitHub credentials
 export GITHUB_USER=xxxxxxxxxxxxx
@@ -23,7 +23,7 @@ export ECS_URL=xxxxxxxxxxxxx
 export ECS_REGION=xxxxxxxxxxxxx
 ```
 
-### Sample admin.json
+## admin.json
 ```
 {
   "admins": [{
@@ -36,11 +36,56 @@ export ECS_REGION=xxxxxxxxxxxxx
 }
 ```
 
-### Sample config.json
+### messages.json
+[sample-messages.json](sample-messages.json)
+
+## config.json
 [sample-config.json](sample-config.json)
+The config.json file is defined as an array of json objects keyed by 'tools' and 'dependencies.' The dependencies section defines any resources that need to be downloaded or cloned from a repository before execution of commands. The following is a simplified example of a config.json file:
+
 ```
-# Config files are defined as an array of json objects
-$ cat sample-config.json | jq '.tools[4]'
+{
+  "tools": [{
+      "name": "List Commands",
+      "description": "List all of the possible commands stored in bashbot",
+      "help": "bashbot list-commands",
+      "trigger": "list-commands",
+      "location": "./",
+      "setup": "echo \"\"",
+      "command": "cat config.json | jq -r '.tools[] | .trigger' | sort",
+      "parameters": [],
+      "log": false,
+      "ephemeral": false,
+      "response": "code",
+      "permissions": ["all"]
+    }
+  ],
+  "dependencies": [
+    {
+      "name": "BashBot scripts Scripts",
+      "source": "https://$GITHUB_TOKEN@github.com/eaze/bashbot-scripts.git",
+      "install": "git clone ${source}",
+      "setup": "echo \"\""
+    }
+  ]
+}
+```
+Each object in the tools array defines the parameters of a single command.
+```
+name, description and help provide human readable information about the specific command
+trigger:      unique alphanumeric word that represents the command
+location:     absolute or relative path to dependency directory (use "./" for no dependency)
+setup:        command that is run before the main command. (use "echo \"\"" as a default)
+command:      bash command using ${parameter-name} to inject white-listed parameters or environment variables
+parameters:   array of parameter objects. (more detail below)
+log:          define whether the command should be logged in log channel
+ephemeral:    define if the response should be shown to all, or just the user that triggered the command
+response:     [code|text] code displays response in a code block, text displays response as raw text
+permissions:  array of strings. private channel ids to restrict command access to
+```
+
+In this example, a user would type `bashbot list-commands` and that would then run the command `cat config.json | jq -r '.tools[] | .trigger' | sort` which takes no parameters and returns a code block of text from the response. 
+```
 {
   "name": "List Commands",
   "description": "List all of the possible commands stored in bashbot",
@@ -55,27 +100,10 @@ $ cat sample-config.json | jq '.tools[4]'
   "response": "code",
   "permissions": ["all"]
 }
-
-# name, description and help provide human readable information about the specific command
-# trigger:      unique alphanumeric word that represents the command
-# location:     absolute or relative path to dependency directory (use "./" for no dependency)
-# setup:        command that is run before the main command. (use "echo \"\"" as a default)
-# command:      bash command using ${parameter-name} to inject white-listed parameters or environment variables
-# parameters:   array of parameter objects. (more detail below)
-# log:          define whether the command should be logged in log channel
-# ephemeral:    define if the response should be shown to all, or just the user that triggered the command
-# response:     [code|text] code displays response in a code block, text displays response as raw text
-# permissions:  array of strings. private channel ids to restrict command access to
-
-# parameters continued:
-# There are a few ways to define parameters for a command, but the parameters passed to the bot MUST
-# be white-listed. This is an attempt to ensure security of sensitive environment variables. If the
-# command can be triggered with no parameters, an empty array can be used as in the first example.
-# If the command requires parameters, they can be a hard coded array of strings, or derived from another
-# command. In this example, the hard-coded list of possible parameters is defined (random, question, answer).
-# The 'question' action essentially selects a random line in the 'questions-file' text file. The 'answer'
-# action does the same as questions, but with a greater-than sign appended to the string. Finally, the
-# 'random' action selects both, a random question and random answer from both linked text files.
+```
+### parameters continued (1 of 2):
+There are a few ways to define parameters for a command, but the parameters passed to the bot MUST be white-listed. This is an attempt to ensure security of sensitive environment variables. If the command can be triggered with no parameters, an empty array can be used as in the first example. If the command requires parameters, they can be a hard coded array of strings, or derived from another command. In this example, the hard-coded list of possible parameters is defined (random, question, answer). The 'question' action essentially selects a random line in the 'questions-file' text file. The 'answer' action does the same as questions, but with a greater-than sign appended to the string. Finally, the 'random' action selects both, a random question and random answer from both linked text files.
+```
 {
   "name": "Cards Against Humanity",
   "description": "Picks a random question and answer from a list.",
@@ -93,13 +121,12 @@ $ cat sample-config.json | jq '.tools[4]'
   "response": "text",
   "permissions": ["all"]
 }
+```
 
-# parameters continued:
-# In this example, a list of all 'trigger' values are extracted from the config.json and used as the
-# parameter white-list. When the parameter list can be derived from output of another unix command,
-# it can be "piped" in using the 'source' key. The command must execute without additional stdin
-# input and consist of a newline separated list of values. The command jq is used to parse the json
-# file of all 'trigger' values in a newline separated list. 
+
+### parameters continued (2 of 2): 
+In this example, a list of all 'trigger' values are extracted from the config.json and used as the parameter white-list. When the parameter list can be derived from output of another unix command, it can be "piped" in using the 'source' key. The command must execute without additional stdin input and consist of a newline separated list of values. The command jq is used to parse the json file of all 'trigger' values in a newline separated list.
+```
 {
   "name": "Describe Command",
   "description": "Show the json object for a specific command",
@@ -121,9 +148,6 @@ $ cat sample-config.json | jq '.tools[4]'
   "permissions": ["all"]
 }
 ```
-
-### Sample messages.json
-[sample-messages.json](sample-messages.json)
 
 ### Setup (bare metal)
 
