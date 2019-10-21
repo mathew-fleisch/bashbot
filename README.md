@@ -88,26 +88,25 @@ $ cat sample-config.json | jq '.tools[4]'
     }
 
 # parameters continued:
-In this example, a list of slack user ids are derived from a raw api request and used as the parameter white-list.
+In this example, a list of all 'trigger' values are extracted from the config.json and used as the parameter white-list. When the parameter list can be derived from output of another unix command, it can be "piped" in using the 'source' key. The command must execute without additional stdin input and consist of a newline separated list of values. The command jq is used to parse the json file of all 'trigger' values in a newline separated list. 
 {
-  "name": "Slap User",
-  "description": "Slap a specific user with a trout gif",
-  "help": "bashbot slap [user]",
-  "trigger": "slap",
+  "name": "Describe Command",
+  "description": "Show the json object for a specific command",
+  "help": "bashbot describe [command]",
+  "trigger": "describe",
   "location": "./vendor/bashbot-scripts",
   "setup": "echo \"\"",
-  "command": "./giphy.sh slap+trout 10",
+  "command": "./describeCommand.sh ../../config.json ${command}",
   "parameters": [
     {
-      "name": "user",
+      "name": "command",
       "allowed": [],
-      "description": "tag a slack user",
-      "source": "curl -s \"https://slack.com/api/users.list?token=$SLACK_TOKEN\" | jq -r '.members[] | select(.deleted == false) | .id' | sort | sed -e 's/\\(.*\\)/<@\\1>/g'"
-    }
-  ],
+      "description": "a command to describe ('bashbot list-commands')",
+      "source": "cat ../../config.json | jq -r '.tools[] | .trigger'"
+    }],
   "log": false,
   "ephemeral": false,
-  "response": "text",
+  "response": "code",
   "permissions": ["all"]
 }
 ```
