@@ -102,7 +102,7 @@ In this example, a user would type `bashbot list-commands` and that would then r
 }
 ```
 ### parameters continued (1 of 2):
-There are a few ways to define parameters for a command, but the parameters passed to the bot MUST be white-listed. This is an attempt to ensure security of sensitive environment variables. If the command can be triggered with no parameters, an empty array can be used as in the first example. If the command requires parameters, they can be a hard coded array of strings, or derived from another command. In this example, the hard-coded list of possible parameters is defined (random, question, answer). The 'question' action essentially selects a random line in the 'questions-file' text file. The 'answer' action does the same as questions, but with a greater-than sign appended to the string. Finally, the 'random' action selects both, a random question and random answer from both linked text files.
+There are a few ways to define parameters for a command, but the parameters passed to the bot MUST be white-listed. If the command can be triggered with no parameters, an empty array can be used as in the first example. If the command requires parameters, they can be a hard coded array of strings, or derived from another command. In this example, the hard-coded list of possible parameters is defined (random, question, answer). The `question` action essentially selects a random line in the `--questions-file` text file. The `answer` action does the same as questions, but with a greater-than sign appended to the string. Finally, the `random` action selects both, a random question and random answer from both linked text files.
 ```
 {
   "name": "Cards Against Humanity",
