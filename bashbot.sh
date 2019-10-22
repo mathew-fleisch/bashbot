@@ -95,7 +95,6 @@ if [ "$ACTION" == "build-ecs" ]; then
     [ -z "$REMOTE_CONFIG_BUCKET" ] && echo "Missing remote config s3 bucket." && exit 1;
     [ -z "$CIRCLE_TOKEN" ] && echo "Missing circle token." && exit 1;
     [ -z "$CIRCLE_PROJECT" ] && echo "Missing circle project (organization/fork)." && exit 1;
-    pull_s3_config $REMOTE_CONFIG_BUCKET
     CIRCLE_URL="https://circleci.com/gh/$CIRCLE_PROJECT"
     BUILD_URL="https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT/tree/master?circle-token=$CIRCLE_TOKEN"
     json=$(jq -c -r -n '{"build_parameters":{"CIRCLE_JOB":"ecs_deploy","REMOTE_CONFIG_BUCKET":"'$REMOTE_CONFIG_BUCKET'"}}')
