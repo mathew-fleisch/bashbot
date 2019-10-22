@@ -2,7 +2,94 @@
 
 BashBot is a white-listed command injection tool for slack. A [config.json](sample-config.json) file defines the possible commands that can be run as well as all of the parameters that can be passed to those commands. This bot uses circleci to build a docker container, that is pushed to AWS ECR and is run in ECS. Sensitive commands can be restricted to specific slack channels. Import other repositories like [bashbot-scripts](https://github.com/eaze/bashbot-scripts) to extend functionality, and reduce clutter in the configuration file.
 
-## Sample .env file
+## Table of Contents
+
+- [Installation](#Installation%20and%20setup)
+  * [Bare Metal](#Bare%20Metal%20Setup)
+  * [Docker](#Docker%20Setup)
+  * [ECS](#ECS%20Setup)
+- [Sample Env File](#Sample%20.env%20file)
+- [Sample admin.json](#Sample%20admin.json)
+- [Sample config.json](#Sample%20config.json)
+- [Sample messages.json](#Sample%20messages.json)
+- [CircleCi Environment Variables](#CircleCi%20Environment%20Variables)
+
+## Installation and setup 
+We have listed 3 different ways to install and get this up and running! Sample .env, admin.json, config.json and sample messages below. When setting up your s3 and ecs cluster make sure they are in the same region.
+
+### Bare Metal Setup
+
+```
+# Log in as root
+sudo -i
+
+# Install dependencies
+apt update
+apt upgrade -y
+apt install -y zip wget iputils-ping curl jq build-essential libssl-dev ssh python python-pip python3 python3-pip openssl file libgcrypt-dev git redis-server sudo build-essential libssl-dev awscli vim
+
+# Clone bashbot
+git clone https://github.com/eaze/bashbot.git /bashbot
+
+# Create .env file
+touch /bashbot/.env
+# add secrets/tokens
+
+# Copy Sample Config
+cp /bashbot/sample-config.json /bashbot/config.json
+
+# Copy Sample Messages Config
+cp /bashbot/sample-messages.json /bashbot/messages.json
+
+# Create Admin Config
+touch /bashbot/admin.json
+# add personal user id and channel id for public/private channels
+
+./start.sh
+```
+
+----------------------------------------------------------------
+
+### Docker Setup
+
+  - clone bashbot locally
+  - Create public and private s3 buckets to setup aws and store secrets
+  - Define a .env file for environment variables save to private bucket and root of bashbot
+  - Define a config.json, messages.json and admin.json file and save to private bucket and root of bashbot
+
+```
+# Create/modify .env, config.json, messages.json, admin.json and `push-configs` to config s3 bucket
+./bashbot.sh --action push-configs --config-bucket [bucket-path] 
+
+# Run build command
+./bashbot.sh --action build-docker --config-bucket [bucket-path]
+
+# Run Docker Container
+docker run -it bashbot:latest
+```
+
+----------------------------------------------------------------
+
+
+### ECS Setup
+
+  - clone bashbot locally
+  - Create public and private s3 buckets to setup aws and store secrets
+  - Setup ecs cluster, task definition, service and repository
+  - Define a .env file for environment variables save to private bucket
+  - Define a config.json, messages.json and admin.json file and save to private bucket
+
+```
+# Create/modify .env, config.json, messages.json, admin.json and `push-configs` to config s3 bucket
+./bashbot.sh --action push-configs --config-bucket [bucket-path] 
+
+# Run build command through circleci job
+./bashbot.sh --action build-ecs --config-bucket [bucket-path] --circle-token [circleci-token] --circle-project [circleci-project]
+```
+
+---------------------------------------------------------------- 
+
+### Sample .env file
 ```
 # GitHub credentials
 export GITHUB_USER=xxxxxxxxxxxxx
@@ -25,7 +112,7 @@ export ECS_REGION=xxxxxxxxxxxxx
 
 ----------------------------------------------------------------
 
-## admin.json
+### admin.json
 ```
 {
   "admins": [{
@@ -46,7 +133,7 @@ export ECS_REGION=xxxxxxxxxxxxx
 ----------------------------------------------------------------
 
 
-## config.json
+### config.json
 [sample-config.json](sample-config.json)
 The config.json file is defined as an array of json objects keyed by 'tools' and 'dependencies.' The dependencies section defines any resources that need to be downloaded or cloned from a repository before execution of commands. The following is a simplified example of a config.json file:
 
@@ -152,79 +239,6 @@ In this example, a list of all 'trigger' values are extracted from the config.js
   "response": "code",
   "permissions": ["all"]
 }
-```
-
-----------------------------------------------------------------
-
-
-### Setup (bare metal)
-
-```
-# Log in as root
-sudo -i
-
-# Install dependencies
-apt update
-apt upgrade -y
-apt install -y zip wget iputils-ping curl jq build-essential libssl-dev ssh python python-pip python3 python3-pip openssl file libgcrypt-dev git redis-server sudo build-essential libssl-dev awscli vim
-
-# Clone bashbot
-git clone https://github.com/eaze/bashbot.git /bashbot
-
-# Create .env file
-touch /bashbot/.env
-# add secrets/tokens
-
-# Copy Sample Config
-cp /bashbot/sample-config.json /bashbot/config.json
-
-# Copy Sample Messages Config
-cp /bashbot/sample-messages.json /bashbot/messages.json
-
-# Create Admin Config
-touch /bashbot/admin.json
-# add personal user id and channel id for public/private channels
-
-./start.sh
-```
-
-----------------------------------------------------------------
-
-### Setup (Docker)
-
-  - clone bashbot locally
-  - Create public and private s3 buckets to setup aws and store secrets
-  - Define a .env file for environment variables save to private bucket and root of bashbot
-  - Define a config.json, messages.json and admin.json file and save to private bucket and root of bashbot
-
-```
-# Create/modify .env, config.json, messages.json, admin.json and `push-configs` to config s3 bucket
-./bashbot.sh --action push-configs --config-bucket [bucket-path] 
-
-# Run build command
-./bashbot.sh --action build-docker --config-bucket [bucket-path]
-
-# Run Docker Container
-docker run -it bashbot:latest
-```
-
-----------------------------------------------------------------
-
-
-### Setup (ECS)
-
-  - clone bashbot locally
-  - Create public and private s3 buckets to setup aws and store secrets
-  - Setup ecs cluster, task definition, service and repository
-  - Define a .env file for environment variables save to private bucket
-  - Define a config.json, messages.json and admin.json file and save to private bucket
-
-```
-# Create/modify .env, config.json, messages.json, admin.json and `push-configs` to config s3 bucket
-./bashbot.sh --action push-configs --config-bucket [bucket-path] 
-
-# Run build command through circleci job
-./bashbot.sh --action build-ecs --config-bucket [bucket-path] --circle-token [circleci-token] --circle-project [circleci-project]
 ```
 
 ----------------------------------------------------------------
