@@ -5,6 +5,7 @@ BashBot is a white-listed command injection tool for slack. A [config.json](samp
 ## Table of Contents
 
 - [Installation](#Installation%20and%20setup)
+  * [Slack App Setup](#Slack%20App%20Setup)
   * [Bare Metal](#Bare%20Metal%20Setup)
   * [Docker](#Docker%20Setup)
   * [ECS](#ECS%20Setup)
@@ -16,6 +17,10 @@ BashBot is a white-listed command injection tool for slack. A [config.json](samp
 
 ## Installation and setup 
 We have listed 3 different ways to install and get this up and running! Sample .env, admin.json, config.json and sample messages below. When setting up your s3 and ecs cluster make sure they are in the same region.
+
+### Slack App Setup
+
+- Copy "Bot User OAuth Access Token" to .env file
 
 ### Bare Metal Setup
 
@@ -44,6 +49,15 @@ cp /bashbot/sample-messages.json /bashbot/messages.json
 # Create Admin Config
 touch /bashbot/admin.json
 # add personal user id and channel id for public/private channels
+
+# Install Go runtime (version 1.12 at least)
+wget https://dl.google.com/go/go1.12.12.linux-amd64.tar.gz
+tar xvf go1.12.12.linux-amd64.tar.gz
+sudo mv go /usr/local
+echo "export GOROOT=/usr/local/go" >> ~/.bashrc
+echo "export GOPATH=$HOME/go" >> ~/.bashrc
+echo "export PATH=$GOPATH/bin:$GOROOT/bin:$PATH" >> ~/.bashrc
+source ~/.bashrc
 
 ./start.sh
 ```
