@@ -211,6 +211,7 @@ func processCommand(event *slack.MessageEvent) bool {
   fmt.Printf("%+v\n", event)
   fmt.Printf("Channel: %+v\n", event.Channel)
   fmt.Printf("User: %+v\n", event.User)
+  fmt.Printf("Timestamp: %+v\n", event.Timestamp)
 
   words := strings.Fields(event.Text)
   var triggered string
@@ -244,7 +245,7 @@ func processCommand(event *slack.MessageEvent) bool {
   switch words[1] {
   case triggered:
     reportToChannel(event.Channel, "processing_command", "")
-    return processWhitelistedCommand(cmd, thisTool, event.Channel, event.User)
+    return processWhitelistedCommand(cmd, thisTool, event.Channel, event.User, event.Timestamp)
   case "cmd":
     reportToChannel(event.Channel, "processing_raw_command", "")
     return processRawCommand(cmd, event.Channel, event.User)
@@ -256,7 +257,7 @@ func processCommand(event *slack.MessageEvent) bool {
 }
 
 // Whitelisted commands
-func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, user string) bool {
+func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, user string, timestamp string) bool {
   var admin Admin = getAdmin()
   validParams := make([]bool, len(thisTool.Parameters))
   var tmpHelp string
@@ -369,7 +370,7 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
     buildCmd = re.ReplaceAllString(buildCmd, cmds[x])
     // fmt.Printf("%q\n", buildCmd)
   }
-  buildCmd = getUserChannelInfo(user, thisUser.Profile.DisplayName, channel) + " && cd " + thisTool.Location + " && " + thisTool.Setup + " && " + buildCmd
+  buildCmd = getUserChannelInfo(user, thisUser.Profile.DisplayName, channel, timestamp) + " && cd " + thisTool.Location + " && " + thisTool.Setup + " && " + buildCmd
   fmt.Printf("%q\n", buildCmd)
 
   tmpCmd := []string{"bash", "-c", buildCmd}
@@ -387,8 +388,8 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
   }
   return true
 }
-func getUserChannelInfo(userid string, username string, channel string) string {
-  return "export TRIGGERED_USER_ID=" + userid + " && export TRIGGERED_USER_NAME=" + username + " && export TRIGGERED_CHANNEL_ID=" + channel + " && export TRIGGERED_CHANNEL_NAME=" + strings.Join(getChannelNames([]string{channel}), "")
+func getUserChannelInfo(userid string, username string, channel string, timestamp string) string {
+  return "export TRIGGERED_AT=" + timestamp + " && export TRIGGERED_USER_ID=" + userid + " && export TRIGGERED_USER_NAME=" + username + " && export TRIGGERED_CHANNEL_ID=" + channel + " && export TRIGGERED_CHANNEL_NAME=" + strings.Join(getChannelNames([]string{channel}), "")
 }
 
 // Raw commands
