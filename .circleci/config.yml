@@ -9,7 +9,9 @@ jobs:
       - run:
           name: Do Nothing
           command: ls -la
-# This section requires aws access to a private s3 bucket, and an 
+
+##############################################################################          
+# This job requires aws access to a private s3 bucket, and an 
 # ecs cluster, repository, task-definition and ecs-service already set up.
 # The s3 bucket must contain the following files:
 #   - .env, admin.config, config.json, messages.json
@@ -110,6 +112,101 @@ jobs:
               echo "Fargate ecs containers automatically start up after being stopped."
             fi
 
+
+  ecs_independent_deploy:
+    docker:
+      - image: golang:1.12.6
+    working_directory: ~/bashbot
+    steps:
+      - run: apt-get update
+      - run:
+          name: Install awscli
+          working_directory: /
+          command: apt-get -y -qq install awscli
+
+      - checkout
+
+      - setup_remote_docker:
+          version: 17.05.0-ce
+          docker_layer_caching: true 
+
+      - run:
+          name: Install Docker client
+          working_directory: /
+          command: |
+            set -x
+            VER="17.03.0-ce"
+            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+            mv /tmp/docker/* /usr/bin
+
+      - run:
+          name: build
+          command: |
+            echo "Starting build..."
+            export PATH="/usr/local/go/bin:$PATH"
+            export GOPATH=/opt/go/ 
+            export PATH=$PATH:$GOPATH/bin 
+            export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+            export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+
+            [ -z "${Z_REMOTE_CONFIG_BUCKET}" ] && echo "Missing Z_REMOTE_CONFIG_BUCKET variable that should be passed into job." && exit 1;
+
+            echo "Get local .env file, and config files..."
+            aws s3 cp $Z_REMOTE_CONFIG_BUCKET/.env .env
+            aws s3 cp $Z_REMOTE_CONFIG_BUCKET/config.json config.json
+            aws s3 cp $Z_REMOTE_CONFIG_BUCKET/messages.json messages.json
+            aws s3 cp $Z_REMOTE_CONFIG_BUCKET/admin.json admin.json
+            source .env
+            [ -z "${AWS_PUBLIC_SETUP_URL}" ] && echo "Missing aws setup file..." && exit 1;
+            curl $AWS_PUBLIC_SETUP_URL | bash
+            echo "Global environment variables set."
+            rm -rf ~/.gitconfig
+            [ -z "${GITHUB_USER}" ] && echo "Missing github env variable..." && exit 1;
+            [ -z "${GITHUB_TOKEN}" ] && echo "Missing github env variable..." && exit 1;
+            echo "machine github.com" >> ~/.netrc
+            echo "  login $GITHUB_USER" >> ~/.netrc
+            echo "  password $GITHUB_TOKEN" >> ~/.netrc
+            echo "Run docker build."
+            make clean
+            make
+            make docker-no-sudo
+            echo "Log into ecs."
+            [ -z "${ECS_REGION}" ] && echo "Missing ecs env variable [ECS_REGION]..." && exit 1;
+            [ -z "${ECS_URL}" ] && echo "Missing ecs env variable [ECS_URL]..." && exit 1;
+            [ -z "${ECS_CLUSTER}" ] && echo "Missing ecs env variable [ECS_CLUSTER]..." && exit 1;
+            [ -z "${ECS_SERVICE}" ] && echo "Missing ecs env variable [ECS_SERVICE]..." && exit 1;
+            [ -z "${ECS_REPO}" ] && echo "Missing ecs env variable [ECS_REPO]..." && exit 1;
+            $(aws ecr get-login --region ${ECS_REGION})
+            echo "Tag docker build."
+            docker tag $ECS_REPO:latest $ECS_URL/$ECS_REPO:latest
+            echo "Push container to ecr"
+            docker push $ECS_URL/$ECS_REPO:latest
+
+      - run:
+          name: deploy
+          command: |
+            export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+            export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+            echo "Get local .env file..."
+            aws s3 cp $Z_REMOTE_CONFIG_BUCKET/.env .env
+            source .env
+            echo "ECS_REGION=${ECS_REGION}"
+            echo "ECS_CLUSTER=${ECS_CLUSTER}"
+            echo "ECS_SERVICE=${ECS_SERVICE}"
+            echo "ECS_REPO=${ECS_REPO}"
+            $(aws ecr get-login --region ${ECS_REGION})
+            TASK_ARN=$(aws ecs list-tasks --cluster ${ECS_CLUSTER} --service-name ${ECS_SERVICE} --output text --query taskArns[0])
+            echo "TASK_ARN = ${TASK_ARN}"
+            if [[ "${TASK_ARN}" == "None" ]]; then
+              echo "No existing task to restart"
+            else
+              aws ecs stop-task --cluster $ECS_CLUSTER --task $TASK_ARN
+              echo "Fargate ecs containers automatically start up after being stopped."
+            fi
+
+
+
 # WORKFLOW - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 workflows:
   version: 2  
@@ -123,4 +220,7 @@ workflows:
           filters:
             branches:
               only: never-build-this-automatically
-
+      - ecs_independent_deploy:
+          filters:
+            branches:
+              only: never-build-this-automatically
