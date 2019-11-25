@@ -2,6 +2,11 @@
 
 BashBot is a white-listed command injection tool for slack. A [config.json](sample-config.json) file defines the possible commands that can be run as well as all of the parameters that can be passed to those commands. This bot uses circleci to build a docker container, that is pushed to AWS ECR and is run in ECS. Sensitive commands can be restricted to specific slack channels. Import other repositories like [bashbot-scripts](https://github.com/eaze/bashbot-scripts) to extend functionality, and reduce clutter in the configuration file.
 
+BashBot is built using the [nlopes golang slack api client](https://github.com/nlopes/slack), which receives "Real Time Message" (RTM) events through a socket. The bot parses every message event using regular expression string matching, to determine if a bot command should be executed. The first regular expression match comes from the `trigger` value in [admin.json](#Sample%20admin.json); if a user types this value into slack with the bot running, the rest of the message is parsed to determine if the whole message is a valid command. Commands are defined in a [config.json](sample-config.json) and use the same `trigger` paradigm to separate different commands. Each command can include parameters, provided they are white-listed. There are two ways to build a parameter list (see below for examples):
+
+ - Hard coded array of strings
+ - A command that builds a newline separated list of values
+
 ## Table of Contents
 
 - [Installation](#Installation%20and%20setup)
