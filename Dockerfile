@@ -26,5 +26,6 @@ RUN mkdir -p vendor
 RUN cat /bashbot/.env >> ~/.bashrc
 RUN source ~/.bashrc
 RUN go install -v ./...
+RUN go get github.com/nlopes/slack@master
 
 CMD ["/bin/bash", "start.sh"]
