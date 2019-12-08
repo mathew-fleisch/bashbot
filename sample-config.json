@@ -26,6 +26,26 @@
       "response": "code",
       "permissions": ["all"]
     },{
+      "name": "Get User Info",
+      "description": "Use slack api to get user information",
+      "help": "bashbot user-info [user]",
+      "trigger": "user-info",
+      "location": "./vendor/bashbot-scripts",
+      "setup": "echo \"\"",
+      "command": "./slackApi.sh --endpoint users.info --user-id $(./slackApi.sh --get-id-from-tag \"${user}\") --output json",
+      "parameters": [
+        {
+          "name": "user",
+          "allowed": [],
+          "description": "tag a slack user",
+          "source": "./slackApi.sh --endpoint users.list --output idtags"
+        }
+      ],
+      "log": false,
+      "ephemeral": false,
+      "response": "code",
+      "permissions": ["all"]
+    },{
       "name": "List Commands",
       "description": "List all of the possible commands stored in bashbot",
       "help": "bashbot list-commands",
