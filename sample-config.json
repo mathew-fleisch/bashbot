@@ -104,6 +104,19 @@
       "response": "code",
       "permissions": ["private-channel-id"]
     },{
+      "name": "BashBot rebuild",
+      "description": "Causes a redeploy in ecs using circleci",
+      "help": "bashbot rebuild",
+      "trigger": "rebuild",
+      "location": "./",
+      "setup": "echo \"Rebuilding ecs container in circleci\"",
+      "command": "./bashbot.sh --action build-ecs --config-bucket ${REMOTE_CONFIG_BUCKET} --circle-token ${CIRCLE_TOKEN} --circle-project [YOUR-ORG-AND-FORK-OF-BASHBOT-HERE]",
+      "parameters": [],
+      "log": false,
+      "ephemeral": false,
+      "response": "code",
+      "permissions": ["private-channel-id"]
+    },{
       "name": "Cards Against Humanity",
       "description": "Picks a random question and answer from a list.",
       "help": "bashbot cah [random|question|answer]",

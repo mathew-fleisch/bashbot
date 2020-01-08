@@ -260,6 +260,50 @@ In this example, a list of all 'trigger' values are extracted from the config.js
 }
 ```
 
+## Triggering CircleCi Jobs
+
+You can trigger circleci jobs to extend the functionality of bashbot to isolated environments. An example of triggering a job outside of the bashbot container is running the sample-config's `rebuild` command. It assumes a few things are set up ahead of time: bashbot is already running in ECS, secrets are stored in the REMOTE_CONFIG_BUCKET environment variable for s3, and you have the proper permissions set up to run [circleci jobs](https://circleci.com/docs/enterprise/quick-start/) under your fork of bashbot. It also assumes bashbot has aws credentials to get the secrets in s3 via environment variables. Here is a list of the hard-coded (for now) expected variables to run the command, which will be below that:
+```
+# AWS Credentials
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+
+# Script to set up ~/.aws/credentials and ~/.aws/config with your AWS account information
+AWS_PUBLIC_SETUP_URL
+
+# Remote config bucket (including path to configs) is 
+# expected to have 4 files (.env, config.json, messages.json, admin.json)
+REMOTE_CONFIG_BUCKET
+
+# Github user/token to get private golang repos if necessary
+GITHUB_USER
+GITHUB_TOKEN
+
+# ECS Variables
+ECS_REGION
+ECS_URL
+ECS_CLUSTER
+ECS_SERVICE
+ECS_REPO
+```
+***config.json for [this circleci job](.circleci/config.yml)***
+```
+{
+  "name": "BashBot rebuild",
+  "description": "Causes a redeploy in ecs using circleci",
+  "help": "bashbot rebuild",
+  "trigger": "rebuild",
+  "location": "./",
+  "setup": "echo \"Rebuilding ecs container in circleci\"",
+  "command": "./bashbot.sh --action build-ecs --config-bucket ${REMOTE_CONFIG_BUCKET} --circle-token ${CIRCLE_TOKEN} --circle-project [YOUR-ORG-AND-FORK-OF-BASHBOT-HERE]",
+  "parameters": [],
+  "log": false,
+  "ephemeral": false,
+  "response": "code",
+  "permissions": ["private-channel-id"]
+}
+```
+
 ----------------------------------------------------------------
 
 
