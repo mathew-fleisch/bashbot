@@ -6,7 +6,7 @@ RUN mkdir /bashbot
 
 RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt upgrade -y
-RUN DEBIAN_FRONTEND=noninteractive apt install -y zip wget iputils-ping curl jq build-essential libssl-dev ssh python python-pip python3 python3-pip openssl file libgcrypt-dev git redis-server sudo build-essential libssl-dev awscli vim
+RUN DEBIAN_FRONTEND=noninteractive apt install -y zip wget iputils-ping curl jq build-essential libssl-dev ssh python python-pip python3 python3-pip openssl file libgcrypt-dev git redis-server sudo build-essential libssl-dev awscli sqlite3 vim
 # Get newest version of awscli
 RUN pip3 install awscli --upgrade --user
 ENV NVM_DIR /usr/local/nvm
