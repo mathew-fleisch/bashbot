@@ -147,16 +147,35 @@ func findChannelByName(name string) string {
 }
 
 func getChannelNames(channelIds []string) []string {
-  // fmt.Printf("getChannelNames()")
+  fmt.Printf("getChannelNames()")
   var names []string
-  params := &slack.GetConversationsParameters{ExcludeArchived: "true", Limit: 10000, Types: []string{"private_channel", "public_channel"}}
+  pparams := &slack.GetConversationsParameters{ExcludeArchived: "true", Limit: 1000, Types: []string{"private_channel"}}
+  pchannels, _, _ := api.GetConversations(pparams)
+  pnumChannels := len(pchannels)
+  fmt.Printf("\nNumber of private channels:%s", pnumChannels)
+  for j := 0; j < pnumChannels; j++ {
+    pthisChannel, _ := json.Marshal(pchannels[j])
+    var pthatChannel Channel
+    json.Unmarshal([]byte(pthisChannel), &pthatChannel)
+    // fmt.Printf("\n%s:%s", pthatChannel.Id, pthatChannel.Name)
+    for i := 0; i < len(channelIds); i++ {
+      // fmt.Printf("\ndoes %s match %s", pthatChannel.Id, channelIds[i])
+      if channelIds[i] == pthatChannel.Id {
+        names = append(names, pthatChannel.Name)
+      }
+    }
+  }
+  params := &slack.GetConversationsParameters{ExcludeArchived: "true", Limit: 1000, Types: []string{"public_channel"}}
   channels, _, _ := api.GetConversations(params)
-  for j := 0; j < len(channels); j++ {
+  numChannels := len(channels)
+  fmt.Printf("\nNumber of public channels:%s", numChannels)
+  for j := 0; j < numChannels; j++ {
     thisChannel, _ := json.Marshal(channels[j])
     var thatChannel Channel
     json.Unmarshal([]byte(thisChannel), &thatChannel)
     // fmt.Printf("\n%s:%s", thatChannel.Id, thatChannel.Name)
     for i := 0; i < len(channelIds); i++ {
+      // fmt.Printf("\ndoes %s match %s", thatChannel.Id, channelIds[i])
       if channelIds[i] == thatChannel.Id {
         names = append(names, thatChannel.Name)
       }
@@ -370,7 +389,7 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
     buildCmd = re.ReplaceAllString(buildCmd, cmds[x])
     // fmt.Printf("%q\n", buildCmd)
   }
-  buildCmd = getUserChannelInfo(user, thisUser.Profile.DisplayName, channel, timestamp) + " && cd " + thisTool.Location + " && " + thisTool.Setup + " && " + buildCmd
+  buildCmd = getUserChannelInfo(user, thisUser.Name, channel, timestamp) + " && cd " + thisTool.Location + " && " + thisTool.Setup + " && " + buildCmd
   fmt.Printf("%q\n", buildCmd)
 
   tmpCmd := []string{"bash", "-c", buildCmd}
