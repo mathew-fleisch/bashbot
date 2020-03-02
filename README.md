@@ -4,23 +4,24 @@ BashBot is a white-listed command injection tool for slack. A [config.json](samp
 
 BashBot is built using the [nlopes golang slack api client](https://github.com/nlopes/slack), which receives "Real Time Message" (RTM) events through a socket. The bot parses every message event using regular expression string matching, to determine if a bot command should be executed. The first regular expression match comes from the `trigger` value in [admin.json](#Sample%20admin.json); if a user types this value into slack with the bot running, the rest of the message is parsed to determine if the whole message is a valid command. Commands are defined in a [config.json](sample-config.json) and use the same `trigger` paradigm to separate different commands. Each command can include parameters, provided they are white-listed. There are two ways to build a parameter list (see below for examples):
 
- - Hard coded array of strings
- - A command that builds a newline separated list of values
+- Hard coded array of strings
+- A command that builds a newline separated list of values
 
 ## Table of Contents
 
 - [Installation](#Installation%20and%20setup)
-  * [Slack App Setup](#Slack%20App%20Setup)
-  * [Bare Metal](#Bare%20Metal%20Setup)
-  * [Docker](#Docker%20Setup)
-  * [ECS](#ECS%20Setup)
+  - [Slack App Setup](#Slack%20App%20Setup)
+  - [Bare Metal](#Bare%20Metal%20Setup)
+  - [Docker](#Docker%20Setup)
+  - [ECS](#ECS%20Setup)
 - [Sample Env File](#Sample%20.env%20file)
 - [Sample admin.json](#Sample%20admin.json)
 - [Sample config.json](#Sample%20config.json)
 - [Sample messages.json](#Sample%20messages.json)
 - [CircleCi Environment Variables](#CircleCi%20Environment%20Variables)
 
-## Installation and setup 
+## Installation and setup
+
 We have listed 3 different ways to install and get this up and running! Sample .env, admin.json, config.json and sample messages below. When setting up your s3 and ecs cluster make sure they are in the same region.
 
 ### Slack App Setup
@@ -29,7 +30,7 @@ We have listed 3 different ways to install and get this up and running! Sample .
 
 ### Bare Metal Setup
 
-```
+```bash
 # Log in as root
 sudo -i
 
@@ -71,12 +72,12 @@ source ~/.bashrc
 
 ### Docker Setup
 
-  - clone bashbot locally
-  - Create public and private s3 buckets to setup aws and store secrets
-  - Define a .env file for environment variables save to private bucket and root of bashbot
-  - Define a config.json, messages.json and admin.json file and save to private bucket and root of bashbot
+- clone bashbot locally
+- Create public and private s3 buckets to setup aws and store secrets
+- Define a .env file for environment variables save to private bucket and root of bashbot
+- Define a config.json, messages.json and admin.json file and save to private bucket and root of bashbot
 
-```
+```bash
 # Create/modify .env, config.json, messages.json, admin.json and `push-configs` to config s3 bucket
 ./bashbot.sh --action push-configs --config-bucket [bucket-path] 
 
@@ -89,16 +90,15 @@ docker run -it bashbot:latest
 
 ----------------------------------------------------------------
 
-
 ### ECS Setup
 
-  - clone bashbot locally
-  - Create public and private s3 buckets to setup aws and store secrets
-  - Setup ecs cluster, task definition, service and repository
-  - Define a .env file for environment variables save to private bucket
-  - Define a config.json, messages.json and admin.json file and save to private bucket
+- clone bashbot locally
+- Create public and private s3 buckets to setup aws and store secrets
+- Setup ecs cluster, task definition, service and repository
+- Define a .env file for environment variables save to private bucket
+- Define a config.json, messages.json and admin.json file and save to private bucket
 
-```
+```bash
 # Create/modify .env, config.json, messages.json, admin.json and `push-configs` to config s3 bucket
 ./bashbot.sh --action push-configs --config-bucket [bucket-path] 
 
@@ -109,7 +109,8 @@ docker run -it bashbot:latest
 ---------------------------------------------------------------- 
 
 ### Sample .env file
-```
+
+```bash
 # GitHub credentials
 export GITHUB_USER=xxxxxxxxxxxxx
 export GITHUB_TOKEN=xxxxxxxxxxxxx
@@ -132,7 +133,8 @@ export ECS_REGION=xxxxxxxxxxxxx
 ----------------------------------------------------------------
 
 ### admin.json
-```
+
+```json
 {
   "admins": [{
     "trigger": "bashbot",
@@ -147,16 +149,17 @@ export ECS_REGION=xxxxxxxxxxxxx
 ----------------------------------------------------------------
 
 ### messages.json
+
 [sample-messages.json](sample-messages.json)
 
 ----------------------------------------------------------------
 
-
 ### config.json
+
 [sample-config.json](sample-config.json)
 The config.json file is defined as an array of json objects keyed by 'tools' and 'dependencies.' The dependencies section defines any resources that need to be downloaded or cloned from a repository before execution of commands. The following is a simplified example of a config.json file:
 
-```
+```json
 {
   "tools": [{
       "name": "List Commands",
@@ -183,7 +186,9 @@ The config.json file is defined as an array of json objects keyed by 'tools' and
   ]
 }
 ```
+
 Each object in the tools array defines the parameters of a single command.
+
 ```
 name, description and help provide human readable information about the specific command
 trigger:      unique alphanumeric word that represents the command
@@ -198,7 +203,8 @@ permissions:  array of strings. private channel ids to restrict command access t
 ```
 
 In this example, a user would type `bashbot list-commands` and that would then run the command `cat config.json | jq -r '.tools[] | .trigger' | sort` which takes no parameters and returns a code block of text from the response. 
-```
+
+```json
 {
   "name": "List Commands",
   "description": "List all of the possible commands stored in bashbot",
@@ -214,9 +220,12 @@ In this example, a user would type `bashbot list-commands` and that would then r
   "permissions": ["all"]
 }
 ```
+
 #### parameters continued (1 of 2):
+
 There are a few ways to define parameters for a command, but the parameters passed to the bot MUST be white-listed. If the command can be triggered with no parameters, an empty array can be used as in the first example. If the command requires parameters, they can be a hard coded array of strings, or derived from another command. In this example, the hard-coded list of possible parameters is defined (random, question, answer). The `question` action essentially selects a random line in the `--questions-file` text file. The `answer` action does the same as questions, but with a greater-than sign appended to the string. Finally, the `random` action selects both, a random question and random answer from both linked text files.
-```
+
+```bash
 {
   "name": "Cards Against Humanity",
   "description": "Picks a random question and answer from a list.",
@@ -235,9 +244,12 @@ There are a few ways to define parameters for a command, but the parameters pass
   "permissions": ["all"]
 }
 ```
-#### parameters continued (2 of 2): 
+
+#### parameters continued (2 of 2):
+
 In this example, a list of all 'trigger' values are extracted from the config.json and used as the parameter white-list. When the parameter list can be derived from output of another unix command, it can be "piped" in using the 'source' key. The command must execute without additional stdin input and consist of a newline separated list of values. The command jq is used to parse the json file of all 'trigger' values in a newline separated list.
-```
+
+```json
 {
   "name": "Describe Command",
   "description": "Show the json object for a specific command",
@@ -263,7 +275,8 @@ In this example, a list of all 'trigger' values are extracted from the config.js
 ## Triggering CircleCi Jobs
 
 You can trigger circleci jobs to extend the functionality of bashbot to isolated environments. An example of triggering a job outside of the bashbot container is running the sample-config's `rebuild` command. It assumes a few things are set up ahead of time: bashbot is already running in ECS, secrets are stored in the REMOTE_CONFIG_BUCKET environment variable for s3, and you have the proper permissions set up to run [circleci jobs](https://circleci.com/docs/enterprise/quick-start/) under your fork of bashbot. It also assumes bashbot has aws credentials to get the secrets in s3 via environment variables. Here is a list of the hard-coded (for now) expected variables to run the command, which will be below that:
-```
+
+```bash
 # AWS Credentials
 AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY
@@ -286,8 +299,10 @@ ECS_CLUSTER
 ECS_SERVICE
 ECS_REPO
 ```
+
 ***config.json for [this circleci job](.circleci/config.yml)***
-```
+
+```json
 {
   "name": "BashBot rebuild",
   "description": "Causes a redeploy in ecs using circleci",
@@ -306,9 +321,9 @@ ECS_REPO
 
 ----------------------------------------------------------------
 
-
 ### CircleCi Environment Variables
-```
+
+```bash
 # AWS credentials
 AWS_ACCESS_KEY_ID=xxxxxxxxxxxxx
 AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxx
