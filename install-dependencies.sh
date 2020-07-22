@@ -46,7 +46,7 @@ if ! [ -f "$CURRENT_PATH/$CONFIG_PATH/messages.json" ]; then
 fi
 echo "Copying config from repo: $CONFIG_PATH"
 cd $STARTING_DIRECTORY
-#cp "$CURRENT_PATH/$CONFIG_PATH/admin.json" admin.json
+cp "$CURRENT_PATH/$CONFIG_PATH/admin.json" admin.json
 cp "$CURRENT_PATH/$CONFIG_PATH/config.json" config.json
 cp "$CURRENT_PATH/$CONFIG_PATH/messages.json" messages.json
 rm -rf tmp
