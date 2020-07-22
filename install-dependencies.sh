@@ -16,11 +16,14 @@ for expect in $EXPECTED_PRIMARY_VARIABLES; do
   fi
 done
 unset expect
-aws s3 cp $CONFIG_BUCKET .env --region us-east-1
+echo "AWS User:"
+aws sts get-caller-identity
+echo "Get config file: $CONFIG_BUCKET"
+aws s3 cp "$CONFIG_BUCKET" .env
 echo "Load environment variables..."
-echo "   bucket: $CONFIG_BUCKET"
-echo "   awskey: $AWS_ACCESS_KEY_ID"
-echo "awssecret: $AWS_SECRET_ACCESS_KEY"
+echo "   bucket: '$CONFIG_BUCKET'"
+echo "   awskey: '$AWS_ACCESS_KEY_ID'"
+echo "awssecret: '$AWS_SECRET_ACCESS_KEY'"
 if ! [ -f ".env" ]; then
   echo "Missing .env file"
   exit 1
