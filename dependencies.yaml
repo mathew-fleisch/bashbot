@@ -1,0 +1,21 @@
+name: cicd/util/bashbot
+tag: 1.0.0
+installers:
+  local:
+    - name: blackbox
+      version: latest
+    - name: helm
+      version: latest
+    - name: kops
+      version: latest
+    - name: kubectl
+      version: latest
+    - name: kubectx
+      version: latest
+    - name: terragrunt
+      version: latest
+  actions:
+    - name: packer
+      version: latest
+    - name: terraform
+      version: latest
