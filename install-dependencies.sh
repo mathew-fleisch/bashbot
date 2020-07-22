@@ -18,6 +18,13 @@ done
 unset expect
 aws s3 cp $CONFIG_BUCKET .env
 echo "Load environment variables..."
+echo "   bucket: $CONFIG_BUCKET"
+echo "   awskey: $AWS_ACCESS_KEY_ID"
+echo "awssecret: $AWS_SECRET_ACCESS_KEY"
+if ! [ -f ".env" ]; then
+  echo "Missing .env file"
+  exit 1
+fi
 source .env
 
 EXPECTED_VARIABLES="GIT_TOKEN CONFIG_REPO CONFIG_PATH SLACK_TOKEN WELCOME_CHANNEL"
@@ -61,7 +68,6 @@ fi
 
 echo "Cloning dependencies"
 DEPENDENCIES=$(cat ../config.json | jq -r '.dependencies[] | " \(.install)\(.source)"' | tr '\n' ';')
-# DEPENDENCIES=$(cat ../config.json | jq -r '.dependencies[] | " \(.install)\(.source)"' | sed -e 's/\$GIT_TOKEN/'"$GIT_TOKEN"'/g' | tr '\n' ';')
 echo "Install Dependencies:"
 echo "$(echo $DEPENDENCIES | tr ';' '\n' | sed -e 's/^\s//g')"
 echo "$(eval $(echo $DEPENDENCIES))"
