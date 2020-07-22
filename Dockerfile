@@ -1,4 +1,4 @@
-FROM golang:1.12.6-stretch
+FROM golang:1.14.4-stretch
 
 LABEL maintainer="Mathew Fleisch <mathew.fleisch@gmail.com>"
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
