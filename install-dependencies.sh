@@ -16,7 +16,7 @@ for expect in $EXPECTED_PRIMARY_VARIABLES; do
   fi
 done
 unset expect
-aws s3 cp $CONFIG_BUCKET .env
+aws s3 cp $CONFIG_BUCKET .env --region us-east-1
 echo "Load environment variables..."
 echo "   bucket: $CONFIG_BUCKET"
 echo "   awskey: $AWS_ACCESS_KEY_ID"
