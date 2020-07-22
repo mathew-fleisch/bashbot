@@ -16,9 +16,9 @@ for expect in $EXPECTED_PRIMARY_VARIABLES; do
   fi
 done
 unset expect
-AWS_ACCESS_KEY_ID=$(echo "AWS_ACCESS_KEY_ID" | tr -d '\n' | tr -d '\r')
-AWS_SECRET_ACCESS_KEY=$(echo "AWS_SECRET_ACCESS_KEY" | tr -d '\n' | tr -d '\r')
-CONFIG_BUCKET=$(echo "CONFIG_BUCKET" | tr -d '\n' | tr -d '\r')
+AWS_ACCESS_KEY_ID=$(echo "$AWS_ACCESS_KEY_ID" | tr -d '\n' | tr -d '\r')
+AWS_SECRET_ACCESS_KEY=$(echo "$AWS_SECRET_ACCESS_KEY" | tr -d '\n' | tr -d '\r')
+CONFIG_BUCKET=$(echo "$CONFIG_BUCKET" | tr -d '\n' | tr -d '\r')
 echo "AWS User:"
 aws sts get-caller-identity
 echo "Get config file: $CONFIG_BUCKET"
