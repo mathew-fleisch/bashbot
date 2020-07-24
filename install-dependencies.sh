@@ -67,6 +67,12 @@ rm -rf tmp
 mkdir -p vendor
 cd vendor
 
+if [ -n "$JENKINS_PEM" ]; then
+    mkdir -p ~/.ssh/keys
+    echo "$JENKINS_PEM" > ~/.ssh/keys/jenkins.pem
+    chmod 600 ~/.ssh/keys/jenkins.pem
+fi
+
 if [[ ! -z $NPM_TOKEN ]]; then
   echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
   echo 'registry=https://registry.npmjs.org/' >> ~/.npmrc
