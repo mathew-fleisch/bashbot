@@ -1,5 +1,5 @@
 name: cicd/util/bashbot
-tag: 1.0.6
+tag: 1.0.7
 installers:
   local:
     - name: blackbox
@@ -14,10 +14,12 @@ installers:
       version: latest
     - name: kubectx
       version: latest
+    - name: sdccli
+      version: latest
     - name: terragrunt
       version: latest
+    - name: terraform
+      version: 0.12.29
   actions:
     - name: packer
-      version: latest
-    - name: terraform
       version: latest
