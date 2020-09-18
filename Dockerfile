@@ -1,11 +1,12 @@
-FROM golang:1.14.7-stretch
+# FROM golang:1.14.7-stretch
+FROM ubuntu:20.04
 
 LABEL maintainer="Mathew Fleisch <mathew.fleisch@gmail.com>"
-RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+# RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 WORKDIR /root
 RUN apt update \
-    && DEBIAN_FRONTEND=noninteractive apt upgrade -y \
-    && DEBIAN_FRONTEND=noninteractive apt install -y curl sudo \
+    && DEBIAN_FRONTEND=noninteractive apt dist-upgrade -y \
+    && DEBIAN_FRONTEND=noninteractive apt install -y curl sudo golang \
     && rm -rf /var/lib/apt/lists/* \
     && echo "%sudo ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 RUN curl -s https://s3.amazonaws.com/download.draios.com/dependencies/get-dependency-installer.sh | bash
