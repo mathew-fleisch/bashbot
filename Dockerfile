@@ -2,7 +2,7 @@
 FROM ubuntu:20.04
 
 LABEL maintainer="Mathew Fleisch <mathew.fleisch@gmail.com>"
-# RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 WORKDIR /root
 RUN apt update \
     && DEBIAN_FRONTEND=noninteractive apt dist-upgrade -y \
