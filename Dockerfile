@@ -1,4 +1,3 @@
-# FROM golang:1.14.7-stretch
 FROM ubuntu:20.04
 
 LABEL maintainer="Mathew Fleisch <mathew.fleisch@gmail.com>"
