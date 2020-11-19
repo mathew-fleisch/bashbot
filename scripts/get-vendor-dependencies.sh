@@ -21,7 +21,7 @@ if ! [[ -d "$vendor_dir" ]]; then
     echo "Must pass vendor directory as second argument"
     exit 0
 fi
-cd $vendor_dir
+cd $vendor_dir && rm -rf *
 echo "Installing Dependencies..."
 dependencies=$(jq -r '.dependencies[].install' $config_file | sed 'N;s/\n/ \&\& /')
 eval $dependencies

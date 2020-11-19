@@ -1,6 +1,7 @@
 #!/bin/bash
 
-if [[ -f bashbot.go ]]; then
+if [[ -f bashbot.go ]] && [[ -f .env ]]; then
+  source .env
   mkdir -p vendor \
     && cd scripts \
     && ./get-config.sh \
