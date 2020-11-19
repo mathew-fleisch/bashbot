@@ -31,6 +31,7 @@ jobs:
           docker push docker.io/mathewfleisch/bashbot:${tag}
           cd ..
           tar -zcvf bashbot.tar.gz bashbot
+          mv bashbot.tar.gz bashbot/.
       - name: Upload tarball
         uses: actions/upload-artifact@v1
         with:

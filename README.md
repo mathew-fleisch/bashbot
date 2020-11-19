@@ -23,23 +23,14 @@ Bashbot can be run as a go binary or as a container and requires an .env file fo
 
 Slack's permissions model has changed and the "RTM" socket connection requires a "classic app" to be configured to get the correct type of token to run Bashbot. After logging into slack, visit [https://api.slack.com/apps?new_classic_app=1](https://api.slack.com/apps?new_classic_app=1) to set up a new "Bot User OAuth Access Token" and save the `xoxb-xxxxxxxxx-xxxxxxx` as the environment variable `SLACK_TOKEN` in a `.env` file at bashbot's root.
 
-***.env file***
-
-```bash
-export SLACK_TOKEN=xoxb-
-export GIT_TOKEN=
-export github_org=
-export github_repo=
-export github_branch=
-export github_filename=path/to/config.json
-```
-
 ***Requirements***
 
 - jq
 - git
 - golang
 
+
+## Create .env and config.json
 
 ```bash
 # Copy Sample Config
@@ -58,14 +49,45 @@ touch .env
 # export github_filename=path/to/config.json
 
 # add secrets/tokens...
-source .env
-# Boostrap/Start local bashbot
-./start.sh
-
-# Type into slack: bashbot help
 ```
 
+## Starting Manually
+
+```bash
+git clone git@github.com:mathew-fleisch/bashbot.git
+# or
+git clone https://github.com/mathew-fleisch/bashbot.git
+
+cd bashbot
+# Create/copy .env file and config.json to bashbot root
+
+# Start local bashbot
+./start.sh
+```
+
+## Starting via Docker
+
+```bash
+# Create/copy .env file and config.json to wherever this next command runs:
+docker run -v ${PWD}/config.json:/bashbot/config.json -v ${PWD}/.env:/bashbot/.env -it mathewfleisch/bashbot:v1.1.0
+```
+
+
 ----------------------------------------------------------------
+
+
+### .env file
+
+```bash
+export SLACK_TOKEN=xoxb-
+export GIT_TOKEN=
+export github_org=
+export github_repo=
+export github_branch=
+export github_filename=path/to/config.json
+```
+
+
 
 ### config.json
 [sample-config.json](sample-config.json)
