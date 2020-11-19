@@ -113,9 +113,7 @@ The config.json file is defined as an array of json objects keyed by 'tools' and
   "dependencies": [
     {
       "name": "BashBot scripts Scripts",
-      "source": "https://$GITHUB_TOKEN@github.com/eaze/bashbot-scripts.git",
-      "install": "git clone ${source}",
-      "setup": "echo \"\""
+      "install": "git clone https://$GITHUB_TOKEN@github.com/eaze/bashbot-scripts.git"
     }
   ]
 }
@@ -123,7 +121,7 @@ The config.json file is defined as an array of json objects keyed by 'tools' and
 
 Each object in the tools array defines the parameters of a single command.
 
-```json
+```
 name, description and help provide human readable information about the specific command
 trigger:      unique alphanumeric word that represents the command
 location:     absolute or relative path to dependency directory (use "./" for no dependency)
