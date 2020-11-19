@@ -66,7 +66,7 @@ cd bashbot
 ```
 
 ## Starting via Docker
-
+https://hub.docker.com/repository/docker/mathewfleisch/bashbot
 ```bash
 # Create/copy .env file and config.json to wherever this next command runs:
 docker run -v ${PWD}/config.json:/bashbot/config.json -v ${PWD}/.env:/bashbot/.env -it mathewfleisch/bashbot:v1.1.0
