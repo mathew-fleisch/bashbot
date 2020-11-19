@@ -598,7 +598,7 @@ func main() {
 	api = slack.New(slacktoken)
 
 	// log.Printf("Admin Config: %+v\n", admin)
-	var matchTrigger string = fmt.Sprintf("^%s", admin.Trigger)
+	var matchTrigger string = fmt.Sprintf("^%s .", admin.Trigger)
 
 	if err != nil {
 		log.Fatal(err)

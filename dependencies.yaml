@@ -1,5 +1,5 @@
 name: cicd/util/bashbot
-tag: 1.1.1
+tag: 1.1.2
 installers:
   local:
     - name: blackbox
