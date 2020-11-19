@@ -93,7 +93,7 @@ export github_filename=path/to/config.json
 [sample-config.json](sample-config.json)
 The config.json file is defined as an array of json objects keyed by 'tools' and 'dependencies.' The dependencies section defines any resources that need to be downloaded or cloned from a repository before execution of commands. The following is a simplified example of a config.json file:
 
-```
+```json
 {
   "tools": [{
       "name": "List Commands",
@@ -120,8 +120,10 @@ The config.json file is defined as an array of json objects keyed by 'tools' and
   ]
 }
 ```
+
 Each object in the tools array defines the parameters of a single command.
-```
+
+```json
 name, description and help provide human readable information about the specific command
 trigger:      unique alphanumeric word that represents the command
 location:     absolute or relative path to dependency directory (use "./" for no dependency)
@@ -135,7 +137,7 @@ permissions:  array of strings. private channel ids to restrict command access t
 ```
 
 In this example, a user would type `bashbot list-commands` and that would then run the command `cat config.json | jq -r '.tools[] | .trigger' | sort` which takes no parameters and returns a code block of text from the response. 
-```
+```json
 {
   "name": "List Commands",
   "description": "List all of the possible commands stored in bashbot",
@@ -153,7 +155,7 @@ In this example, a user would type `bashbot list-commands` and that would then r
 ```
 #### parameters continued (1 of 2):
 There are a few ways to define parameters for a command, but the parameters passed to the bot MUST be white-listed. If the command can be triggered with no parameters, an empty array can be used as in the first example. If the command requires parameters, they can be a hard coded array of strings, or derived from another command. In this example, the hard-coded list of possible parameters is defined (random, question, answer). The `question` action essentially selects a random line in the `--questions-file` text file. The `answer` action does the same as questions, but with a greater-than sign appended to the string. Finally, the `random` action selects both, a random question and random answer from both linked text files.
-```
+```json
 {
   "name": "Cards Against Humanity",
   "description": "Picks a random question and answer from a list.",
@@ -174,7 +176,7 @@ There are a few ways to define parameters for a command, but the parameters pass
 ```
 #### parameters continued (2 of 2): 
 In this example, a list of all 'trigger' values are extracted from the config.json and used as the parameter white-list. When the parameter list can be derived from output of another unix command, it can be "piped" in using the 'source' key. The command must execute without additional stdin input and consist of a newline separated list of values. The command jq is used to parse the json file of all 'trigger' values in a newline separated list.
-```
+```json
 {
   "name": "Describe Command",
   "description": "Show the json object for a specific command",
