@@ -1,156 +1,71 @@
-# BashBot
+```
+---------------------------------------
+ ____            _     ____        _   
+|  _ \          | |   |  _ \      | |  
+| |_) | __ _ ___| |__ | |_) | ___ | |_ 
+|  _ < / _' / __| '_ \|  _ < / _ \| __|
+| |_) | (_| \__ \ | | | |_) | (_) | |_ 
+|____/ \__,_|___/_| |_|____/ \___/ \__|
+---------------------------------------
+```
+BashBot is a slack bot written in golang for infrastructure/devops teams. A socket connection to slack provides bashbot with a stream of text from each channel it is invited to, and ueses regular expressions to trigger bash scripts. A [configuration file](sample-config.json) defines a list of commands that can be run in public and/or private channels. Restricting certain commands to private channels gives granular control, over which users can execute them. Bashbot allows infrastructure/devops teams to extend the tools and scripts they already use to manage their environments, into slack, that also acts as an execution log, and leverages slack's access controls.  
 
-BashBot is a white-listed command injection tool for slack. A [config.json](sample-config.json) file defines the possible commands that can be run as well as all of the parameters that can be passed to those commands. This bot uses circleci to build a docker container, that is pushed to AWS ECR and is run in ECS. Sensitive commands can be restricted to specific slack channels. Import other repositories like [bashbot-scripts](https://github.com/eaze/bashbot-scripts) to extend functionality, and reduce clutter in the configuration file.
 
-BashBot is built using the [nlopes golang slack api client](https://github.com/nlopes/slack), which receives "Real Time Message" (RTM) events through a socket. The bot parses every message event using regular expression string matching, to determine if a bot command should be executed. The first regular expression match comes from the `trigger` value in [admin.json](#Sample%20admin.json); if a user types this value into slack with the bot running, the rest of the message is parsed to determine if the whole message is a valid command. Commands are defined in a [config.json](sample-config.json) and use the same `trigger` paradigm to separate different commands. Each command can include parameters, provided they are white-listed. There are two ways to build a parameter list (see below for examples):
-
- - Hard coded array of strings
- - A command that builds a newline separated list of values
-
-## Table of Contents
-
-- [Installation](#Installation%20and%20setup)
-  * [Slack App Setup](#Slack%20App%20Setup)
-  * [Bare Metal](#Bare%20Metal%20Setup)
-  * [Docker](#Docker%20Setup)
-  * [ECS](#ECS%20Setup)
-- [Sample Env File](#Sample%20.env%20file)
-- [Sample admin.json](#Sample%20admin.json)
-- [Sample config.json](#Sample%20config.json)
-- [Sample messages.json](#Sample%20messages.json)
-- [CircleCi Environment Variables](#CircleCi%20Environment%20Variables)
+--------------------------------------------------
 
 ## Installation and setup 
-We have listed 3 different ways to install and get this up and running! Sample .env, admin.json, config.json and sample messages below. When setting up your s3 and ecs cluster make sure they are in the same region.
 
-### Slack App Setup
+Bashbot can be run as a go binary or as a container and requires an .env file for secrets/environment-variables and a config.json saved in a git repository. The .env file will contain a slack token, a git token (for pulling private repositories), and the location of a config.json file. 
 
-- Copy "Bot User OAuth Access Token" to .env file
 
-### Bare Metal Setup
 
+***Note***
+
+Slack's permissions model has changed and the "RTM" socket connection requires a "classic app" to be configured to get the correct type of token to run Bashbot. After logging into slack, visit [https://api.slack.com/apps?new_classic_app=1](https://api.slack.com/apps?new_classic_app=1) to set up a new "Bot User OAuth Access Token" and save the `xoxb-xxxxxxxxx-xxxxxxx` as the environment variable `SLACK_TOKEN` in a `.env` file at bashbot's root.
+
+***.env file***
+
+```bash
+export SLACK_TOKEN=xoxb-
+export GIT_TOKEN=
+export github_org=
+export github_repo=
+export github_branch=
+export github_filename=path/to/config.json
 ```
-# Log in as root
-sudo -i
 
-# Install dependencies
-apt update
-apt upgrade -y
-apt install -y zip wget iputils-ping curl jq build-essential libssl-dev ssh python python-pip python3 python3-pip openssl file libgcrypt-dev git redis-server sudo build-essential libssl-dev awscli vim
+***Requirements***
 
-# Clone bashbot
-git clone https://github.com/eaze/bashbot.git /bashbot
+- jq
+- git
+- golang
 
-# Create .env file
-touch /bashbot/.env
-# add secrets/tokens
 
+```bash
 # Copy Sample Config
-cp /bashbot/sample-config.json /bashbot/config.json
+cp sample-config.json config.json
 
-# Copy Sample Messages Config
-cp /bashbot/sample-messages.json /bashbot/messages.json
+# Commit config.json to new repo (preferably private with token read access)
 
-# Create Admin Config
-touch /bashbot/admin.json
-# add personal user id and channel id for public/private channels
+# Create .env file and fill in github_ variables pointing to custom config.json
+touch .env
+# Expected Format:
+# export SLACK_TOKEN=xoxb-
+# export GIT_TOKEN=
+# export github_org=
+# export github_repo=
+# export github_branch=
+# export github_filename=path/to/config.json
 
-# Install Go runtime (version 1.12 at least)
-wget https://dl.google.com/go/go1.12.12.linux-amd64.tar.gz
-tar xvf go1.12.12.linux-amd64.tar.gz
-sudo mv go /usr/local
-echo "export GOROOT=/usr/local/go" >> ~/.bashrc
-echo "export GOPATH=$HOME/go" >> ~/.bashrc
-echo "export PATH=$GOPATH/bin:$GOROOT/bin:$PATH" >> ~/.bashrc
-source ~/.bashrc
-
+# add secrets/tokens...
+source .env
+# Boostrap/Start local bashbot
 ./start.sh
+
+# Type into slack: bashbot help
 ```
 
 ----------------------------------------------------------------
-
-### Docker Setup
-
-  - clone bashbot locally
-  - Create public and private s3 buckets to setup aws and store secrets
-  - Define a .env file for environment variables save to private bucket and root of bashbot
-  - Define a config.json, messages.json and admin.json file and save to private bucket and root of bashbot
-
-```
-# Create/modify .env, config.json, messages.json, admin.json and `push-configs` to config s3 bucket
-./bashbot.sh --action push-configs --config-bucket [bucket-path] 
-
-# Run build command
-./bashbot.sh --action build-docker --config-bucket [bucket-path]
-
-# Run Docker Container
-docker run -it bashbot:latest
-```
-
-----------------------------------------------------------------
-
-
-### ECS Setup
-
-  - clone bashbot locally
-  - Create public and private s3 buckets to setup aws and store secrets
-  - Setup ecs cluster, task definition, service and repository
-  - Define a .env file for environment variables save to private bucket
-  - Define a config.json, messages.json and admin.json file and save to private bucket
-
-```
-# Create/modify .env, config.json, messages.json, admin.json and `push-configs` to config s3 bucket
-./bashbot.sh --action push-configs --config-bucket [bucket-path] 
-
-# Run build command through circleci job
-./bashbot.sh --action build-ecs --config-bucket [bucket-path] --circle-token [circleci-token] --circle-project [circleci-project]
-```
-
----------------------------------------------------------------- 
-
-### Sample .env file
-```
-# GitHub credentials
-export GITHUB_USER=xxxxxxxxxxxxx
-export GITHUB_TOKEN=xxxxxxxxxxxxx
-
-# Slack Token
-export SLACK_TOKEN=xxxxxxxxxxxxx
-
-# Public/Private s3 buckets
-export AWS_PUBLIC_SETUP_URL=xxxxxxxxxxxxx
-export REMOTE_CONFIG_BUCKET=xxxxxxxxxxxxx
-
-# ECS Information
-export ECS_REPO=xxxxxxxxxxxxx
-export ECS_CLUSTER=xxxxxxxxxxxxx
-export ECS_SERVICE=xxxxxxxxxxxxx
-export ECS_URL=xxxxxxxxxxxxx
-export ECS_REGION=xxxxxxxxxxxxx
-```
-
-----------------------------------------------------------------
-
-### admin.json
-```
-{
-  "admins": [{
-    "trigger": "bashbot",
-    "appName": "BashBot",
-    "userIds": ["admin-user-id"],
-    "privateChannelId": "private-slack-channel-id",
-    "logChannelId": "public-log-slack-channel-id"
-  }]
-}
-```
-
-----------------------------------------------------------------
-
-### messages.json
-[sample-messages.json](sample-messages.json)
-
-----------------------------------------------------------------
-
 
 ### config.json
 [sample-config.json](sample-config.json)
@@ -243,74 +158,19 @@ In this example, a list of all 'trigger' values are extracted from the config.js
   "description": "Show the json object for a specific command",
   "help": "bashbot describe [command]",
   "trigger": "describe",
-  "location": "./vendor/bashbot-scripts",
+  "location": "./scripts",
   "setup": "echo \"\"",
-  "command": "./describeCommand.sh ../../config.json ${command}",
+  "command": "./describe-command.sh ../config.json ${command}",
   "parameters": [
     {
       "name": "command",
       "allowed": [],
       "description": "a command to describe ('bashbot list-commands')",
-      "source": "cat ../../config.json | jq -r '.tools[] | .trigger'"
+      "source": "cat ../config.json | jq -r '.tools[] | .trigger'"
     }],
   "log": false,
   "ephemeral": false,
   "response": "code",
   "permissions": ["all"]
 }
-```
-
-## Triggering CircleCi Jobs
-
-You can trigger circleci jobs to extend the functionality of bashbot to isolated environments. An example of triggering a job outside of the bashbot container is running the sample-config's `rebuild` command. It assumes a few things are set up ahead of time: bashbot is already running in ECS, secrets are stored in the REMOTE_CONFIG_BUCKET environment variable for s3, and you have the proper permissions set up to run [circleci jobs](https://circleci.com/docs/enterprise/quick-start/) under your fork of bashbot. It also assumes bashbot has aws credentials to get the secrets in s3 via environment variables. Here is a list of the hard-coded (for now) expected variables to run the command, which will be below that:
-```
-# AWS Credentials
-AWS_ACCESS_KEY_ID
-AWS_SECRET_ACCESS_KEY
-
-# Script to set up ~/.aws/credentials and ~/.aws/config with your AWS account information
-AWS_PUBLIC_SETUP_URL
-
-# Remote config bucket (including path to configs) is 
-# expected to have 4 files (.env, config.json, messages.json, admin.json)
-REMOTE_CONFIG_BUCKET
-
-# Github user/token to get private golang repos if necessary
-GITHUB_USER
-GITHUB_TOKEN
-
-# ECS Variables
-ECS_REGION
-ECS_URL
-ECS_CLUSTER
-ECS_SERVICE
-ECS_REPO
-```
-***config.json for [this circleci job](.circleci/config.yml)***
-```
-{
-  "name": "BashBot rebuild",
-  "description": "Causes a redeploy in ecs using circleci",
-  "help": "bashbot rebuild",
-  "trigger": "rebuild",
-  "location": "./",
-  "setup": "echo \"Rebuilding ecs container in circleci\"",
-  "command": "./bashbot.sh --action build-ecs --config-bucket ${REMOTE_CONFIG_BUCKET} --circle-token ${CIRCLE_TOKEN} --circle-project [YOUR-ORG-AND-FORK-OF-BASHBOT-HERE]",
-  "parameters": [],
-  "log": false,
-  "ephemeral": false,
-  "response": "code",
-  "permissions": ["private-channel-id"]
-}
-```
-
-----------------------------------------------------------------
-
-
-### CircleCi Environment Variables
-```
-# AWS credentials
-AWS_ACCESS_KEY_ID=xxxxxxxxxxxxx
-AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxx
-REMOTE_CONFIG_BUCKET=xxxxxxxxxxxxx
 ```

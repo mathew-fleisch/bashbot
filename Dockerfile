@@ -30,6 +30,6 @@ WORKDIR /bashbot
 COPY . .
 RUN mkdir -p vendor
 RUN go install -v ./...
-RUN go get github.com/nlopes/slack@master
+RUN go get github.com/slack-go/slack@master
 
 CMD ["/bin/bash", "start.sh"]
