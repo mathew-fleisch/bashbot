@@ -13,10 +13,9 @@
 
 .env*
 .DS_Store
+*/vendor/*
 vendor/*
 
 config.json
-admin.json
-messages.json
 
 tmp/*

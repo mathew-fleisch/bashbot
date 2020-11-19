@@ -1,11 +1,11 @@
 #!/bin/bash
 
-source ~/.bashrc
-if [[ ! -z $AWS_PUBLIC_SETUP_URL ]]; then
-  curl $AWS_PUBLIC_SETUP_URL | bash
-fi
 if [[ -f bashbot.go ]]; then
-  ./install-dependencies.sh
+  mkdir -p vendor \
+    && cd scripts \
+    && ./get-config.sh \
+    && ./get-vendor-dependencies.sh ../config.json ../vendor \
+    && cd ..
   go run bashbot.go
 else
   echo "Must run start from project root."

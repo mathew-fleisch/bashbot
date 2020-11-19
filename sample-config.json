@@ -1,8 +1,48 @@
 {
+  "admins": [{
+    "trigger": "bashbot",
+    "appName": "BashBot",
+    "userIds": ["SLACK-USER-ID"],
+    "privateChannelId": "SLACK-CHANNEL-ID",
+    "logChannelId": "SLACK-CHANNEL-ID"
+  }],
+  "messages": [{
+    "active": true,
+    "name": "welcome",
+    "text": "Witness the power of %s"
+  },{
+    "active": true,
+    "name": "processing_command",
+    "text": ":robot_face: Processing command..."
+  },{
+    "active": true,
+    "name": "processing_raw_command",
+    "text": ":smiling_imp: Processing raw command..."
+  },{
+    "active": true,
+    "name": "command_not_found",
+    "text": ":thinking_face: Command not found..."
+  },{
+    "active": true,
+    "name": "incorrect_parameters",
+    "text": ":face_with_monocle: Incorrect number of parameters"
+  },{
+    "active": true,
+    "name": "invalid_parameter",
+    "text": ":face_with_monocle: Invalid parameter value: %s"
+  },{
+    "active": true,
+    "name": "ephemeral",
+    "text": ":shushing_face: Message only shown to user who triggered it."
+  },{
+    "active": true,
+    "name": "unauthorized",
+    "text": ":skull_and_crossbones: You are not authorized to use this command in this channel.\nAllowed in: [%s]"
+  }],
   "tools": [{
       "name": "BashBot Help",
       "description": "Show this message",
-      "help": "bashbot help",
+      "help": "help",
       "trigger": "help",
       "location": "./",
       "setup": "echo \"BashBot is a white-listed command injection tool for slack... written in go. Add this bot to the channel that you wish to carry out commands, and type \\`bashbot help\\` to see this message.\nRun \\`bashbot <command> help\\` to see whitelist of parameters.\nPossible \\`<commands>\\`:\"",
@@ -15,11 +55,11 @@
     },{
       "name": "Get User/Channel Info",
       "description": "Get information about the user and channel command is being run from",
-      "help": "bashbot info",
+      "help": "info",
       "trigger": "info",
-      "location": "./vendor/bashbot-scripts",
+      "location": "./scripts",
       "setup": "echo \"\"",
-      "command": "./getBasicInfo.sh",
+      "command": "./get-info.sh",
       "parameters": [],
       "log": false,
       "ephemeral": false,
@@ -28,9 +68,9 @@
     },{
       "name": "Get User Info",
       "description": "Use slack api to get user information",
-      "help": "bashbot user-info [user]",
+      "help": "user-info [user]",
       "trigger": "user-info",
-      "location": "./vendor/bashbot-scripts",
+      "location": "./scripts",
       "setup": "echo \"\"",
       "command": "./slackApi.sh --endpoint users.info --user-id $(./slackApi.sh --get-id-from-tag \"${user}\") --output json",
       "parameters": [
@@ -48,7 +88,7 @@
     },{
       "name": "List Commands",
       "description": "List all of the possible commands stored in bashbot",
-      "help": "bashbot list-commands",
+      "help": "list-commands",
       "trigger": "list-commands",
       "location": "./",
       "setup": "echo \"\"",
@@ -61,65 +101,52 @@
     },{
       "name": "Describe Command",
       "description": "Show the json object for a specific command",
-      "help": "bashbot describe [command]",
+      "help": "describe [command]",
       "trigger": "describe",
-      "location": "./vendor/bashbot-scripts",
+      "location": "./scripts",
       "setup": "echo \"\"",
-      "command": "./describeCommand.sh ../../config.json ${command}",
+      "command": "./describe-command.sh ../config.json ${command}",
       "parameters": [
         {
           "name": "command",
           "allowed": [],
           "description": "a command to describe ('bashbot list-commands')",
-          "source": "cat ../../config.json | jq -r '.tools[] | .trigger'"
+          "source": "cat ../config.json | jq -r '.tools[] | .trigger'"
         }],
       "log": false,
       "ephemeral": false,
       "response": "code",
       "permissions": ["all"]
     },{
-      "name": "BashBot update",
-      "description": "Pulls a fresh config file from s3",
-      "help": "bashbot update",
-      "trigger": "update",
-      "location": "./",
-      "setup": "mkdir -p ./tmp",
-      "command": "./bashbot.sh --action pull-configs --config-bucket ${REMOTE_CONFIG_BUCKET}",
-      "parameters": [],
-      "log": false,
-      "ephemeral": true,
-      "response": "code",
-      "permissions": ["private-channel-id"]
-    },{
-      "name": "BashBot upgrade",
-      "description": "Pulls a fresh config file from s3 and updates dependencies",
-      "help": "bashbot upgrade",
-      "trigger": "upgrade",
-      "location": "./",
-      "setup": "mkdir -p ./tmp",
-      "command": "./bashbot.sh --action pull-configs --config-bucket ${REMOTE_CONFIG_BUCKET} && rm -rf ./vendor/* && ./init.sh",
-      "parameters": [],
-      "log": false,
-      "ephemeral": true,
-      "response": "code",
-      "permissions": ["private-channel-id"]
-    },{
-      "name": "BashBot rebuild",
-      "description": "Causes a redeploy in ecs using circleci",
-      "help": "bashbot rebuild",
-      "trigger": "rebuild",
-      "location": "./",
-      "setup": "echo \"Rebuilding ecs container in circleci\"",
-      "command": "./bashbot.sh --action build-ecs --config-bucket ${REMOTE_CONFIG_BUCKET} --circle-token ${CIRCLE_TOKEN} --circle-project [YOUR-ORG-AND-FORK-OF-BASHBOT-HERE]",
+      "name": "Get config.json",
+      "description": "Pulls a fresh config file from github",
+      "help": "get-config",
+      "trigger": "get-config",
+      "location": "./scripts",
+      "setup": "echo \"Pulling config.json from: https://api.github.com/repos/${github_org}/${github_repo}/contents/${github_filename}?ref=${github_branch}\"",
+      "command": "./get-config.sh",
       "parameters": [],
       "log": false,
       "ephemeral": false,
       "response": "code",
-      "permissions": ["private-channel-id"]
+      "permissions": ["GTCAZ2G3X"]
+    },{
+      "name": "Get Dependencies",
+      "description": "Clones all dependencies defined for this bot",
+      "help": "dependencies",
+      "trigger": "dependencies",
+      "location": "./scripts",
+      "setup": "rm -rf ../vendor/*",
+      "command": "./get-vendor-dependencies.sh ../config.json ../vendor",
+      "parameters": [],
+      "log": false,
+      "ephemeral": false,
+      "response": "code",
+      "permissions": ["GTCAZ2G3X"]
     },{
       "name": "Cards Against Humanity",
       "description": "Picks a random question and answer from a list.",
-      "help": "bashbot cah [random|question|answer]",
+      "help": "cah [random|question|answer]",
       "trigger": "cah",
       "location": "./vendor/bashbot-scripts",
       "setup": "echo \"\"",
@@ -135,7 +162,7 @@
     },{
       "name": "CAT FACTS",
       "description": "Picks a random line from a text file",
-      "help": "bashbot cat-fact",
+      "help": "cat-fact",
       "trigger": "cat-fact",
       "location": "./vendor/bashbot-scripts",
       "setup": "echo \"\"",
@@ -148,7 +175,7 @@
     },{
       "name": "Slap User",
       "description": "Slap a specific user with a trout gif",
-      "help": "bashbot slap [user]",
+      "help": "slap [user]",
       "trigger": "slap",
       "location": "./vendor/bashbot-scripts",
       "setup": "echo \"\"",
@@ -170,15 +197,11 @@
   "dependencies": [
     {
       "name": "BashBot scripts Scripts",
-      "source": "https://$GITHUB_TOKEN@github.com/eaze/bashbot-scripts.git",
-      "install": "git clone ${source}",
-      "setup": "echo \"\""
+      "install": "https://${GIT_TOKEN}@github.com/eaze/bashbot-scripts.git"
     },
     {
       "name": "Cards Against Humanity",
-      "source": "https://github.com/nodanaonlyzuul/against-humanity.git",
-      "install": "git clone ${source}",
-      "setup": "echo \"\""
+      "install": "git clone https://github.com/nodanaonlyzuul/against-humanity.git"
     }
   ]
 }

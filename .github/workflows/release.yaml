@@ -1,0 +1,39 @@
+name: Release Bashbot
+on:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  build:
+    name: Release Bashbot
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Release Bashbot"
+        env:
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+          GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
+          go build bashbot.go
+          tag=$(git describe --tags)
+          message="$(git for-each-ref refs/tags/$tag --format='%(contents)')"
+          name=$(echo "$message" | head -n1)
+          # Create a release
+          release=$(curl -XPOST -H "Authorization:token $GIT_TOKEN" --data "{\"tag_name\": \"$tag\", \"target_commitish\": \"main\", \"name\": \"bashbot-${tag}\", \"body\": \"$name\", \"draft\": false, \"prerelease\": false}" https://api.github.com/repos/mathew-fleisch/bashbot/releases)
+          echo "$release"
+          echo "${tag}" > version
+          rm -rf .git
+          echo "$DOCKER_TOKEN" | docker login docker.io -u="$DOCKER_USER" --password-stdin
+          docker build -t bashbot-local .
+          docker tag bashbot-local docker.io/mathewfleisch/bashbot:${tag}
+          docker push docker.io/mathewfleisch/bashbot:${tag}
+          cd ..
+          tar -zcvf bashbot.tar.gz bashbot
+      - name: Upload tarball
+        uses: actions/upload-artifact@v1
+        with:
+          name: bashbot.tar.gz
+          path: bashbot.tar.gz
+          
