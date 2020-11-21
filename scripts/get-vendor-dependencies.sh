@@ -24,5 +24,6 @@ fi
 cd $vendor_dir && rm -rf *
 echo "Installing Dependencies..."
 dependencies=$(jq -r '.dependencies[].install' $config_file | sed 'N;s/\n/ \&\& /')
+echo "$dependencies"
 eval $dependencies
 echo "Dependencies installed."

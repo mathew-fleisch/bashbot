@@ -8,7 +8,7 @@
 |____/ \__,_|___/_| |_|____/ \___/ \__|
 ---------------------------------------
 ```
-BashBot is a slack bot written in golang for infrastructure/devops teams. A socket connection to slack provides bashbot with a stream of text from each channel it is invited to, and ueses regular expressions to trigger bash scripts. A [configuration file](sample-config.json) defines a list of commands that can be run in public and/or private channels. Restricting certain commands to private channels gives granular control, over which users can execute them. Bashbot allows infrastructure/devops teams to extend the tools and scripts they already use to manage their environments, into slack, that also acts as an execution log, and leverages slack's access controls.  
+BashBot is a slack bot written in golang for infrastructure/devops teams. A socket connection to slack provides bashbot with a stream of text from each channel it is invited to, and uses regular expressions to trigger bash scripts. A [configuration file](sample-config.json) defines a list of commands that can be run in public and/or private channels. Restricting certain commands to private channels gives granular control, over which users can execute them. Bashbot allows infrastructure/devops teams to extend the tools and scripts they already use to manage their environments, into slack, that also acts as an execution log, and leverages slack's access controls.
 
 
 --------------------------------------------------
@@ -21,7 +21,7 @@ Bashbot can be run as a go binary or as a container and requires an .env file fo
 
 ***Note***
 
-Slack's permissions model has changed and the "RTM" socket connection requires a "classic app" to be configured to get the correct type of token to run Bashbot. After logging into slack, visit [https://api.slack.com/apps?new_classic_app=1](https://api.slack.com/apps?new_classic_app=1) to set up a new "Bot User OAuth Access Token" and save the `xoxb-xxxxxxxxx-xxxxxxx` as the environment variable `SLACK_TOKEN` in a `.env` file at bashbot's root.
+Slack's permissions model has changed and the "[RTM](https://api.slack.com/rtm)" socket connection requires a "classic app" to be configured to get the correct type of token to run Bashbot. After logging into slack, visit [https://api.slack.com/apps?new_classic_app=1](https://api.slack.com/apps?new_classic_app=1) to set up a new "Bot User OAuth Access Token" and save the `xoxb-xxxxxxxxx-xxxxxxx` as the environment variable `SLACK_TOKEN` in a `.env` file at bashbot's root.
 
 ***Requirements***
 
@@ -66,7 +66,9 @@ cd bashbot
 ```
 
 ## Starting via Docker
-https://hub.docker.com/repository/docker/mathewfleisch/bashbot
+
+https://hub.docker.com/r/mathewfleisch/bashbot
+
 ```bash
 # Create/copy .env file and config.json to wherever this next command runs:
 docker run -v ${PWD}/config.json:/bashbot/config.json -v ${PWD}/.env:/bashbot/.env -it mathewfleisch/bashbot:v1.1.0
