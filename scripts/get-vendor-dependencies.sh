@@ -23,7 +23,18 @@ if ! [[ -d "$vendor_dir" ]]; then
 fi
 cd $vendor_dir && rm -rf *
 echo "Installing Dependencies..."
-dependencies=$(jq -r '.dependencies[].install' $config_file | sed 'N;s/\n/ \&\& /g')
-echo "$dependencies"
-eval $dependencies
+jq -c '.dependencies[]' $config_file
+for dep in $(jq -r '.dependencies[] | @base64' $config_file); do
+  echo "---------------------"
+    _jq() {
+     echo ${dep} | base64 --decode | jq -r ${1}
+    }
+
+  this_name=$(_jq '.name')
+  this_install=$(_jq '.install')
+
+  echo "$this_name"
+  echo "$this_install"
+  eval $this_install
+done
 echo "Dependencies installed."
