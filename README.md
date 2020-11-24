@@ -15,7 +15,7 @@ BashBot is a slack bot written in golang for infrastructure/devops teams. A sock
 
 ## Installation and setup 
 
-Bashbot can be run as a go binary or as a container and requires an .env file for secrets/environment-variables and a config.json saved in a git repository. The .env file will contain a slack token, a git token (for pulling private repositories), and the location of a config.json file. 
+Bashbot can be run as a go binary or as a container and requires an .env file for secrets/environment-variables and a config.json saved in a _git repository_. The .env file will contain a slack token, a git token (for pulling private repositories), and the location of a config.json file. This _git repository_ should exist in your organization and should be devoted to your configuration of the bot. Bashbot will read from this repository constantly, making it easy to change the configuration without restarting the bot.
 
 
 
@@ -42,10 +42,10 @@ cp sample-config.json config.json
 touch .env
 # Expected Format:
 # export SLACK_TOKEN=xoxb-
-# export GIT_TOKEN=
-# export github_org=
-# export github_repo=
-# export github_branch=
+# export GIT_TOKEN= <generate with permissions to READ from repo defined below>
+# export github_org= <or username if you do not use an organizaion>
+# export github_repo= <repo that will store the bot's config>
+# export github_branch= <doesn't have to live on the main branch>
 # export github_filename=path/to/config.json
 
 # add secrets/tokens...
