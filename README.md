@@ -198,3 +198,22 @@ In this example, a list of all 'trigger' values are extracted from the config.js
   "permissions": ["all"]
 }
 ```
+
+
+
+## Automation (Build/Release)
+Included in this repository is a [github action](.github/workflows/release.yaml) that when git tags are pushed, a release is cut, added to github and a docker build is pushed to a target registry, if the proper github secrets are added in the repository settings. 
+
+```bash
+# Expected github secrets for automation to execute
+REGISTRY_USERNAME
+REGISTRY_PASSWORD
+REGISTRY_URL=docker.io
+REGISTRY_APPNAME=mathewfleisch/bashbot
+FORK_OWNER=mathew-fleisch
+GIT_TOKEN
+
+# example semver bump: v1.2.4
+git tag v1.2.4
+git push origin v1.2.4
+```
