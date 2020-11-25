@@ -19,6 +19,14 @@ jobs:
           GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
+          expected="REGISTRY_USERNAME REGISTRY_PASSWORD REGISTRY_URL REGISTRY_APPNAME FORK_OWNER GIT_TOKEN"
+          for expect in $expected; do
+            if [[ -z "${!expect}" ]]; then
+              echo "Missing Github Secret: $expect"
+              echo "See read-me about automation to set this up in your fork"
+              exit 1
+            fi
+          done
           go build bashbot.go
           tag=$(git describe --tags)
           message="$(git for-each-ref refs/tags/$tag --format='%(contents)')"
