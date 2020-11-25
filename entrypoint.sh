@@ -1,0 +1,23 @@
+#!/bin/bash
+if [[ -f bashbot.go ]]; then
+  # If an aws user+bucket are saved as environment variables, pull the .env file from bucket
+  if [[ -n "$AWS_ACCESS_KEY_ID" ]] && [[ -n "$AWS_SECRET_ACCESS_KEY" ]] && [[ -n "$S3_CONFIG_BUCKET" ]]; then
+    aws s3 cp ${S3_CONFIG_BUCKET}/.env .env
+  fi
+  # The .env file doesn't have to come from aws s3 bucket. Verify it exists.
+  if [[ -f .env ]]; then
+    source .env
+    mkdir -p vendor \
+      && cd scripts \
+      && ./get-config.sh \
+      && ./get-vendor-dependencies.sh ../config.json ../vendor \
+      && cd ..
+    go run bashbot.go
+  else
+    echo "Must include a .env file at project root. See bashbot read-me for more details."
+    exit 1
+  fi
+else
+  echo "Must run start from project root."
+  exit 1
+fi
