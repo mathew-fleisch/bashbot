@@ -71,9 +71,9 @@ docker run \
   -it mathewfleisch/bashbot:v1.2.0
 # or by s3 bucket
 docker run \
-  -e AWS_ACCESS_KEY_ID="xxx"
-  -e AWS_SECRET_ACCESS_KEY="xxx"
-  -e S3_CONFIG_BUCKET="s3://[PATH-TO-ENV-FILE]"
+  -e AWS_ACCESS_KEY_ID="xxx" \
+  -e AWS_SECRET_ACCESS_KEY="xxx" \
+  -e S3_CONFIG_BUCKET="s3://[PATH-TO-ENV-FILE]" \
   -it mathewfleisch/bashbot:v1.2.0
 ```
 ```yaml
