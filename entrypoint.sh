@@ -4,7 +4,7 @@ if [[ -f bashbot.go ]]; then
   if [[ -n "$AWS_ACCESS_KEY_ID" ]] && [[ -n "$AWS_SECRET_ACCESS_KEY" ]] && [[ -n "$S3_CONFIG_BUCKET" ]]; then
     echo "Attempting to pull .env file from s3 bucket: $(echo $S3_CONFIG_BUCKET | sed -e 's/\//\/ /g')"
     aws sts get-caller-identity
-    aws s3 cp ${S3_CONFIG_BUCKET}/.env .env
+    aws s3 cp ${S3_CONFIG_BUCKET} .env
   fi
   # The .env file doesn't have to come from aws s3 bucket. Verify it exists.
   if [[ -f .env ]]; then
