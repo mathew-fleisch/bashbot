@@ -11,24 +11,35 @@ jobs:
       - uses: actions/checkout@v2
       - name: "Release Bashbot"
         env:
-          DOCKER_USER: ${{ secrets.DOCKER_USER }}
-          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+          REGISTRY_APPNAME: ${{ secrets.REGISTRY_APPNAME }}
+          FORK_OWNER: ${{ secrets.FORK_OWNER }}
           GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
+          expected="REGISTRY_USERNAME REGISTRY_PASSWORD REGISTRY_URL REGISTRY_APPNAME FORK_OWNER GIT_TOKEN"
+          for expect in $expected; do
+            if [[ -z "${!expect}" ]]; then
+              echo "Missing Github Secret: $expect"
+              echo "See read-me about automation to set this up in your fork"
+              exit 1
+            fi
+          done
           go build bashbot.go
           tag=$(git describe --tags)
           message="$(git for-each-ref refs/tags/$tag --format='%(contents)')"
           name=$(echo "$message" | head -n1)
           # Create a release
-          release=$(curl -XPOST -H "Authorization:token $GIT_TOKEN" --data "{\"tag_name\": \"$tag\", \"target_commitish\": \"main\", \"name\": \"bashbot-${tag}\", \"body\": \"$name\", \"draft\": false, \"prerelease\": false}" https://api.github.com/repos/mathew-fleisch/bashbot/releases)
+          release=$(curl -XPOST -H "Authorization:token $GIT_TOKEN" --data "{\"tag_name\": \"$tag\", \"target_commitish\": \"main\", \"name\": \"bashbot-${tag}\", \"body\": \"$name\", \"draft\": false, \"prerelease\": false}" https://api.github.com/repos/${FORK_OWNER}/bashbot/releases)
           echo "$release"
           echo "${tag}" > version
           rm -rf .git
-          echo "$DOCKER_TOKEN" | docker login docker.io -u="$DOCKER_USER" --password-stdin
+          echo "$REGISTRY_PASSWORD" | docker login ${REGISTRY_URL} -u="$REGISTRY_USERNAME" --password-stdin
           docker build -t bashbot-local .
-          docker tag bashbot-local docker.io/mathewfleisch/bashbot:${tag}
-          docker push docker.io/mathewfleisch/bashbot:${tag}
+          docker tag bashbot-local ${REGISTRY_URL}/${REGISTRY_APPNAME}:${tag}
+          docker push ${REGISTRY_URL}/${REGISTRY_APPNAME}:${tag}
           cd ..
           tar -zcvf bashbot.tar.gz bashbot
           mv bashbot.tar.gz bashbot/.
