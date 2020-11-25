@@ -17,6 +17,20 @@ BashBot is a slack bot written in golang for infrastructure/devops teams. A sock
 
 Bashbot can be run as a go binary or as a container and requires an .env file for secrets/environment-variables and a config.json saved in a _git repository_. The .env file will contain a slack token, a git token (for pulling private repositories), and the location of a config.json file. This _git repository_ should exist in your organization/personal-github-account and should be devoted to your configuration of the bot. Bashbot will read from this repository constantly, making it easy to change the configuration without restarting the bot. An s3 bucket can used to store the .env file and referenced via environment variables to pull configuration/secrets for specific bashbot instances.
 
+***Note***
+
+Slack's permissions model has changed and the "[RTM](https://api.slack.com/rtm)" socket connection requires a "classic app" to be configured to get the correct type of token to run Bashbot. After logging into slack, visit [https://api.slack.com/apps?new_classic_app=1](https://api.slack.com/apps?new_classic_app=1) to set up a new "Bot User OAuth Access Token" and save the `xoxb-xxxxxxxxx-xxxxxxx` as the environment variable `SLACK_TOKEN` in a `.env` file at bashbot's root.
+
+***Requirements***
+
+- jq
+- git
+- golang
+
+or
+
+- docker
+
 ```bash
 # Step 1: Get slack "classic app" bot token
 # https://api.slack.com/apps?new_classic_app=1
@@ -120,19 +134,6 @@ spec:
       terminationGracePeriodSeconds: 30
 ```
 
-***Note***
-
-Slack's permissions model has changed and the "[RTM](https://api.slack.com/rtm)" socket connection requires a "classic app" to be configured to get the correct type of token to run Bashbot. After logging into slack, visit [https://api.slack.com/apps?new_classic_app=1](https://api.slack.com/apps?new_classic_app=1) to set up a new "Bot User OAuth Access Token" and save the `xoxb-xxxxxxxxx-xxxxxxx` as the environment variable `SLACK_TOKEN` in a `.env` file at bashbot's root.
-
-***Requirements***
-
-- jq
-- git
-- golang
-
-or
-
-- docker
 
 -------------------------------------------------------------------------
 
