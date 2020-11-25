@@ -15,9 +15,110 @@ BashBot is a slack bot written in golang for infrastructure/devops teams. A sock
 
 ## Installation and setup 
 
-Bashbot can be run as a go binary or as a container and requires an .env file for secrets/environment-variables and a config.json saved in a _git repository_. The .env file will contain a slack token, a git token (for pulling private repositories), and the location of a config.json file. This _git repository_ should exist in your organization and should be devoted to your configuration of the bot. Bashbot will read from this repository constantly, making it easy to change the configuration without restarting the bot.
+Bashbot can be run as a go binary or as a container and requires an .env file for secrets/environment-variables and a config.json saved in a _git repository_. The .env file will contain a slack token, a git token (for pulling private repositories), and the location of a config.json file. This _git repository_ should exist in your organization/personal-github-account and should be devoted to your configuration of the bot. Bashbot will read from this repository constantly, making it easy to change the configuration without restarting the bot. An s3 bucket can used to store the .env file and referenced via environment variables to pull configuration/secrets for specific bashbot instances.
 
-
+```bash
+# Step 1: Get slack "classic app" bot token
+# https://api.slack.com/apps?new_classic_app=1
+#
+###################################################
+#
+# Step 2: Create configuration repository (see below for .env and config.json format)
+# botname
+#  ├── config.json
+#  └── .env
+# Note: .env will contain secrets and can be stored in s3 by setting these environment variables: 
+#   AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_CONFIG_BUCKET
+#
+###################################################
+#
+# Step 3a: Run Bashbot locally
+curl -sL https://api.github.com/repos/mathew-fleisch/bashbot/releases/latest \
+    | jq -r '.tarball_url' \
+    | xargs -I {} curl -sL {} -o bashbot.tar.gz \
+  && mkdir bashbot \
+  && tar -zxvf bashbot.tar.gz -C bashbot --strip-components=1
+# or clone via ssh
+git clone git@github.com:mathew-fleisch/bashbot.git
+# or clone via https
+git clone https://github.com/mathew-fleisch/bashbot.git
+# Copy .env/config.json to bashbot root and run entrypoint
+cp config.json bashbot/. \
+  && cp .env bashbot/. \
+  && cd bashbot \
+  && ./entrypoint.sh
+#
+###################################################
+#
+# Step 3b: Run Bashbot via docker (https://hub.docker.com/r/mathewfleisch/bashbot)
+docker run \
+  -v ${PWD}/config.json:/bashbot/config.json \
+  -v ${PWD}/.env:/bashbot/.env \
+  -it mathewfleisch/bashbot:v1.2.0
+# or by s3 bucket
+docker run \
+  -e AWS_ACCESS_KEY_ID="xxx"
+  -e AWS_SECRET_ACCESS_KEY="xxx"
+  -e S3_CONFIG_BUCKET="s3://[PATH-TO-ENV-FILE]"
+  -it mathewfleisch/bashbot:v1.2.0
+```
+```yaml
+#
+###################################################
+#
+# Step 3c: Deploy Bashbot via kubernetes
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: bashbot
+  name: bashbot
+  namespace: bashbot
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: bashbot
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: bashbot
+    spec:
+      containers:
+      - image: mathewfleisch/bashbot:v1.2.0
+        imagePullPolicy: IfNotPresent
+        name: bashbot
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        workingDir: /bashbot
+        volumeMounts:
+        - name: config-json
+          mountPath: /bashbot/config.json
+        - name: env-vars
+          mountPath: /bashbot/.env
+      volumes:
+        - name: config-json
+          hostPath:
+            path: /tmp/bashbot-configs/bashbot/config.json
+        - name: env-vars
+          hostPath:
+            path: /tmp/bashbot-configs/bashbot/.env
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+```
 
 ***Note***
 
@@ -29,64 +130,21 @@ Slack's permissions model has changed and the "[RTM](https://api.slack.com/rtm)"
 - git
 - golang
 
+or
 
-## Create .env and config.json
+- docker
 
-```bash
-# Copy Sample Config
-cp sample-config.json config.json
-
-# Commit config.json to new repo (preferably private with token read access)
-
-# Create .env file and fill in github_ variables pointing to custom config.json
-touch .env
-# Expected Format:
-# export SLACK_TOKEN=xoxb-
-# export GIT_TOKEN= <generate with permissions to READ from repo defined below>
-# export github_org= <or username if you do not use an organizaion>
-# export github_repo= <repo that will store the bot's config>
-# export github_branch= <doesn't have to live on the main branch>
-# export github_filename=path/to/config.json
-
-# add secrets/tokens...
-```
-
-## Starting Manually
-
-```bash
-git clone git@github.com:mathew-fleisch/bashbot.git
-# or
-git clone https://github.com/mathew-fleisch/bashbot.git
-
-cd bashbot
-# Create/copy .env file and config.json to bashbot root
-
-# Start local bashbot
-./start.sh
-```
-
-## Starting via Docker
-
-https://hub.docker.com/r/mathewfleisch/bashbot
-
-```bash
-# Create/copy .env file and config.json to wherever this next command runs:
-docker run -v ${PWD}/config.json:/bashbot/config.json -v ${PWD}/.env:/bashbot/.env -it mathewfleisch/bashbot:v1.1.0
-```
-
-
-----------------------------------------------------------------
-
+-------------------------------------------------------------------------
 
 ### .env file
 
 ```bash
-export SLACK_TOKEN=xoxb-
-export GIT_TOKEN=
-export github_org=
-export github_repo=
-export github_branch=
-export github_filename=path/to/config.json
+export SLACK_TOKEN=<xoxb-xxxxxx-xxxxxx>
+export GIT_TOKEN=<generate with permissions to READ from repo defined below>
+export github_org=<github user or organization>
+export github_repo=<repo that will store the bot config>
+export github_branch=<config can be pulled from any branch>
+export github_filename=<path/to/config.json>
 ```
 
 
@@ -97,6 +155,46 @@ The config.json file is defined as an array of json objects keyed by 'tools' and
 
 ```json
 {
+  "admins": [{
+    "trigger": "bashbot",
+    "appName": "BashBot",
+    "userIds": ["SLACK-USER-ID"],
+    "privateChannelId": "SLACK-CHANNEL-ID",
+    "logChannelId": "SLACK-CHANNEL-ID"
+  }],
+  "messages": [{
+    "active": true,
+    "name": "welcome",
+    "text": "Witness the power of %s"
+  },{
+    "active": true,
+    "name": "processing_command",
+    "text": ":robot_face: Processing command..."
+  },{
+    "active": true,
+    "name": "processing_raw_command",
+    "text": ":smiling_imp: Processing raw command..."
+  },{
+    "active": true,
+    "name": "command_not_found",
+    "text": ":thinking_face: Command not found..."
+  },{
+    "active": true,
+    "name": "incorrect_parameters",
+    "text": ":face_with_monocle: Incorrect number of parameters"
+  },{
+    "active": true,
+    "name": "invalid_parameter",
+    "text": ":face_with_monocle: Invalid parameter value: %s"
+  },{
+    "active": true,
+    "name": "ephemeral",
+    "text": ":shushing_face: Message only shown to user who triggered it."
+  },{
+    "active": true,
+    "name": "unauthorized",
+    "text": ":skull_and_crossbones: You are not authorized to use this command in this channel.\nAllowed in: [%s]"
+  }],
   "tools": [{
       "name": "List Commands",
       "description": "List all of the possible commands stored in bashbot",
