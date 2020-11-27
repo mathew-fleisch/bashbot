@@ -21,6 +21,20 @@ Bashbot can be run as a go binary or as a container and requires an .env file fo
 
 Slack's permissions model has changed and the "[RTM](https://api.slack.com/rtm)" socket connection requires a "classic app" to be configured to get the correct type of token to run Bashbot. After logging into slack, visit [https://api.slack.com/apps?new_classic_app=1](https://api.slack.com/apps?new_classic_app=1) to set up a new "legacy bot user" and "Bot User OAuth Access Token" and save the `xoxb-xxxxxxxxx-xxxxxxx` as the environment variable `SLACK_TOKEN` in a `.env` file at bashbot's root.
 
+***Steps To Prove It's Working***
+
+- Once the Slack "Classic Bot" App is installed into your workspace, run it locally with the `entrypoint.sh` shell script.
+- If your `config.json` file is accessible according to your `.env` definitions AND your `SLACK_TOKEN` is actually associated with a "classic app", then the `start.sh` script should finish with:
+```
+CONNECTED; ACQUIRING TARGETING DATA
+```
+- Now you should be able to run a few commands in your slack channel ...
+- Create a new public channel in your slack called `#bot-test`
+- Invite the BashBot into your channel by typing `@BashBot`
+- Slackbot should respond with the message: `OK! I’ve invited @BashBot to this channel.`
+- Now type `bashbot help`
+- If all is configured correctly, you should see BashBot respond immediately with `Processing command...` and momentarily post a full list of commands that are defined in config.json
+
 ***Requirements***
 
 - jq
@@ -132,12 +146,13 @@ spec:
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
-```
 
+```
 
 -------------------------------------------------------------------------
 
 ### .env file
+[sample-env-file](sample-env-file)
 
 ```bash
 export SLACK_TOKEN=<xoxb-xxxxxx-xxxxxx>
