@@ -1,0 +1,6 @@
+export SLACK_TOKEN=
+export GIT_TOKEN=
+export github_org=
+export github_repo=
+export github_branch=
+export github_filename=

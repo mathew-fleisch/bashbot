@@ -147,20 +147,12 @@ spec:
       securityContext: {}
       terminationGracePeriodSeconds: 30
 
-
-## Starting via Docker
-
-https://hub.docker.com/r/mathewfleisch/bashbot
-
-```bash
-# Create/copy .env file and config.json to wherever this next command runs:
-docker run -v ${PWD}/config.json:/bashbot/config.json -v ${PWD}/.env:/bashbot/.env -it mathewfleisch/bashbot:v1.1.0
 ```
-
 
 -------------------------------------------------------------------------
 
 ### .env file
+[sample-env-file](sample-env-file)
 
 ```bash
 export SLACK_TOKEN=<xoxb-xxxxxx-xxxxxx>
