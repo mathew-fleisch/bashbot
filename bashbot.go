@@ -149,7 +149,7 @@ func findChannelByName(name string) string {
 func getChannelNames(channelIds []string) []string {
 	fmt.Printf("getChannelNames()")
 	var names []string
-	pparams := &slack.GetConversationsParameters{ExcludeArchived: "true", Limit: 1000, Types: []string{"private_channel"}}
+	pparams := &slack.GetConversationsParameters{Limit: 1000, Types: []string{"private_channel"}}
 	pchannels, _, _ := api.GetConversations(pparams)
 	pnumChannels := len(pchannels)
 	fmt.Printf("\nNumber of private channels:%s", pnumChannels)
@@ -165,7 +165,7 @@ func getChannelNames(channelIds []string) []string {
 			}
 		}
 	}
-	params := &slack.GetConversationsParameters{ExcludeArchived: "true", Limit: 1000, Types: []string{"public_channel"}}
+	params := &slack.GetConversationsParameters{Limit: 1000, Types: []string{"public_channel"}}
 	channels, _, _ := api.GetConversations(params)
 	numChannels := len(channels)
 	fmt.Printf("\nNumber of public channels:%s", numChannels)
