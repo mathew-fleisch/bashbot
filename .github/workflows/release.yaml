@@ -1,3 +1,7 @@
+# Name:        release.yaml
+# Author:      Mathew Fleisch <mathew.fleisch@gmail.com>
+# Description: This action will build and push a docker container, when triggered by
+#              pushing a new git tag (that starts with the letter 'v').
 name: Release Bashbot
 on:
   push:
@@ -6,20 +10,20 @@ on:
 jobs:
   build:
     name: Release Bashbot
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
       - name: "Release Bashbot"
         env:
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
-          REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
-          REGISTRY_APPNAME: ${{ secrets.REGISTRY_APPNAME }}
-          FORK_OWNER: ${{ secrets.FORK_OWNER }}
           GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
-          GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
-          expected="REGISTRY_USERNAME REGISTRY_PASSWORD REGISTRY_URL REGISTRY_APPNAME FORK_OWNER GIT_TOKEN"
+          echo "This action will build and push a docker container, when triggered by pushing a new git tag (that starts with the letter 'v')."
+          echo "Check environment variables are set..."
+          REGISTRY_URL=docker.io
+          REGISTRY_APPNAME=mathewfleisch/bashbot
+          expected="REGISTRY_USERNAME REGISTRY_PASSWORD REGISTRY_URL REGISTRY_APPNAME GIT_TOKEN"
           for expect in $expected; do
             if [[ -z "${!expect}" ]]; then
               echo "Missing Github Secret: $expect"
@@ -27,25 +31,39 @@ jobs:
               exit 1
             fi
           done
-          go build bashbot.go
+          # Fetch all tags and set most recent as a variable
+          git fetch --prune --unshallow
           tag=$(git describe --tags)
-          message="$(git for-each-ref refs/tags/$tag --format='%(contents)')"
-          name=$(echo "$message" | head -n1)
-          # Create a release
-          release=$(curl -XPOST -H "Authorization:token $GIT_TOKEN" --data "{\"tag_name\": \"$tag\", \"target_commitish\": \"main\", \"name\": \"bashbot-${tag}\", \"body\": \"$name\", \"draft\": false, \"prerelease\": false}" https://api.github.com/repos/${FORK_OWNER}/bashbot/releases)
-          echo "$release"
-          echo "${tag}" > version
-          rm -rf .git
-          echo "$REGISTRY_PASSWORD" | docker login ${REGISTRY_URL} -u="$REGISTRY_USERNAME" --password-stdin
-          docker build -t bashbot-local .
-          docker tag bashbot-local ${REGISTRY_URL}/${REGISTRY_APPNAME}:${tag}
-          docker push ${REGISTRY_URL}/${REGISTRY_APPNAME}:${tag}
-          cd ..
-          tar -zcvf bashbot.tar.gz bashbot
-          mv bashbot.tar.gz bashbot/.
-      - name: Upload tarball
-        uses: actions/upload-artifact@v1
-        with:
-          name: bashbot.tar.gz
-          path: bashbot.tar.gz
-          
+          # Get commit message for selected tag
+          commit_message="$(git for-each-ref refs/tags/$tag --format='%(contents)' | head -n1)"
+          # Container registry credentials stored as environment variables from github secrets
+          echo "Creating git release..."
+          # Build json with tag + commit message
+          curl_data='{"tag_name": "'$tag'", "target_commitish": "main", "name": "bashbot-'$tag'", "body": "'$commit_message'", "draft": false, "prerelease": false}'
+          # Sanity check (does json render through jq)
+          echo "Data: $curl_data"
+          echo "$curl_data" | jq '.'
+          # Build, print and execute curl to create a new release with the github api
+          curl_post="curl -sXPOST -H \"Content-Type: application/json\" -H \"Authorization: token $GIT_TOKEN\" --data '$curl_data' https://api.github.com/repos/mathew-fleisch/bashbot/releases"
+          echo "curl: "
+          echo "$curl_post"
+          release_response="$(eval $curl_post)"
+          echo "Release Response: $release_response"
+          echo "$release_response" | jq '.'
+          # If the release was created, the json response will contain an id
+          release_id=$(echo "$release_response" | jq -r '.id')
+          echo "Release ID: $release_id"
+          if [[ -n $release_id ]]; then
+            echo "Login to container registries"
+            echo "$REGISTRY_PASSWORD" | docker login ${REGISTRY_URL} -u="$REGISTRY_USERNAME" --password-stdin
+            # Build Dockerfile and use git tag as docker tag
+            echo "Build docker container"
+            docker buildx build --platform linux/amd64,linux/arm64 -t $REGISTRY_APPNAME:$tag --push .
+            echo "Release complete: ${REGISTRY_URL}/${REGISTRY_APPNAME}:${tag}"
+            exit 0
+          else
+            echo "Could not get release id from response. Skip upload and docker push."
+            exit 1
+          fi
+
+
