@@ -1,0 +1,12 @@
+awscli 2.1.32
+golang 1.16.2
+helm 3.5.3
+helmfile 0.138.7
+k9s 0.24.6
+kubectl 1.20.5
+kubectx 0.9.3
+shellcheck 0.7.1
+terraform 0.12.30
+terragrunt 0.28.18
+tflint 0.25.0
+yq 4.0.0
