@@ -42,4 +42,4 @@ RUN mkdir -p vendor
 RUN go install -v ./...
 RUN go get github.com/slack-go/slack@master
 
-CMD ["/bin/bash", "entrypoint.sh"]
+CMD /bin/sh -c ". ${ASDF_DATA_DIR}/asdf.sh && ./entrypoint.sh"
