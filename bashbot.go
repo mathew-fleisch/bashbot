@@ -121,7 +121,9 @@ func makeChannelMap() {
 	var admin Admin = getAdmin()
 	log.Println("CONNECTED; ACQUIRING TARGETING DATA")
 	channelsByName = make(map[string]string)
-	channels, err := api.GetChannels(true)
+
+	ppparams := &slack.GetConversationsParameters{Limit: 1000, Types: []string{"private_channel"}}
+	channels, _, err := api.GetConversations(ppparams)
 	if err != nil {
 		return
 	}

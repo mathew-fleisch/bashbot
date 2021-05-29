@@ -12,7 +12,7 @@ WORKDIR /root
 # Apt dependencies
 RUN apt update \
     && DEBIAN_FRONTEND=noninteractive apt dist-upgrade -y \
-    && DEBIAN_FRONTEND=noninteractive apt install -y curl wget apt-utils python3 python3-pip make build-essential openssl lsb-release libssl-dev apt-transport-https ca-certificates iputils-ping git vim jq zip sudo golang \
+    && DEBIAN_FRONTEND=noninteractive apt install -y curl wget apt-utils python3 python3-pip make build-essential openssl lsb-release libssl-dev apt-transport-https ca-certificates iputils-ping git vim jq zip sudo golang ffmpeg \
     && rm -rf /var/lib/apt/lists/* \
     && echo "%sudo ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 # asdf dependencies
