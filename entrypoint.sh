@@ -9,11 +9,11 @@ if [[ -f bashbot.go ]]; then
   # The .env file doesn't have to come from aws s3 bucket. Verify it exists.
   if [[ -f .env ]]; then
     source .env
-    mkdir -p vendor \
-      && pushd scripts \
-      && ./get-config.sh \
-      && ./get-vendor-dependencies.sh ../config.json ../vendor \
-      && popd ..
+    mkdir -p vendor
+    pushd scripts
+    ./get-config.sh
+    ./get-vendor-dependencies.sh ../config.json ../vendor
+    popd ..
     go run bashbot.go
   else
     echo "Must include a .env file at project root. See bashbot read-me for more details."
