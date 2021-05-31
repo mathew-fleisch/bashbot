@@ -13,7 +13,7 @@ if [[ -f bashbot.go ]]; then
     pushd scripts
     ./get-config.sh
     ./get-vendor-dependencies.sh ../config.json ../vendor
-    popd ..
+    popd
     go run bashbot.go
   else
     echo "Must include a .env file at project root. See bashbot read-me for more details."
