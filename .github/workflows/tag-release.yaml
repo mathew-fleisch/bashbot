@@ -18,12 +18,12 @@ jobs:
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
           GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
+          REGISTRY_URL: "docker.io"
+          REGISTRY_APPNAME: "mathewfleisch/bashbot"
+          REPO_OWNER: "mathew-fleisch"
+          REPO_NAME: "bashbot"
+          REPO_BRANCH: "main"
         run: |
-          export REGISTRY_URL=docker.io
-          export REGISTRY_APPNAME=mathewfleisch/bashbot
-          export REPO_OWNER=mathew-fleisch
-          export REPO_NAME=bashbot
-          export REPO_BRANCH=main
           # See the tools repo for more information: https://github.com/mathew-fleisch/tools
           wget -qO- https://raw.githubusercontent.com/mathew-fleisch/tools/main/scripts/tag-release.sh | bash
 
