@@ -1,0 +1,31 @@
+# Name:        tag-release.yaml
+# Author:      Mathew Fleisch <mathew.fleisch@gmail.com>
+# Description: This action will build and push a docker container, when triggered by
+#              pushing a new git tag (that starts with the letter 'v').
+name: Release Bashbot
+on:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  build:
+    name: Release Bashbot
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Release Bashbot"
+        env:
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
+        run: |
+          export REGISTRY_URL=docker.io
+          export REGISTRY_APPNAME=mathewfleisch/bashbot
+          export REPO_OWNER=mathew-fleisch
+          export REPO_NAME=bashbot
+          export REPO_BRANCH=main
+          # See the tools repo for more information: https://github.com/mathew-fleisch/tools
+          wget -qO- https://raw.githubusercontent.com/mathew-fleisch/tools/main/scripts/tag-release.sh | bash
+
+
+
