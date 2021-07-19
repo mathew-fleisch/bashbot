@@ -19,7 +19,8 @@ RUN mkdir -p /bashbot
 WORKDIR /bashbot
 COPY . .
 RUN mkdir -p vendor
-RUN go install -v ./...
-RUN go get github.com/slack-go/slack@master
+RUN . ${ASDF_DATA_DIR}/asdf.sh \
+    && go install -v ./... \
+    && go get github.com/slack-go/slack@master
 
 CMD /bin/sh -c ". ${ASDF_DATA_DIR}/asdf.sh && ./entrypoint.sh"
