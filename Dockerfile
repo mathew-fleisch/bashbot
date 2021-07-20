@@ -1,4 +1,5 @@
 FROM mathewfleisch/tools:latest
+# See this repo for the parent Dockerfile: https://github.com/mathew-fleisch/tools
 LABEL maintainer="Mathew Fleisch <mathew.fleisch@gmail.com>"
 ENV AWS_ACCESS_KEY_ID ""
 ENV AWS_SECRET_ACCESS_KEY ""
