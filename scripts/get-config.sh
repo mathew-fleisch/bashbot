@@ -13,7 +13,9 @@ for expect in $expected_variables; do
 done
 
 curl -H "Authorization: token $GIT_TOKEN" \
-  -H 'Accept: application/vnd.github.v3.raw' \
+  -H "Accept: application/vnd.github.v3+json" \
+  -H "Content-Type: application/json" \
+  -m 15 \
   -o ../config.json \
   -sL https://${github_base}/repos/${github_org}/${github_repo}/contents/${github_filename}?ref=${github_branch} 2>&1
 
