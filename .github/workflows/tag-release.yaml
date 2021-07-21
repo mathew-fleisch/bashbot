@@ -10,6 +10,7 @@ on:
 
 jobs:
   build:
+    needs: release
     name: Build and Push Bashbot Container
     runs-on: ubuntu-latest
     steps:
@@ -49,7 +50,6 @@ jobs:
   # Release bashbot go-binaries once the docker container is built and pushed.
   release:
     name: Release Bashbot Binaries ${{ matrix.platform }}
-    # needs: build
     strategy:
       fail-fast: true
       matrix:
@@ -66,7 +66,7 @@ jobs:
         name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: ${{ matrix.go-version }}}
+          go-version: ${{ matrix.go }}}
           stable: false
       -
         name: Build go-binaries
