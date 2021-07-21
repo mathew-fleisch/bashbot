@@ -53,13 +53,19 @@ jobs:
     runs-on: macos-latest
     steps:
       -
-        name: Checkout
+        name: Checkout Bashbot source
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+      - 
+        name: Install Golang via asdf
+        uses: asdf-vm/actions/install@v1
+        with:
+          tool_versions: golang 1.16.6
       -
         name: Build go-binaries
         run: |
+          asdf global golang 1.16.6
           make setup
           make cross
           echo "Go-Binaries created: $(ls bin -alF)"
