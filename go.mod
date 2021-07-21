@@ -1,6 +1,6 @@
 module github.com/mathew-fleisch/bashbot
 
-go 1.16
+go 1.15
 
 require (
 	github.com/grokify/html-strip-tags-go v0.0.0-20200923094847-079d207a09f1 // indirect
