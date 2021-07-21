@@ -49,12 +49,8 @@ jobs:
 
   # Release bashbot go-binaries once the docker container is built and pushed.
   release:
-    name: Release Bashbot Binaries ${{ matrix.platform }}
-    strategy:
-      fail-fast: true
-      matrix:
-        platform: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.platform }}
+    name: Release Bashbot Binaries
+    runs-on: ubuntu-latest
     steps:
       -
         name: Checkout
@@ -66,9 +62,7 @@ jobs:
         uses: actions/setup-go@v2
       -
         name: Build go-binaries
-        run: |
-          make build
-          GOARCH=arm64 make build
+        run: make cross
 
       -
         name: Cut Github Release
