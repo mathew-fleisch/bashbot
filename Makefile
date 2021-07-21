@@ -1,6 +1,7 @@
 GOOS?=$(shell go env GOOS)
 GOARCH?=$(shell go env GOARCH)
 VERSION?=$(shell git describe --abbrev=0 --tags)
+LATEST_VERSION?=$(shell curl -s https://api.github.com/repos/mathew-fleisch/bashbot/releases/latest | grep tag_name | cut -d '"' -f 4)
 BINARY?=bin/bashbot
 SRC_LOCATION?=cmd/bashbot/bashbot.go
 LDFLAGS="-X main.Version=${VERSION}"
@@ -39,3 +40,10 @@ run:
 clean:
 	echo "Removing any existing go-binaries"
 	rm -rf $(BINARY)*
+
+.PHONY: install-latest
+install-latest:
+	wget -q -O /usr/local/bin/bashbot https://github.com/mathew-fleisch/bashbot/releases/download/$(LATEST_VERSION)/bashbot-$(GOOS)-$(GOARCH)
+	chmod +x /usr/local/bin/bashbot
+	bashbot --version
+	bashbot --help

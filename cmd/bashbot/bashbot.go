@@ -630,7 +630,7 @@ func main() {
 	if getVersion {
 		operatingSystem := runtime.GOOS
 		systemArchitecture := runtime.GOARCH
-		fmt.Println("./bin/bashbot-" + operatingSystem + "-" + systemArchitecture + ": " + Version)
+		fmt.Println("bashbot-" + operatingSystem + "-" + systemArchitecture + "\t" + Version)
 		os.Exit(0)
 	}
 	initLog(logLevel, logFormat)
@@ -648,7 +648,7 @@ func main() {
 		log.Error("to set up a new \"legacy bot user\" and \"Bot User OAuth Access Token\"")
 		log.Error("Export the slack token as the environment variable SLACK_TOKEN")
 		log.Error("export SLACK_TOKEN=xoxb-xxxxxxxxx-xxxxxxx")
-		log.Error("./bin/bashbot-" + operatingSystem + "-" + systemArchitecture + " --config-file ./config.json --slack-token $SLACK_TOKEN")
+		log.Error("bashbot-" + operatingSystem + "-" + systemArchitecture + " --config-file ./config.json --slack-token $SLACK_TOKEN")
 		log.Error("See Read-me file for more detailed instructions: http://github.com/mathew-fleisch/bashbot")
 		os.Exit(1)
 	}
