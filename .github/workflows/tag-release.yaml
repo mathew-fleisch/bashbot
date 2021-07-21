@@ -62,7 +62,9 @@ jobs:
         uses: actions/setup-go@v2
       -
         name: Build go-binaries
-        run: make cross
+        run: |
+          make setup
+          make cross
 
       -
         name: Cut Github Release
