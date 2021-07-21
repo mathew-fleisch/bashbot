@@ -1,7 +1,7 @@
 # Bashbot
 
 [![Build binaries](https://github.com/mathew-fleisch/bashbot/actions/workflows/tag-release.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/tag-release.yaml)
-[![Build containers](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/uild-container.yaml)
+[![Build containers](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml)
 [Docker Hub](https://hub.docker.com/r/mathewfleisch/bashbot/tags?page=1&ordering=last_updated)
 
 BashBot is a slack bot written in golang for infrastructure/devops teams. A socket connection to slack provides bashbot with a stream of text from each channel it is invited to, and uses regular expressions to trigger bash scripts. A [configuration file](sample-config.json) defines a list of commands that can be run in public and/or private channels. Restricting certain commands to private channels gives granular control, over which users can execute them. Bashbot allows infrastructure/devops teams to extend the tools and scripts they already use to manage their environments, into slack, that also acts as an execution log, and leverages slack's access controls.
@@ -353,7 +353,7 @@ In this example, a list of all 'trigger' values are extracted from the config.js
 
 ## Automation (Build/Release)
 Included in this repository two github actions are executed on git tags. The [![tag-release](https://github.com/mathew-fleisch/bashbot/actions/workflows/tag-release.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/tag-release.yaml) action will build multiple go-binaries for each version (linux/amd64, linux/arm64, darwin/amd64, and darwin/arm64) and add them to a github release. The 
-[![Build containers](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/uild-container.yaml) action will use the docker plugin, buildx, to build and push a container for amd64/arm64 to docker hub.
+[![Build containers](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml) action will use the docker plugin, buildx, to build and push a container for amd64/arm64 to docker hub.
 
 ```bash
 # example semver bump: v1.2.4
