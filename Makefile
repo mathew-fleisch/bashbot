@@ -8,6 +8,8 @@ GO_BUILD=go build -ldflags=$(LDFLAGS)
 
 .PHONY: setup
 setup:
+	go mod tidy
+	go mod vendor
 	go install -v ./...
 	go get github.com/slack-go/slack@master
 	go get github.com/sirupsen/logrus
@@ -15,6 +17,8 @@ setup:
 .PHONY: cross
 cross:
 	rm -rf $(BINARY)*
+	go mod tidy
+	go mod vendor
 	GOOS=linux   GOARCH=amd64 $(GO_BUILD) -o $(BINARY)-linux-amd64 $(SRC_LOCATION)
 	GOOS=linux   GOARCH=arm64 $(GO_BUILD) -o $(BINARY)-linux-arm64 $(SRC_LOCATION)
 	GOOS=darwin  GOARCH=amd64 $(GO_BUILD) -o $(BINARY)-darwin-amd64 $(SRC_LOCATION)
@@ -23,6 +27,8 @@ cross:
 .PHONY: build
 build:
 	rm -rf $(BINARY)-$(GOOS)-$(GOARCH)
+	go mod tidy
+	go mod vendor
 	$(GO_BUILD) -o $(BINARY)-$(GOOS)-$(GOARCH) $(SRC_LOCATION)
 
 .PHONY: run
