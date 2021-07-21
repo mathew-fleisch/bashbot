@@ -20,7 +20,9 @@ jobs:
           fetch-depth: 0
       - 
         name: Set tag
-        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+        run: |
+          echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+          echo "tag: ${{ steps.vars.outputs.tag }}"
       -
         name: Set up QEMU
         id: qemu
@@ -59,7 +61,7 @@ jobs:
           fetch-depth: 0
       - 
         name: Set tag
-        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/} && echo ${{ steps.vars.outputs.tag }}
       -
         name: Set up Go
         uses: actions/setup-go@v2
