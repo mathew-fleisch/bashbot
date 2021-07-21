@@ -5,6 +5,13 @@ BINARY?=bin/bashbot
 SRC_LOCATION?=cmd/bashbot/bashbot.go
 LDFLAGS="-X main.Version=${VERSION}"
 GO_BUILD=go build -ldflags=$(LDFLAGS)
+
+.PHONY: setup
+setup:
+	go install -v ./...
+	go get github.com/slack-go/slack@master
+	go get github.com/sirupsen/logrus
+
 .PHONY: cross
 cross:
 	rm -rf $(BINARY)*
