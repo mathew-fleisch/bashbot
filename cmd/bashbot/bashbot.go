@@ -3,35 +3,41 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"html"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/joho/godotenv"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/slack-go/slack"
 )
 
 var specials []func(event *slack.MessageEvent) bool
 
 // Slacking off with global vars
+var Version = "development"
+var help bool
+var getVersion bool
+var configFile string
+var slackToken string
+var logLevel string
+var logFormat string
 var api *slack.Client
 var rtm *slack.RTM
 var channelsByName map[string]string
-
-// var yellkey string
 var countkey string
 var emojiPattern *regexp.Regexp
 var slackUserPattern *regexp.Regexp
 var puncPattern *regexp.Regexp
 var c *regexp.Regexp
-
 var cmdPattern *regexp.Regexp
 
 type Admins struct {
@@ -45,6 +51,8 @@ type Admin struct {
 	PrivateChannelId string   `json:"privateChannelId"`
 	LogChannelId     string   `json:"logChannelId"`
 }
+
+var admin Admin
 
 type Messages struct {
 	Messages []Message `json:"messages"`
@@ -117,51 +125,18 @@ type Topic struct {
 	LastSet int    `json:"last_set"`
 }
 
-func makeChannelMap() {
-	var admin Admin = getAdmin()
-	log.Println("CONNECTED; ACQUIRING TARGETING DATA")
-	channelsByName = make(map[string]string)
-
-	ppparams := &slack.GetConversationsParameters{Limit: 1000, Types: []string{"private_channel"}}
-	channels, _, err := api.GetConversations(ppparams)
-	if err != nil {
-		return
-	}
-
-	for _, v := range channels {
-		channelsByName[v.Name] = v.ID
-	}
-
-	address, found := os.LookupEnv("WELCOME_CHANNEL")
-	if found {
-		reportToChannel(findChannelByName(address), "welcome", admin.AppName)
-	}
-	log.Println(admin.AppName + " IS NOW OPERATIONAL")
-}
-
-func findChannelByName(name string) string {
-	// This feels unidiomatic.
-	val, ok := channelsByName[name]
-	if ok {
-		return val
-	}
-	return ""
-}
-
 func getChannelNames(channelIds []string) []string {
-	fmt.Printf("getChannelNames()")
+	log.Debug("getChannelNames()")
 	var names []string
 	pparams := &slack.GetConversationsParameters{Limit: 1000, Types: []string{"private_channel"}}
 	pchannels, _, _ := api.GetConversations(pparams)
 	pnumChannels := len(pchannels)
-	fmt.Printf("\nNumber of private channels:%s", pnumChannels)
+	log.Debug("Number of private channels this bot is monitoring: " + strconv.Itoa(pnumChannels))
 	for j := 0; j < pnumChannels; j++ {
 		pthisChannel, _ := json.Marshal(pchannels[j])
 		var pthatChannel Channel
 		json.Unmarshal([]byte(pthisChannel), &pthatChannel)
-		// fmt.Printf("\n%s:%s", pthatChannel.Id, pthatChannel.Name)
 		for i := 0; i < len(channelIds); i++ {
-			// fmt.Printf("\ndoes %s match %s", pthatChannel.Id, channelIds[i])
 			if channelIds[i] == pthatChannel.Id {
 				names = append(names, pthatChannel.Name)
 			}
@@ -170,14 +145,12 @@ func getChannelNames(channelIds []string) []string {
 	params := &slack.GetConversationsParameters{Limit: 1000, Types: []string{"public_channel"}}
 	channels, _, _ := api.GetConversations(params)
 	numChannels := len(channels)
-	fmt.Printf("\nNumber of public channels:%s", numChannels)
+	log.Debug("Number of public channels this bot is monitoring: " + strconv.Itoa(numChannels))
 	for j := 0; j < numChannels; j++ {
 		thisChannel, _ := json.Marshal(channels[j])
 		var thatChannel Channel
 		json.Unmarshal([]byte(thisChannel), &thatChannel)
-		// fmt.Printf("\n%s:%s", thatChannel.Id, thatChannel.Name)
 		for i := 0; i < len(channelIds); i++ {
-			// fmt.Printf("\ndoes %s match %s", thatChannel.Id, channelIds[i])
 			if channelIds[i] == thatChannel.Id {
 				names = append(names, thatChannel.Name)
 			}
@@ -190,14 +163,26 @@ func getChannelNames(channelIds []string) []string {
 }
 
 func getAdmin() Admin {
-	jsonFile, err := os.Open("config.json")
+	jsonFile, err := os.Open(configFile)
 	if err != nil {
-		fmt.Println(err)
+		log.Error("Could not open config file")
+		log.Error(err)
 	}
 	defer jsonFile.Close()
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 	var Admins Admins
-	json.Unmarshal(byteValue, &Admins)
+	err = json.Unmarshal(byteValue, &Admins)
+	if err != nil {
+		log.Error(fmt.Printf("this error: %s", err.Error()))
+		log.Error(fmt.Println(err))
+	}
+	switch err := err.(type) {
+	case *json.SyntaxError:
+		log.Error(fmt.Printf("Syntax error (at byte: %d) in config.json file:\n\n %s\n", err.Offset, err.Error()))
+		os.Exit(1)
+	default:
+		log.Debug("config.json parsed successfully")
+	}
 	return Admins.Admins[0]
 }
 
@@ -227,12 +212,11 @@ func processCommand(event *slack.MessageEvent) bool {
 		return false
 	}
 
-	log.Println("command detected")
-	log.Println(event.Text)
-	fmt.Printf("%+v\n", event)
-	fmt.Printf("Channel: %+v\n", event.Channel)
-	fmt.Printf("User: %+v\n", event.User)
-	fmt.Printf("Timestamp: %+v\n", event.Timestamp)
+	log.Info("command detected: `" + event.Text + "`")
+	log.Debug(event)
+	log.Info("Channel: " + event.Channel)
+	log.Info("User: " + event.User)
+	log.Info("Timestamp: " + event.Timestamp)
 
 	words := strings.Fields(event.Text)
 	var triggered string
@@ -240,15 +224,15 @@ func processCommand(event *slack.MessageEvent) bool {
 	var cmd []string
 
 	for index, element := range words {
-		log.Printf(fmt.Sprintf("%s:%s", index, element))
+		log.Info(strconv.Itoa(index) + ": " + element)
 		if index > 1 {
 			cmd = append(cmd, element)
 		}
 	}
 
-	jsonFile, err := os.Open("config.json")
+	jsonFile, err := os.Open(configFile)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 	}
 	defer jsonFile.Close()
 
@@ -279,7 +263,6 @@ func processCommand(event *slack.MessageEvent) bool {
 
 // Whitelisted commands
 func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, user string, timestamp string) bool {
-	var admin Admin = getAdmin()
 	validParams := make([]bool, len(thisTool.Parameters))
 	var tmpHelp string
 	authorized := false
@@ -288,29 +271,27 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
 	reEmail := regexp.MustCompile(`\${email}`)
 	thisUser, err := api.GetUserInfo(user)
 	if err != nil {
-		fmt.Printf("%s\n", err)
+		log.Info(fmt.Printf("%s\n", err))
 		return true
 	}
-	// fmt.Printf("ID: %s, Fullname: %s, Email: %s\n", thisUser.ID, thisUser.Profile.RealName, thisUser.Profile.Email)
 	thisTool.Command = reEmail.ReplaceAllLiteralString(thisTool.Command, thisUser.Profile.Email)
 
-	// fmt.Println("Tool Name:        " + thisTool.Name)
-	// fmt.Println("Tool Description: " + thisTool.Description)
-	// fmt.Println("Tool Log:         " + strconv.FormatBool(thisTool.Log))
-	// fmt.Println("Tool Help:        " + thisTool.Help)
-	// fmt.Println("Tool Group:       " + thisTool.Group)
-	// fmt.Println("Tool Trigger:     " + thisTool.Trigger)
-	// fmt.Println("Tool Location:    " + thisTool.Location)
-	// fmt.Println("Tool Setup:       " + thisTool.Setup)
-	// fmt.Println("Tool Command:     " + thisTool.Command)
-	// fmt.Println("Tool Ephemeral:   " + strconv.FormatBool(thisTool.Ephemeral))
-	// fmt.Println("Tool Response:    " + thisTool.Response)
+	log.Debug("Tool Name:        " + thisTool.Name)
+	log.Debug("Tool Description: " + thisTool.Description)
+	log.Debug("Tool Log:         " + strconv.FormatBool(thisTool.Log))
+	log.Debug("Tool Help:        " + thisTool.Help)
+	log.Debug("Tool Trigger:     " + thisTool.Trigger)
+	log.Debug("Tool Location:    " + thisTool.Location)
+	log.Debug("Tool Setup:       " + thisTool.Setup)
+	log.Debug("Tool Command:     " + thisTool.Command)
+	log.Debug("Tool Ephemeral:   " + strconv.FormatBool(thisTool.Ephemeral))
+	log.Debug("Tool Response:    " + thisTool.Response)
 	var allowedChannels []string = getChannelNames(thisTool.Permissions)
 	if admin.PrivateChannelId == channel {
 		authorized = true
 	} else {
 		for j := 0; j < len(thisTool.Permissions); j++ {
-			fmt.Println("Tool Permissions[" + strconv.Itoa(j) + "]: " + thisTool.Permissions[j])
+			log.Debug("Tool Permissions[" + strconv.Itoa(j) + "]: " + thisTool.Permissions[j])
 			if thisTool.Permissions[j] == channel || thisTool.Permissions[j] == "all" {
 				authorized = true
 			}
@@ -328,7 +309,7 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
 		}
 	}
 
-	if authorized == false {
+	if !authorized {
 		reportToChannel(channel, "unauthorized", strings.Join(allowedChannels, ", "))
 		yell(channel, cmdHelp)
 		chatOpsLog(channel, user, thisTool.Trigger+" "+strings.Join(cmds, " "))
@@ -336,15 +317,15 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
 	}
 
 	if len(thisTool.Parameters) > 0 {
-		// fmt.Println("Tool Parameters Count: " + strconv.Itoa(len(thisTool.Parameters)))
+		log.Debug("Tool Parameters Count: " + strconv.Itoa(len(thisTool.Parameters)))
 		for j := 0; j < len(thisTool.Parameters); j++ {
-			// fmt.Println("Tool Parameters[" + strconv.Itoa(j) + "]: " + thisTool.Parameters[j].Name)
+			log.Debug("Tool Parameters[" + strconv.Itoa(j) + "]: " + thisTool.Parameters[j].Name)
 			derivedSource := thisTool.Parameters[j].Source
 			tmpHelp = fmt.Sprintf("%s\n%s: [%s%s]", tmpHelp, thisTool.Parameters[j].Name, strings.Join(thisTool.Parameters[j].Allowed, "|"), thisTool.Parameters[j].Description)
 			if len(derivedSource) > 0 {
-				// fmt.Println("No hard-coded allowed values. Deriving source: " + derivedSource)
+				log.Debug("No hard-coded allowed values. Deriving source: " + derivedSource)
 				allowedOut := shellOut([]string{"bash", "-c", "cd " + thisTool.Location + " && " + derivedSource})
-				// fmt.Println("Derived: " + allowedOut)
+				log.Debug("Derived: " + allowedOut)
 				thisTool.Parameters[j].Allowed = strings.Split(allowedOut, "\n")
 			}
 			// tmpHelp = fmt.Sprintf("%s\n%s: [%s]", tmpHelp, thisTool.Parameters[j].Name, strings.Join(thisTool.Parameters[j].Allowed, "|"))
@@ -382,23 +363,24 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
 
 	buildCmd := thisTool.Command
 	for x := 0; x < len(cmds); x++ {
-		// fmt.Println("cmd[" + strconv.Itoa(x) + "]: " + cmds[x] + " -> " + strconv.FormatBool(validParams[x]))
-		if validParams[x] == false {
+		if !validParams[x] {
 			reportToChannel(channel, "invalid_parameter", thisTool.Parameters[x].Name)
 			return false
 		}
 		re := regexp.MustCompile(`\${` + thisTool.Parameters[x].Name + `}`)
 		buildCmd = re.ReplaceAllString(buildCmd, cmds[x])
-		// fmt.Printf("%q\n", buildCmd)
 	}
 	buildCmd = getUserChannelInfo(user, thisUser.Name, channel, timestamp) + " && cd " + thisTool.Location + " && " + thisTool.Setup + " && " + buildCmd
-	fmt.Printf("%q\n", buildCmd)
+	splitOn := regexp.MustCompile(`\s\&\&`)
+	displayCmd := splitOn.ReplaceAllString(buildCmd, " \\\n        &&")
+	log.Info("Triggered Command:")
+	log.Info(displayCmd)
 
 	tmpCmd := []string{"bash", "-c", buildCmd}
 
 	ret := splitOut(shellOut(tmpCmd), thisTool.Response)
 
-	if thisTool.Ephemeral == true {
+	if thisTool.Ephemeral {
 		reportToChannel(channel, "ephemeral", "")
 		whisper(channel, user, ret)
 	} else {
@@ -415,7 +397,6 @@ func getUserChannelInfo(userid string, username string, channel string, timestam
 
 // Raw commands
 func processRawCommand(cmds []string, channel string, user string) bool {
-	var admin Admin = getAdmin()
 	if stringInSlice(user, admin.UserIds) && channel == admin.PrivateChannelId {
 		tmpCmd := html.UnescapeString(strings.Join(cmds, " "))
 		// fmt.Println("Combined cmd: " + tmpCmd)
@@ -444,13 +425,16 @@ func shellOut(cmdArgs []string) string {
 		return "error running command."
 	}
 	out := string(cmdOut)
-	fmt.Println(cmdName, out)
+	log.Debug("Output from command:")
+	condense := regexp.MustCompile(`\s*\n`)
+	displayOut := condense.ReplaceAllString(out, "\\n")
+	log.Debug(displayOut)
 	return out
 }
 func reportToChannel(channel string, message string, passalong string) {
-	jsonFile, err := os.Open("config.json")
+	jsonFile, err := os.Open(configFile)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 	}
 	defer jsonFile.Close()
 
@@ -462,8 +446,8 @@ func reportToChannel(channel string, message string, passalong string) {
 	retMessage := message
 
 	for i := 0; i < len(Messages.Messages); i++ {
-		fmt.Printf(Messages.Messages[i].Name)
 		if Messages.Messages[i].Name == message {
+			log.Debug(Messages.Messages[i].Name)
 			isActive = Messages.Messages[i].Active
 			if len(passalong) > 0 {
 				retMessage = fmt.Sprintf(Messages.Messages[i].Text, passalong)
@@ -473,15 +457,16 @@ func reportToChannel(channel string, message string, passalong string) {
 		}
 	}
 	if isActive {
+		log.Debug("Sending slack message[Channel:" + channel + "]: " + retMessage)
 		yell(channel, retMessage)
 	} else {
-		log.Printf("Message suppressed by configuration:\n%s\n", retMessage)
+		log.Warn("Message suppressed by configuration")
+		log.Warn(retMessage)
 	}
 
 }
 
 func yell(channel string, msg string) {
-	var admin Admin = getAdmin()
 	channelID, _, err := api.PostMessage(channel,
 		slack.MsgOptionText(msg, false),
 		slack.MsgOptionUsername(admin.AppName),
@@ -491,14 +476,13 @@ func yell(channel string, msg string) {
 		}))
 
 	if err != nil {
-		log.Printf("%s\n", err)
+		log.Error(fmt.Printf("%s\n", err))
 		return
 	}
-	log.Printf("Sent to %s: `%s`", channelID, msg)
+	log.Info("Send slack message[Channel:" + channelID + "]: " + msg)
 }
 
 func whisper(channel string, user string, msg string) {
-	var admin Admin = getAdmin()
 	_, err := api.PostEphemeral(channel,
 		user,
 		slack.MsgOptionText(msg, false),
@@ -509,25 +493,24 @@ func whisper(channel string, user string, msg string) {
 		}))
 
 	if err != nil {
-		log.Printf("%s\n", err)
+		log.Info(fmt.Printf("%s\n", err))
 		return
 	}
-	log.Printf("Sent to %s: `%s`", channel, msg)
+	log.Info("Send ephemeral slack message[Channel:" + channel + "]: " + msg)
 }
 
 func chatOpsLog(channel string, user string, msg string) {
-	var admin Admin = getAdmin()
 	thisUser, err := api.GetUserInfo(user)
 	if err != nil {
-		fmt.Printf("ERROR GETTING USER: %s\n", err)
+		log.Error("Couldn't get user")
+		log.Error(err)
 		return
 	}
 	thisChannel := getChannelNames([]string{channel})
-	// fmt.Printf("ID: %s, Fullname: %s, Email: %s\n", thisUser.ID, thisUser.Profile.RealName, thisUser.Profile.Email)
 	retacks := regexp.MustCompile("`")
 	msg = retacks.ReplaceAllLiteralString(msg, "")
 	ret := splitOut(admin.AppName+"["+thisUser.Profile.RealName+":"+thisChannel[0]+"]: "+truncateString(msg, 1000), "code")
-	// Display message in chat-ops-log unless it came from matbots
+	// Display message in chat-ops-log unless it came from admin channel
 	if channel != admin.PrivateChannelId {
 		channelID, _, err := api.PostMessage(admin.LogChannelId,
 			slack.MsgOptionText(ret, false),
@@ -538,12 +521,12 @@ func chatOpsLog(channel string, user string, msg string) {
 			}))
 
 		if err != nil {
-			log.Printf("%s\n", err)
+			log.Error(err)
 			return
 		}
-		log.Printf(channelID)
+		log.Debug("Channel ID: " + channelID)
 	}
-	log.Printf(ret)
+	log.Info(ret)
 }
 
 func splitOut(output string, responseType string) string {
@@ -567,7 +550,7 @@ func splitOut(output string, responseType string) string {
 				splitCount++
 			}
 		}
-		// fmt.Printf("%s", resultBuffer.String())
+		log.Debug(resultBuffer.String())
 		return resultBuffer.String()
 	default:
 		return output
@@ -575,7 +558,9 @@ func splitOut(output string, responseType string) string {
 }
 
 func handleMessage(event *slack.MessageEvent) {
-	// fmt.Printf("Handle Event: %v\n", event)
+	// log.Debug("handleMessage()")
+	// log.Debug(event)
+	// To Do: By bypassing this next check for a bot_message, we can test the bot's functionaltiy in a test slack channel
 	if event.SubType == "bot_message" {
 		return
 	}
@@ -587,24 +572,92 @@ func handleMessage(event *slack.MessageEvent) {
 	}
 }
 
+func initLog(logLevel string, logFormat string) {
+	log.SetOutput(os.Stdout)
+
+	switch logLevel {
+	case "info":
+		log.SetLevel(log.InfoLevel)
+	case "debug":
+		log.SetLevel(log.DebugLevel)
+	case "warn":
+		log.SetLevel(log.WarnLevel)
+	case "error":
+		log.SetLevel(log.ErrorLevel)
+	default:
+		log.SetLevel(log.InfoLevel)
+		log.Warn(fmt.Sprintf("Invalid log-level (setting to info level): %s", logLevel))
+	}
+
+	if logFormat == "json" {
+		log.SetFormatter(&log.JSONFormatter{})
+	} else {
+		log.SetFormatter(&log.TextFormatter{
+			FullTimestamp: true,
+		})
+	}
+
+}
+
+func usage() {
+	banner := ` ____            _     ____        _   
+|  _ \          | |   |  _ \      | |  
+| |_) | __ _ ___| |__ | |_) | ___ | |_ 
+|  _ < / _' / __| '_ \|  _ < / _ \| __|
+| |_) | (_| \__ \ | | | |_) | (_) | |_ 
+|____/ \__,_|___/_| |_|____/ \___/ \__|
+Bashbot is a slack bot, written in golang, that can be configured
+to run bash commands or scripts based on a configuration file.
+`
+	fmt.Println(banner)
+	fmt.Println("Usage: ./bashbot [flags]")
+	fmt.Println("")
+	flag.PrintDefaults()
+}
+
 func main() {
-	var admin Admin = getAdmin()
-	err := godotenv.Load(".env")
-	log.Printf(admin.AppName+" Started: %s", time.Now())
-
-	slacktoken, ok := os.LookupEnv("SLACK_TOKEN")
-	if !ok {
-		log.Fatal("You must provide an access token in SLACK_TOKEN")
+	flag.StringVar(&configFile, "config-file", "", "[REQUIRED] Filepath to config.json file")
+	flag.StringVar(&slackToken, "slack-token", "", "[REQUIRED] Slack token used to authenticate with api")
+	flag.StringVar(&logLevel, "log-level", "info", "Log level to display (info,debug,warn,error)")
+	flag.StringVar(&logFormat, "log-format", "text", "Display logs as json or text")
+	flag.BoolVar(&help, "help", false, "Help/usage information")
+	flag.BoolVar(&getVersion, "version", false, "Get current version")
+	flag.Parse()
+	if help {
+		usage()
+		os.Exit(0)
+	}
+	if getVersion {
+		operatingSystem := runtime.GOOS
+		systemArchitecture := runtime.GOARCH
+		fmt.Println("./bin/bashbot-" + operatingSystem + "-" + systemArchitecture + ": " + Version)
+		os.Exit(0)
+	}
+	initLog(logLevel, logFormat)
+	if configFile == "" {
+		usage()
+		log.Error("Must define a config.json file")
+		os.Exit(1)
+	}
+	if slackToken == "" {
+		usage()
+		operatingSystem := runtime.GOOS
+		systemArchitecture := runtime.GOARCH
+		log.Error("Must define a slack token")
+		log.Error("After logging into slack, visit https://api.slack.com/apps?new_classic_app=1")
+		log.Error("to set up a new \"legacy bot user\" and \"Bot User OAuth Access Token\"")
+		log.Error("Export the slack token as the environment variable SLACK_TOKEN")
+		log.Error("export SLACK_TOKEN=xoxb-xxxxxxxxx-xxxxxxx")
+		log.Error("./bin/bashbot-" + operatingSystem + "-" + systemArchitecture + " --config-file ./config.json --slack-token $SLACK_TOKEN")
+		log.Error("See Read-me file for more detailed instructions: http://github.com/mathew-fleisch/bashbot")
+		os.Exit(1)
 	}
 
-	api = slack.New(slacktoken)
+	admin = getAdmin()
+	api = slack.New(slackToken)
+	log.Info(admin.AppName + " Started: " + time.Now().String())
 
-	// log.Printf("Admin Config: %+v\n", admin)
 	var matchTrigger string = fmt.Sprintf("^%s .", admin.Trigger)
-
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	// Regular expressions we'll use a whole lot.
 	// Should probably be in an intialization function to the side.
@@ -622,29 +675,27 @@ func main() {
 	for msg := range rtm.IncomingEvents {
 		switch ev := msg.Data.(type) {
 		case *slack.ConnectedEvent:
-			makeChannelMap()
+			log.Info("Bashbot is now connected to slack. Primary trigger: `" + admin.AppName + "`")
 
 		case *slack.MessageEvent:
-			// fmt.Printf("Message: %v\n", ev)
 			handleMessage(ev)
 
 		case *slack.PresenceChangeEvent:
-			fmt.Printf("Presence Change: %v\n", ev)
+			log.Info("Presence Change: " + ev.Presence)
 
 		case *slack.RTMError:
-			fmt.Printf("Error: %s\n", ev.Error())
+			log.Error("Slack API RTM Error: " + ev.Error())
 
 		case *slack.InvalidAuthEvent:
-			log.Printf(slacktoken)
-			log.Fatal("Invalid credentials")
+			log.Error("Invalid credentials (slack-token)")
 
 		case *slack.ConnectionErrorEvent:
-			fmt.Printf("Event: %v\n", msg)
-			log.Fatal("Can't connect")
+			log.Error("Can't connect to slack...")
+			log.Error(msg)
 
 		default:
 			// Ignore other events..
-			// fmt.Printf("Unhandled Event: %v\n", msg)
+			// log.Debug("Unhandled Event: " + msg.Type)
 		}
 	}
 }

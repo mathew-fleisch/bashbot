@@ -17,6 +17,6 @@
 vendor/*
 
 config.json
-bashbot
 
 tmp/*
+bin/*
