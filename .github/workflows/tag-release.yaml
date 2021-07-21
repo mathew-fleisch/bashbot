@@ -68,14 +68,12 @@ jobs:
           GOARCH=arm64 make build
 
       -
-        name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v2
+        name: Cut Github Release
+        uses: ncipollo/release-action@v1
         with:
-          repo_token: ${{ secrets.GIT_TOKEN }}
-          file: bin/bashbot*
-          tag: ${{ steps.vars.outputs.tag }}
-          overwrite: true
-          file_glob: true
+          token: ${{ secrets.GIT_TOKEN }}
+          allowUpdates: true
+          artifacts: "bin/*"
 
 
 
