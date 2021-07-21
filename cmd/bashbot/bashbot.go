@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -22,7 +23,9 @@ import (
 var specials []func(event *slack.MessageEvent) bool
 
 // Slacking off with global vars
+var Version = "development"
 var help bool
+var getVersion bool
 var configFile string
 var slackToken string
 var logLevel string
@@ -572,7 +575,6 @@ func handleMessage(event *slack.MessageEvent) {
 func initLog(logLevel string, logFormat string) {
 	log.SetOutput(os.Stdout)
 
-	// Only log the warning severity or above.
 	switch logLevel {
 	case "info":
 		log.SetLevel(log.InfoLevel)
@@ -587,11 +589,9 @@ func initLog(logLevel string, logFormat string) {
 		log.Warn(fmt.Sprintf("Invalid log-level (setting to info level): %s", logLevel))
 	}
 
-	switch logFormat {
-	case "json":
+	if logFormat == "json" {
 		log.SetFormatter(&log.JSONFormatter{})
-	case "text":
-	default:
+	} else {
 		log.SetFormatter(&log.TextFormatter{
 			FullTimestamp: true,
 		})
@@ -600,40 +600,57 @@ func initLog(logLevel string, logFormat string) {
 }
 
 func usage() {
-	banner := `
----------------------------------------
- ____            _     ____        _   
+	banner := ` ____            _     ____        _   
 |  _ \          | |   |  _ \      | |  
 | |_) | __ _ ___| |__ | |_) | ___ | |_ 
 |  _ < / _' / __| '_ \|  _ < / _ \| __|
 | |_) | (_| \__ \ | | | |_) | (_) | |_ 
 |____/ \__,_|___/_| |_|____/ \___/ \__|
----------------------------------------
+Bashbot is a slack bot, written in golang, that can be configured
+to run bash commands or scripts based on a configuration file.
 `
 	fmt.Println(banner)
 	fmt.Println("Usage: ./bashbot [flags]")
+	fmt.Println("")
 	flag.PrintDefaults()
-	os.Exit(1)
 }
 
 func main() {
-	flag.StringVar(&configFile, "config-file", "", "[required] Filepath to config.json file")
-	flag.StringVar(&slackToken, "slack-token", "", "[required] Slack token used to authenticate with api")
+	flag.StringVar(&configFile, "config-file", "", "[REQUIRED] Filepath to config.json file")
+	flag.StringVar(&slackToken, "slack-token", "", "[REQUIRED] Slack token used to authenticate with api")
 	flag.StringVar(&logLevel, "log-level", "info", "Log level to display (info,debug,warn,error)")
 	flag.StringVar(&logFormat, "log-format", "text", "Display logs as json or text")
 	flag.BoolVar(&help, "help", false, "Help/usage information")
+	flag.BoolVar(&getVersion, "version", false, "Get current version")
 	flag.Parse()
 	if help {
 		usage()
+		os.Exit(0)
+	}
+	if getVersion {
+		operatingSystem := runtime.GOOS
+		systemArchitecture := runtime.GOARCH
+		fmt.Println("./bin/bashbot-" + operatingSystem + "-" + systemArchitecture + ": " + Version)
+		os.Exit(0)
 	}
 	initLog(logLevel, logFormat)
 	if configFile == "" {
-		log.Error("Must define a config.json file")
 		usage()
+		log.Error("Must define a config.json file")
+		os.Exit(1)
 	}
 	if slackToken == "" {
-		log.Error("Must define a slack token")
 		usage()
+		operatingSystem := runtime.GOOS
+		systemArchitecture := runtime.GOARCH
+		log.Error("Must define a slack token")
+		log.Error("After logging into slack, visit https://api.slack.com/apps?new_classic_app=1")
+		log.Error("to set up a new \"legacy bot user\" and \"Bot User OAuth Access Token\"")
+		log.Error("Export the slack token as the environment variable SLACK_TOKEN")
+		log.Error("export SLACK_TOKEN=xoxb-xxxxxxxxx-xxxxxxx")
+		log.Error("./bin/bashbot-" + operatingSystem + "-" + systemArchitecture + " --config-file ./config.json --slack-token $SLACK_TOKEN")
+		log.Error("See Read-me file for more detailed instructions: http://github.com/mathew-fleisch/bashbot")
+		os.Exit(1)
 	}
 
 	admin = getAdmin()
@@ -658,7 +675,7 @@ func main() {
 	for msg := range rtm.IncomingEvents {
 		switch ev := msg.Data.(type) {
 		case *slack.ConnectedEvent:
-			log.Info(admin.AppName + " IS NOW OPERATIONAL")
+			log.Info("Bashbot is now connected to slack. Primary trigger: `" + admin.AppName + "`")
 
 		case *slack.MessageEvent:
 			handleMessage(ev)
