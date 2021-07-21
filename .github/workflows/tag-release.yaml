@@ -7,25 +7,76 @@ on:
   push:
     tags:
       - 'v*'
+
 jobs:
   build:
-    name: Release Bashbot
-    runs-on: self-hosted
+    name: Build and Push Bashbot Container
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: "Release Bashbot"
-        env:
-          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
-          GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
-          REGISTRY_URL: "docker.io"
-          REGISTRY_APPNAME: "mathewfleisch/bashbot"
-          REPO_OWNER: "mathew-fleisch"
-          REPO_NAME: "bashbot"
-          REPO_BRANCH: "main"
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+      -
+        name: Set up QEMU
+        id: qemu
+        uses: docker/setup-qemu-action@v1
+      -
+        name: Docker Login
+        uses: docker/login-action@v1
+        with:
+          registry: docker.io
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+      -
+        name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: mathewfleisch/bashbot:latest,mathewfleisch/bashbot:${{ steps.vars.outputs.tag }}
+
+  # Release bashbot go-binaries once the docker container is built and pushed.
+  release:
+    name: Release Bashbot Binaries ${{ matrix.platform }}
+    needs: build
+    strategy:
+      fail-fast: true
+      matrix:
+        go-version: [1.16.x]
+        platform: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+      -
+        name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}}
+      -
+        name: Build go-binaries
         run: |
-          # See the tools repo for more information: https://github.com/mathew-fleisch/tools
-          wget -qO- https://raw.githubusercontent.com/mathew-fleisch/tools/main/scripts/tag-release.sh | bash
+          make build
+          GOARCH=arm64 make build
+
+      -
+        name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GIT_TOKEN }}
+          file: bin/bashbot*
+          tag: ${{ steps.vars.outputs.tag }}
+          overwrite: true
+          file_glob: true
+
 
 
 
