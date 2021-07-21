@@ -2,7 +2,7 @@
 # Author:      Mathew Fleisch <mathew.fleisch@gmail.com>
 # Description: This action will build and push a docker container, when triggered by
 #              pushing a new git tag (that starts with the letter 'v').
-name: Release Bashbot
+name: Build Bashbot Containers
 on:
   push:
     tags:
