@@ -21,8 +21,8 @@ RUN mkdir -p /bashbot
 WORKDIR /bashbot
 COPY . .
 RUN mkdir -p vendor
+# && make setup \
 RUN . ${ASDF_DATA_DIR}/asdf.sh \
-    && make setup \
     && make build \
     && mv bin/bashbot-* /usr/local/bin/bashbot
 
