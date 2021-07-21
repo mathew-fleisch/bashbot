@@ -58,9 +58,6 @@ jobs:
         with:
           fetch-depth: 0
       -
-        name: Set up Go
-        uses: actions/setup-go@v2
-      -
         name: Build go-binaries
         run: |
           make setup
