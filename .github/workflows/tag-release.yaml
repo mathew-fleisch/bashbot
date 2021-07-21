@@ -23,6 +23,8 @@ jobs:
         run: |
           echo ::set-output name=tag::${GITHUB_REF#refs/*/}
           echo "tag: ${{ steps.vars.outputs.tag }}"
+          echo "tag: ${{ github.ref }}"
+          echo "tag: ${GITHUB_REF#refs/*/}"
       -
         name: Set up QEMU
         id: qemu
