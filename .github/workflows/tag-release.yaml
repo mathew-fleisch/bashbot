@@ -53,7 +53,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        go-version: [1.16.1]
+        go-version: [ '1.16' ]
         platform: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.platform }}
     steps:
@@ -67,6 +67,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go-version }}}
+          stable: false
       -
         name: Build go-binaries
         run: |
