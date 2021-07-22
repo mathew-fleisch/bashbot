@@ -1,4 +1,4 @@
-# Name:        tag-release.yaml
+# Name:        build-release.yaml
 # Author:      Mathew Fleisch <mathew.fleisch@gmail.com>
 # Description: This action will build and push go-binaries, when triggered by
 #              pushing a new git tag (that starts with the letter 'v').
