@@ -46,7 +46,7 @@ export BASHBOT_CONFIG_FILEPATH=${PWD}/config.json
 
 # Get the version
 bashbot --version
-# bashbot-darwin-amd64  v1.4.2
+# bashbot-darwin-amd64  vv1.4.6
 
 # Show the help dialog
 bashbot --help
@@ -112,7 +112,7 @@ docker run \
   -e SLACK_TOKEN=$SLACK_TOKEN \
   -e LOG_LEVEL="info" \
   -e LOG_FORMAT="text" \
-  -it mathewfleisch/bashbot:v1.4.2
+  -it mathewfleisch/bashbot:vv1.4.6
 ```
 
 ### Run bashbot in kubernetes
@@ -149,7 +149,13 @@ spec:
         app: bashbot
     spec:
       containers:
-      - image: mathewfleisch/bashbot:v1.4.2
+      containers:
+      -
+        env:
+          -
+            name: BASHBOT_ENV_VARS_FILEPATH
+            value: /bashbot/.env
+        image: mathewfleisch/bashbot:v1.4.6
         imagePullPolicy: IfNotPresent
         name: bashbot
         resources: {}
@@ -354,7 +360,7 @@ Included in this repository two github actions are executed on git tags. The [![
 [![Build containers](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml) action will use the docker plugin, buildx, to build and push a container for amd64/arm64 to docker hub.
 
 ```bash
-# example semver bump: v1.4.2
-git tag v1.4.2
-git push origin v1.4.2
+# example semver bump: vv1.4.6
+git tag vv1.4.6
+git push origin vv1.4.6
 ```
