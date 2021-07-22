@@ -1,5 +1,6 @@
 awscli 2.2.21
 bat 0.18.2
+gcloud 349.0.0
 helm 3.6.3
 kubectl 1.21.3
 kubectx 0.9.4

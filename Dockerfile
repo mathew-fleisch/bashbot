@@ -12,7 +12,7 @@ WORKDIR /root
 COPY .tool-versions /root/.tool-versions
 COPY pin /root/pin
 
-RUN apk add --update bash curl git make go jq docker python3 py3-pip \
+RUN apk add --update bash curl git make go jq docker python3 py3-pip vim \
     && rm /bin/sh && ln -s /bin/bash /bin/sh \
     && ln -s /usr/bin/python3 /usr/local/bin/python
 RUN mkdir -p $ASDF_DATA_DIR \

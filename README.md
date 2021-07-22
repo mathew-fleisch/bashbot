@@ -1,6 +1,6 @@
 # Bashbot
 
-[![Build binaries](https://github.com/mathew-fleisch/bashbot/actions/workflows/tag-release.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/tag-release.yaml)
+[![Build binaries](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-release.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-release.yaml)
 [![Build containers](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml)
 [Docker Hub](https://hub.docker.com/r/mathewfleisch/bashbot/tags?page=1&ordering=last_updated)
 
@@ -350,7 +350,7 @@ In this example, a list of all 'trigger' values are extracted from the config.js
 
 
 ## Automation (Build/Release)
-Included in this repository two github actions are executed on git tags. The [![tag-release](https://github.com/mathew-fleisch/bashbot/actions/workflows/tag-release.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/tag-release.yaml) action will build multiple go-binaries for each version (linux/amd64, linux/arm64, darwin/amd64, and darwin/arm64) and add them to a github release. The 
+Included in this repository two github actions are executed on git tags. The [![build-release](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-release.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-release.yaml) action will build multiple go-binaries for each version (linux/amd64, linux/arm64, darwin/amd64, and darwin/arm64) and add them to a github release. The 
 [![Build containers](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml) action will use the docker plugin, buildx, to build and push a container for amd64/arm64 to docker hub.
 
 ```bash
