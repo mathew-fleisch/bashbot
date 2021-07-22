@@ -30,7 +30,7 @@ Slack's permissions model has changed and the "[RTM](https://api.slack.com/rtm)"
 - curl
 
 ```bash
-# Download the latest version of bashbot
+# Download and install the latest version of bashbot
 make install-latest
 # or manually (without golang)
 os=$(uname | tr '[:upper:]' '[:lower:]')
@@ -107,6 +107,8 @@ export BASHBOT_CONFIG_FILEPATH=${PWD}/config.json
 docker run \
   -v ${PWD}/config.json:/bashbot/config.json \
   -e BASHBOT_CONFIG_FILEPATH "/bashbot/config.json" \
+  -v ${PWD}/.env:/bashbot/.env \
+  -e BASHBOT_CONFIG_FILEPATH "/bashbot/.env" \
   -e SLACK_TOKEN $SLACK_TOKEN \
   -e LOG_LEVEL "info" \
   -e LOG_FORMAT "text" \
@@ -120,10 +122,6 @@ docker run \
 - kubernetes
 
 ```yaml
-#
-###################################################
-#
-# Step 3c: Deploy Bashbot via kubernetes
 ---
 apiVersion: apps/v1
 kind: Deployment

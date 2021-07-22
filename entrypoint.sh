@@ -10,10 +10,16 @@ if ! [ -f "$BASHBOT_CONFIG_FILEPATH" ]; then
   exit 1
 fi
 
+# If .env file is present, load it.
+if [ -f "$BASHBOT_ENV_VARS_FILEPATH" ]; then
+  . "$BASHBOT_ENV_VARS_FILEPATH"
+fi
+
 if [ -z "$SLACK_TOKEN" ]; then
   echo "SLACK_TOKEN is not set. Please set it and try again."
   exit 1
 fi
+
 
 # If the log-level doesn't exist, set it to 'info'
 LOG_LEVEL=${LOG_LEVEL:-info}

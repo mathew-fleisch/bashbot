@@ -2,6 +2,7 @@ FROM mathewfleisch/tools:latest
 # See this repo for the parent Dockerfile: https://github.com/mathew-fleisch/tools
 LABEL maintainer="Mathew Fleisch <mathew.fleisch@gmail.com>"
 ENV BASHBOT_CONFIG_FILEPATH=/bashbot/config.json
+ENV BASHBOT_ENV_VARS_FILEPATH ""
 ENV SLACK_TOKEN ""
 ENV LOG_LEVEL "info"
 ENV LOG_FORMAT "text"
