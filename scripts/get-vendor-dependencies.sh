@@ -27,7 +27,7 @@ jq -c '.dependencies[]' $config_file
 for dep in $(jq -r '.dependencies[] | @base64' $config_file); do
   echo "---------------------"
     _jq() {
-     echo ${dep} | base64 --decode | jq -r ${1}
+     echo ${dep} | base64 -d | jq -r ${1}
     }
 
   this_name=$(_jq '.name')
