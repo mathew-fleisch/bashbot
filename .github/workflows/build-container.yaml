@@ -45,3 +45,5 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           tags: mathewfleisch/bashbot:latest,mathewfleisch/bashbot:${{ env.RELEASE_VERSION }}
+          cache-from: type=registry,ref=mathewfleisch/bashbot:latest
+          cache-to: type=inline
