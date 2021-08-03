@@ -1,0 +1,12 @@
+{
+  "admins": [{
+    "trigger": "bashbotrelease",
+    "appName": "Bashbot Releases",
+    "userIds": [""],
+    "privateChannelId": "",
+    "logChannelId": ""
+  }],
+  "messages": [],
+  "tools": [],
+  "dependencies": []
+}

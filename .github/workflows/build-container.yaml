@@ -47,3 +47,16 @@ jobs:
           tags: mathewfleisch/bashbot:latest,mathewfleisch/bashbot:${{ env.RELEASE_VERSION }}
           cache-from: type=registry,ref=mathewfleisch/bashbot:latest
           cache-to: type=inline
+      -
+        name: Notify Release Channel
+        env:
+          SLACK_TOKEN: ${{ secrets.RELEASE_SLACK_TOKEN }}
+          SLACK_CHANNEL: C02A1SH4GLT
+        run: |
+          arch=amd64
+          [ $(uname -m) == "aarch64" ] && arch=arm64
+          os=$(uname | tr '[:upper:]' '[:lower:]')
+          wget -q https://github.com/mathew-fleisch/bashbot/releases/download/${{ env.RELEASE_VERSION }}/bashbot-${os}-${arch} -O bashbot
+          chmod +x bashbot
+          ./bashbot --version
+          ./bashbot --slack-token ${{ secrets.SLACK_TOKEN }} --config-file .github/workflows/release-config.json --send-message-channel ${{ env.SLACK_CHANNEL }} --send-message-text "Bashbot <https://github.com/mathew-fleisch/bashbot/releases/tag/${{ env.RELEASE_VERSION}}|${{ env.RELEASE_VERSION }}> has been released!"
