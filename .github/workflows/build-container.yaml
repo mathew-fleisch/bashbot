@@ -50,7 +50,6 @@ jobs:
       -
         name: Notify Release Channel
         env:
-          SLACK_TOKEN: ${{ secrets.RELEASE_SLACK_TOKEN }}
           SLACK_CHANNEL: C02A1SH4GLT
         run: |
           arch=amd64
@@ -59,4 +58,4 @@ jobs:
           wget -q https://github.com/mathew-fleisch/bashbot/releases/download/${{ env.RELEASE_VERSION }}/bashbot-${os}-${arch} -O bashbot
           chmod +x bashbot
           ./bashbot --version
-          ./bashbot --slack-token ${{ secrets.SLACK_TOKEN }} --config-file .github/workflows/release-config.json --send-message-channel ${{ env.SLACK_CHANNEL }} --send-message-text "Bashbot <https://github.com/mathew-fleisch/bashbot/releases/tag/${{ env.RELEASE_VERSION}}|${{ env.RELEASE_VERSION }}> has been released!"
+          ./bashbot --slack-token ${{ secrets.RELEASE_SLACK_TOKEN }} --config-file .github/workflows/release-config.json --send-message-channel ${{ env.SLACK_CHANNEL }} --send-message-text "Bashbot <https://github.com/mathew-fleisch/bashbot/releases/tag/${{ env.RELEASE_VERSION}}|${{ env.RELEASE_VERSION }}> has been released!"
