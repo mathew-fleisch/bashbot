@@ -28,6 +28,10 @@ var help bool
 var getVersion bool
 var configFile string
 var slackToken string
+var sendMessageChannel string
+var sendMessageText string
+var sendMessageEphemeral string
+var sendMessageUser string
 var logLevel string
 var logFormat string
 var api *slack.Client
@@ -468,7 +472,7 @@ func reportToChannel(channel string, message string, passalong string) {
 
 func yell(channel string, msg string) {
 	channelID, _, err := api.PostMessage(channel,
-		slack.MsgOptionText(msg, false),
+		slack.MsgOptionText(strings.Replace(msg, "\\n", "\n", -1), false),
 		slack.MsgOptionUsername(admin.AppName),
 		slack.MsgOptionPostMessageParameters(slack.PostMessageParameters{
 			UnfurlLinks: true,
@@ -485,7 +489,7 @@ func yell(channel string, msg string) {
 func whisper(channel string, user string, msg string) {
 	_, err := api.PostEphemeral(channel,
 		user,
-		slack.MsgOptionText(msg, false),
+		slack.MsgOptionText(strings.Replace(msg, "\\n", "\n", -1), false),
 		slack.MsgOptionUsername(admin.AppName),
 		slack.MsgOptionPostMessageParameters(slack.PostMessageParameters{
 			UnfurlLinks: true,
@@ -618,6 +622,10 @@ to run bash commands or scripts based on a configuration file.
 func main() {
 	flag.StringVar(&configFile, "config-file", "", "[REQUIRED] Filepath to config.json file")
 	flag.StringVar(&slackToken, "slack-token", "", "[REQUIRED] Slack token used to authenticate with api")
+	flag.StringVar(&sendMessageChannel, "send-message-channel", "", "Don't run bashbot, send message in this channel")
+	flag.StringVar(&sendMessageText, "send-message-text", "", "Don't run bashbot, send message")
+	flag.StringVar(&sendMessageEphemeral, "send-message-ephemeral", "", "Don't run bashbot, send ephemeral message")
+	flag.StringVar(&sendMessageUser, "send-message-user", "", "Don't run bashbot, send ephemeral message to this user")
 	flag.StringVar(&logLevel, "log-level", "info", "Log level to display (info,debug,warn,error)")
 	flag.StringVar(&logFormat, "log-format", "text", "Display logs as json or text")
 	flag.BoolVar(&help, "help", false, "Help/usage information")
@@ -655,6 +663,17 @@ func main() {
 
 	admin = getAdmin()
 	api = slack.New(slackToken)
+
+	// Send simple text message to slack
+	if sendMessageChannel != "" && sendMessageText != "" {
+		if sendMessageEphemeral == "true" && sendMessageUser != "" {
+			whisper(sendMessageChannel, sendMessageUser, sendMessageText)
+			os.Exit(0)
+		}
+		yell(sendMessageChannel, sendMessageText)
+		os.Exit(0)
+	}
+
 	log.Info(admin.AppName + " Started: " + time.Now().String())
 
 	var matchTrigger string = fmt.Sprintf("^%s .", admin.Trigger)
