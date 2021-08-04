@@ -30,7 +30,7 @@ var configFile string
 var slackToken string
 var sendMessageChannel string
 var sendMessageText string
-var sendMessageEphemeral string
+var sendMessageEphemeral bool
 var sendMessageUser string
 var logLevel string
 var logFormat string
@@ -622,10 +622,10 @@ to run bash commands or scripts based on a configuration file.
 func main() {
 	flag.StringVar(&configFile, "config-file", "", "[REQUIRED] Filepath to config.json file")
 	flag.StringVar(&slackToken, "slack-token", "", "[REQUIRED] Slack token used to authenticate with api")
-	flag.StringVar(&sendMessageChannel, "send-message-channel", "", "Don't run bashbot, send message in this channel")
-	flag.StringVar(&sendMessageText, "send-message-text", "", "Don't run bashbot, send message")
-	flag.StringVar(&sendMessageEphemeral, "send-message-ephemeral", "", "Don't run bashbot, send ephemeral message")
-	flag.StringVar(&sendMessageUser, "send-message-user", "", "Don't run bashbot, send ephemeral message to this user")
+	flag.StringVar(&sendMessageChannel, "send-message-channel", "", "Send stand-alone slack message to this channel (requires -send-message-text)")
+	flag.StringVar(&sendMessageText, "send-message-text", "", "Send stand-alone slack message (requires -send-message-channel)")
+	flag.BoolVar(&sendMessageEphemeral, "send-message-ephemeral", false, "Send stand-alone ephemeral slack message to a specific user (requires -send-message-channel -send-message-text and -send-message-user)")
+	flag.StringVar(&sendMessageUser, "send-message-user", "", "Send stand-alone ephemeral slack message to this slack user (requires -send-message-channel -send-message-text and -send-message-ephemeral)")
 	flag.StringVar(&logLevel, "log-level", "info", "Log level to display (info,debug,warn,error)")
 	flag.StringVar(&logFormat, "log-format", "text", "Display logs as json or text")
 	flag.BoolVar(&help, "help", false, "Help/usage information")
@@ -656,7 +656,7 @@ func main() {
 		log.Error("to set up a new \"legacy bot user\" and \"Bot User OAuth Access Token\"")
 		log.Error("Export the slack token as the environment variable SLACK_TOKEN")
 		log.Error("export SLACK_TOKEN=xoxb-xxxxxxxxx-xxxxxxx")
-		log.Error("bashbot-" + operatingSystem + "-" + systemArchitecture + " --config-file ./config.json --slack-token $SLACK_TOKEN")
+		log.Error("bashbot-" + operatingSystem + "-" + systemArchitecture + " -config-file ./config.json -slack-token $SLACK_TOKEN")
 		log.Error("See Read-me file for more detailed instructions: http://github.com/mathew-fleisch/bashbot")
 		os.Exit(1)
 	}
@@ -666,7 +666,7 @@ func main() {
 
 	// Send simple text message to slack
 	if sendMessageChannel != "" && sendMessageText != "" {
-		if sendMessageEphemeral == "true" && sendMessageUser != "" {
+		if sendMessageEphemeral && sendMessageUser != "" {
 			whisper(sendMessageChannel, sendMessageUser, sendMessageText)
 			os.Exit(0)
 		}
