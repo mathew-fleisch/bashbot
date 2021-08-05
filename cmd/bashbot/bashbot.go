@@ -28,6 +28,7 @@ var help bool
 var getVersion bool
 var configFile string
 var slackToken string
+var installVendorDependenciesFlag bool
 var sendMessageChannel string
 var sendMessageText string
 var sendMessageEphemeral bool
@@ -92,6 +93,15 @@ type Parameter struct {
 	Allowed     []string `json:"allowed"`
 	Description string   `json:"description,omitempty"`
 	Source      string   `json:"source,omitempty"`
+}
+
+type Dependencies struct {
+	Dependencies []Dependency `json:"dependencies"`
+}
+
+type Dependency struct {
+	Name    string `json:"name"`
+	Install string `json:"install"`
 }
 
 type Channel struct {
@@ -188,6 +198,36 @@ func getAdmin() Admin {
 		log.Debug("config.json parsed successfully")
 	}
 	return Admins.Admins[0]
+}
+
+func installVendorDependencies() bool {
+	log.Debug("installVendorDependencies()")
+	jsonFile, err := os.Open(configFile)
+	if err != nil {
+		log.Error(err)
+	}
+	defer jsonFile.Close()
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	var Dependencies Dependencies
+	json.Unmarshal(byteValue, &Dependencies)
+
+	for i := 0; i < len(Dependencies.Dependencies); i++ {
+		log.Info(Dependencies.Dependencies[i].Name)
+
+		words := strings.Fields(Dependencies.Dependencies[i].Install)
+		var tcmd []string
+
+		for index, element := range words {
+			log.Debug(strconv.Itoa(index) + ": " + element)
+			tcmd = append(tcmd, element)
+		}
+		cmd := []string{"bash", "-c", "pushd vendor && " + strings.Join(tcmd, " ") + " && popd"}
+		log.Debug(strings.Join(cmd, " "))
+		ret := shellOut(cmd)
+		log.Info(ret)
+	}
+	return true
 }
 
 func stringInSlice(a string, list []string) bool {
@@ -622,11 +662,12 @@ to run bash commands or scripts based on a configuration file.
 func main() {
 	flag.StringVar(&configFile, "config-file", "", "[REQUIRED] Filepath to config.json file")
 	flag.StringVar(&slackToken, "slack-token", "", "[REQUIRED] Slack token used to authenticate with api")
+	flag.BoolVar(&installVendorDependenciesFlag, "install-vendor-dependencies", false, "Cycle through dependencies array in config file to install extra dependencies")
 	flag.StringVar(&sendMessageChannel, "send-message-channel", "", "Send stand-alone slack message to this channel (requires -send-message-text)")
 	flag.StringVar(&sendMessageText, "send-message-text", "", "Send stand-alone slack message (requires -send-message-channel)")
 	flag.BoolVar(&sendMessageEphemeral, "send-message-ephemeral", false, "Send stand-alone ephemeral slack message to a specific user (requires -send-message-channel -send-message-text and -send-message-user)")
 	flag.StringVar(&sendMessageUser, "send-message-user", "", "Send stand-alone ephemeral slack message to this slack user (requires -send-message-channel -send-message-text and -send-message-ephemeral)")
-	flag.StringVar(&logLevel, "log-level", "info", "Log level to display (info,debug,warn,error)")
+	flag.StringVar(&logLevel, "log-level", "info", "Log elevel to display (info,debug,warn,error)")
 	flag.StringVar(&logFormat, "log-format", "text", "Display logs as json or text")
 	flag.BoolVar(&help, "help", false, "Help/usage information")
 	flag.BoolVar(&getVersion, "version", false, "Get current version")
@@ -641,6 +682,7 @@ func main() {
 		fmt.Println("bashbot-" + operatingSystem + "-" + systemArchitecture + "\t" + Version)
 		os.Exit(0)
 	}
+
 	initLog(logLevel, logFormat)
 	if configFile == "" {
 		usage()
@@ -659,6 +701,14 @@ func main() {
 		log.Error("bashbot-" + operatingSystem + "-" + systemArchitecture + " -config-file ./config.json -slack-token $SLACK_TOKEN")
 		log.Error("See Read-me file for more detailed instructions: http://github.com/mathew-fleisch/bashbot")
 		os.Exit(1)
+	}
+
+	if installVendorDependenciesFlag {
+		if !installVendorDependencies() {
+			log.Error("Failed to install dependencies")
+			os.Exit(1)
+		}
+		os.Exit(0)
 	}
 
 	admin = getAdmin()

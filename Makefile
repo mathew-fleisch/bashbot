@@ -36,6 +36,10 @@ build:
 run:
 	@go run $(SRC_LOCATION) --config-file $(PWD)/config.json --slack-token $(SLACK_TOKEN)
 
+.PHONY: run-version
+run:
+	@go run $(SRC_LOCATION) --version
+
 .PHONY: clean
 clean:
 	echo "Removing any existing go-binaries"
