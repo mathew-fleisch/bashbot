@@ -6,6 +6,18 @@
 
 BashBot is a slack bot written in golang for infrastructure/devops teams. A socket connection to slack provides bashbot with a stream of text from each channel it is invited to, and uses regular expressions to determine when to trigger bash scripts. A [configuration file](sample-config.json) defines a list of commands that can be run in public and/or private channels. Restricting certain commands to private channels gives granular control, over which users can execute them. Bashbot allows infrastructure/devops teams to extend the tools and scripts they already use to manage their environments, into slack, that also acts as an execution log, and leverages slack's access controls.
 
+
+```
+example=examples/version.json
+config=config.json
+tmpconfig=tmp-config.json
+add=$(jq -c '.' ${example})
+jq '.tools += ['${add}']' ${config} > ${tmpconfig} \
+  && mv ${tmpconfig} ${config}
+rm -rf ${tmpconfig}
+```
+
+
 --------------------------------------------------
 
 ## Installation and setup 
@@ -44,7 +56,7 @@ export BASHBOT_CONFIG_FILEPATH=${PWD}/config.json
 
 # Get the version
 bashbot --version
-# bashbot-darwin-amd64  v1.4.6
+# bashbot-darwin-amd64  v1.4.13
 
 # Show the help dialog
 bashbot --help
@@ -67,11 +79,18 @@ bashbot --help
 #         Display logs as json or text (default "text")
 #   -log-level string
 #         Log level to display (info,debug,warn,error) (default "info")
+#   -send-message-channel string
+#         Send stand-alone slack message to this channel (requires -send-message-text)
+#   -send-message-ephemeral
+#         Send stand-alone ephemeral slack message to a specific user (requires -send-message-channel -send-message-text and -send-message-user)
+#   -send-message-text string
+#         Send stand-alone slack message (requires -send-message-channel)
+#   -send-message-user string
+#         Send stand-alone ephemeral slack message to this slack user (requires -send-message-channel -send-message-text and -send-message-ephemeral)
 #   -slack-token string
 #         [REQUIRED] Slack token used to authenticate with api
 #   -version
 #         Get current version
-
 
 # Run Bashbot
 bashbot \
@@ -110,7 +129,7 @@ docker run \
   -e SLACK_TOKEN=$SLACK_TOKEN \
   -e LOG_LEVEL="info" \
   -e LOG_FORMAT="text" \
-  -it mathewfleisch/bashbot:v1.4.6
+  -it mathewfleisch/bashbot:v1.4.13
 ```
 
 ### Run bashbot in kubernetes
@@ -153,7 +172,7 @@ spec:
           -
             name: BASHBOT_ENV_VARS_FILEPATH
             value: /bashbot/.env
-        image: mathewfleisch/bashbot:v1.4.6
+        image: mathewfleisch/bashbot:v1.4.13
         imagePullPolicy: IfNotPresent
         name: bashbot
         resources: {}
@@ -358,7 +377,7 @@ Included in this repository two github actions are executed on git tags. The [![
 [![Build containers](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml) action will use the docker plugin, buildx, to build and push a container for amd64/arm64 to docker hub.
 
 ```bash
-# example semver bump: v1.4.6
-git tag v1.4.6
-git push origin v1.4.6
+# example semver bump: v1.4.13
+git tag v1.4.13
+git push origin v1.4.13
 ```
