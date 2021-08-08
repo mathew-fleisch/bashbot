@@ -15,11 +15,11 @@ $ ./remove-command.sh version
 
 ## Examples
 
-1. [Get Caller Information](info)
-2. [Get Running Version](version)
-3. [List Available Commands](list)
-4. [Describe Command](describe)
-5. [Get File From Repository](get-file-from-repo)
+1. [Get Caller Information](info) + `./add-command.sh info/info.json` - `./remove-command.sh info`
+2. [Get Running Version](version) + `./add-command.sh version/version.json` - `./remove-command.sh version`
+3. [List Available Commands](list) + `./add-command.sh list/list.json` - `./remove-command.sh list`
+4. [Describe Command](describe) + `./add-command.sh describe/describe.json` - `./remove-command.sh describe`
+5. [Get File From Repository](get-file-from-repo) + `./add-command.sh get-file-from-repo/get-config.json` - `./remove-command.sh get-config`
 
 
 
