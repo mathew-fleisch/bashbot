@@ -1,0 +1,29 @@
+# Name:        example-bashbot-github-actions.yaml
+# Author:      Mathew Fleisch <mathew.fleisch@gmail.com>
+# Description: This action demonstrates how to trigger a GitHub action from Bashbot.
+name: Example Bashbot Triggered GitHub Action
+on:
+  repository_dispatch:
+    types:
+      - trigger-github-action
+
+jobs:
+  build:
+    name: Example Bashbot Triggered GitHub Action
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Send Slack Message With Bashbot Binary
+        env:
+          BASHBOT_CONFIG_FILEPATH: .github/workflows/example-config.json
+          SLACK_TOKEN: ${{ secrets.RELEASE_SLACK_TOKEN }}
+          SLACK_CHANNEL: ${{ github.event.client_payload.channel }}
+          SLACK_USERID: ${{ github.event.client_payload.user_id }}
+          REPO_OWNER: mathew-fleisch
+          REPO_NAME: bashbot
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./examples/github-action/github-action.sh
+          

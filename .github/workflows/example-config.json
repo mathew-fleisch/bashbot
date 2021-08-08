@@ -1,0 +1,12 @@
+{
+  "admins": [{
+    "trigger": "bashbotexample",
+    "appName": "Bashbot Example",
+    "userIds": [""],
+    "privateChannelId": "",
+    "logChannelId": ""
+  }],
+  "messages": [],
+  "tools": [],
+  "dependencies": []
+}

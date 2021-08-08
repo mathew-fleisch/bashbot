@@ -11,7 +11,7 @@ for expect in $expected_variables; do
     exit 1
   fi
 done
-echo "Downloading ${github_filename} from: https://api.github.com/repos/${github_org}/${github_repo}/contents/${github_filename}?ref=${github_branch}"
+echo "Downloading ${github_filename} from: https://${github_base}/repos/${github_org}/${github_repo}/contents/${github_filename}?ref=${github_branch}"
 echo "To: ${output_filename}"
 curl -H "Authorization: token $github_token" \
   -H "Accept: application/vnd.github.v3+json" \
