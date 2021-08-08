@@ -12,4 +12,4 @@ done
 headers="-sH \"Accept: application/vnd.github.everest-preview+json\" -H \"Authorization: token ${GITHUB_TOKEN}\" -X POST"
 curl ${headers} \
   --data '{"event_type":"trigger-github-action","client_payload": {"channel":"'${SLACK_CHANNEL}'", "user_id": "'${SLACK_USERID}'"}}' \
-  https://${github_base}/repos/${REPO_OWNER}/${REPO_NAME}/disapatches 
+  https://${github_base}/repos/${REPO_OWNER}/${REPO_NAME}/dispatches 
