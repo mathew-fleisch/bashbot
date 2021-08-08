@@ -7,17 +7,6 @@
 BashBot is a slack bot written in golang for infrastructure/devops teams. A socket connection to slack provides bashbot with a stream of text from each channel it is invited to, and uses regular expressions to determine when to trigger bash scripts. A [configuration file](sample-config.json) defines a list of commands that can be run in public and/or private channels. Restricting certain commands to private channels gives granular control, over which users can execute them. Bashbot allows infrastructure/devops teams to extend the tools and scripts they already use to manage their environments, into slack, that also acts as an execution log, and leverages slack's access controls.
 
 
-```
-example=examples/version.json
-config=config.json
-tmpconfig=tmp-config.json
-add=$(jq -c '.' ${example})
-jq '.tools += ['${add}']' ${config} > ${tmpconfig} \
-  && mv ${tmpconfig} ${config}
-rm -rf ${tmpconfig}
-```
-
-
 --------------------------------------------------
 
 ## Installation and setup 
@@ -129,7 +118,7 @@ docker run \
   -e SLACK_TOKEN=$SLACK_TOKEN \
   -e LOG_LEVEL="info" \
   -e LOG_FORMAT="text" \
-  -it mathewfleisch/bashbot:v1.4.13
+  -it mathewfleisch/bashbot:v1.5.0
 ```
 
 ### Run bashbot in kubernetes
@@ -155,10 +144,7 @@ spec:
     matchLabels:
       app: bashbot
   strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
+    type: Recreate
   template:
     metadata:
       creationTimestamp: null
@@ -172,7 +158,7 @@ spec:
           -
             name: BASHBOT_ENV_VARS_FILEPATH
             value: /bashbot/.env
-        image: mathewfleisch/bashbot:v1.4.13
+        image: mathewfleisch/bashbot:v1.5.0
         imagePullPolicy: IfNotPresent
         name: bashbot
         resources: {}
@@ -214,7 +200,9 @@ spec:
 
 
 
+## Configuration (config.json)
 
+The configuration of bashbot is loaded into the go-binary as a json file. More about the config.json syntax can be found in the [examples](examples) directory.
 
 
 ## Automation (Build/Release)

@@ -13,6 +13,7 @@ $ ./remove-command.sh version
 # version removed from /Users/user/bashbot/config.json
 ```
 
+## Examples
 
 1. [Get Caller Information](info)
 2. [Get Running Version](version)
@@ -22,12 +23,10 @@ $ ./remove-command.sh version
 
 
 
-
-
 -------------------------------------------------------------------------
 
 ### config.json
-[sample-config.json](sample-config.json)
+[sample-config.json](../sample-config.json)
 The config.json file is defined as an array of json objects keyed by 'tools' and 'dependencies.' The dependencies section defines any resources that need to be downloaded or cloned from a repository before execution of commands. The following is a simplified example of a config.json file:
 
 ```json
@@ -111,24 +110,53 @@ response:     [code|text] code displays response in a code block, text displays 
 permissions:  array of strings. private channel ids to restrict command access to
 ```
 
-#### parameters continued (1 of 2):
-There are a few ways to define parameters for a command, but the parameters passed to the bot MUST be white-listed. If the command can be triggered with no parameters, an empty array can be used as in the first example. If the command requires parameters, they can be a hard coded array of strings, or derived from another command. In this example, the hard-coded list of possible parameters is defined (random, question, answer). The `question` action essentially selects a random line in the `--questions-file` text file. The `answer` action does the same as questions, but with a greater-than sign appended to the string. Finally, the `random` action selects both, a random question and random answer from both linked text files.
+#### parameters
+Parameters passed to Bashbot cannot be arbitrary/free-form text and must come from a hard-coded list of values, or a dynamic list of values as the return of another command. In this first example a hard-coded list of values is used to print the current `date` or `uptime` by passing to bashbot `bashbot time date` or `bashbot time uptime`
+
 ```json
 {
-  "name": "Cards Against Humanity",
-  "description": "Picks a random question and answer from a list.",
-  "help": "bashbot cah [random|question|answer]",
-  "trigger": "cah",
-  "location": "./vendor/bashbot-scripts",
+  "name": "Date or Uptime",
+  "description": "Show the current time or uptime",
+  "help": "bashbot time",
+  "trigger": "time",
+  "location": "./",
   "setup": "echo \"\"",
-  "command": "./cardsAgainstHumanity.sh --action ${action} --questions-file ../against-humanity/questions.txt --answers-file ../against-humanity/answers.txt",
-  "parameters": [{
-    "name": "action",
-    "allowed": ["random", "question", "answer"]
-  }],
+  "command": "${command}",
+  "parameters": [
+    {
+      "name": "command",
+      "allowed": ["date","uptime"]
+    }
+  ],
   "log": false,
   "ephemeral": false,
-  "response": "text",
+  "response": "code",
+  "permissions": ["all"]
+}
+```
+
+In this next example, the command is derived by the output of another command. The valid parameters in this case, are the "trigger" values at `.tools[].trigger` and are used to output the json object, through jq, at that array index. Running `bashbot describe describe` would therefore output itself.
+
+```json
+{
+  "name": "Describe Bashbot [command]",
+  "description": "Show the json object for a specific command",
+  "help": "bashbot describe [command]",
+  "trigger": "describe",
+  "location": "./",
+  "setup": "echo \"\"",
+  "command": "jq '.tools[] | select(.trigger==\"${command}\")' ${BASHBOT_CONFIG_FILEPATH}",
+  "parameters": [
+    {
+      "name": "command",
+      "allowed": [],
+      "description": "a command to describe ('bashbot list')",
+      "source": "jq -r '.tools[] | .trigger' ${BASHBOT_CONFIG_FILEPATH}"
+    }
+  ],
+  "log": false,
+  "ephemeral": false,
+  "response": "code",
   "permissions": ["all"]
 }
 ```
