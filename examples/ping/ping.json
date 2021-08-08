@@ -1,0 +1,14 @@
+{
+  "name": "Ping/Pong",
+  "description": "Return pong on pings",
+  "help": "bashbot ping",
+  "trigger": "ping",
+  "location": "./",
+  "setup": "echo \"\"",
+  "command": "echo \"pong\"",
+  "parameters": [],
+  "log": false,
+  "ephemeral": false,
+  "response": "text",
+  "permissions": ["all"]
+}
