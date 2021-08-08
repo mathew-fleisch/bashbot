@@ -1,0 +1,14 @@
+{
+  "name": "Get Bashbot Version",
+  "description": "Displays the currently running version of Bashbot",
+  "help": "bashbot version",
+  "trigger": "version",
+  "location": "./examples/version",
+  "setup": "echo \"\"",
+  "command": "./get-version.sh",
+  "parameters": [],
+  "log": false,
+  "ephemeral": false,
+  "response": "code",
+  "permissions": ["all"]
+}

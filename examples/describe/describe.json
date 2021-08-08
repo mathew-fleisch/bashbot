@@ -1,0 +1,21 @@
+{
+  "name": "Describe Bashbot [command]",
+  "description": "Show the json object for a specific command",
+  "help": "bashbot describe [command]",
+  "trigger": "describe",
+  "location": "./",
+  "setup": "echo \"\"",
+  "command": "jq '.tools[] | select(.trigger==\"${command}\")' ${BASHBOT_CONFIG_FILEPATH}",
+  "parameters": [
+    {
+      "name": "command",
+      "allowed": [],
+      "description": "a command to describe ('bashbot list')",
+      "source": "jq -r '.tools[] | .trigger' ${BASHBOT_CONFIG_FILEPATH}"
+    }
+  ],
+  "log": false,
+  "ephemeral": false,
+  "response": "code",
+  "permissions": ["all"]
+}

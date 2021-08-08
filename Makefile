@@ -34,7 +34,7 @@ build:
 
 .PHONY: run
 run:
-	@go run $(SRC_LOCATION) --config-file $(PWD)/config.json --slack-token $(SLACK_TOKEN)
+	@go run $(SRC_LOCATION) --config-file $(BASHBOT_CONFIG_FILEPATH) --slack-token $(SLACK_TOKEN)
 
 .PHONY: run-version
 run:

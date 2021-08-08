@@ -1,0 +1,14 @@
+{
+  "name": "Get User/Channel Info",
+  "description": "Get information about the user and channel command is being run from",
+  "help": "info",
+  "trigger": "info",
+  "location": "./examples/info",
+  "setup": "echo \"\"",
+  "command": "./get-info.sh",
+  "parameters": [],
+  "log": false,
+  "ephemeral": false,
+  "response": "code",
+  "permissions": ["all"]
+}

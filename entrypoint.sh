@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1090
 
 if ! command -v bashbot > /dev/null; then
   echo "bashbot is not installed. Please install bashbot and try again."
@@ -27,14 +28,9 @@ LOG_LEVEL=${LOG_LEVEL:-info}
 LOG_FORMAT=${LOG_FORMAT:-text}
 
 # Run install-vendor-dependencies path
-bashbot \
-  --config-file "$BASHBOT_CONFIG_FILEPATH" \
-  --slack-token "$SLACK_TOKEN" \
-  --install-vendor-dependencies
+bashbot --install-vendor-dependencies
 
 # Run Bashbot binary passing the config file and the Slack token
 bashbot \
-  --config-file "$BASHBOT_CONFIG_FILEPATH" \
-  --slack-token "$SLACK_TOKEN" \
   --log-level "$LOG_LEVEL" \
   --log-format "$LOG_FORMAT"
