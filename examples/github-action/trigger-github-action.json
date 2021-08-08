@@ -9,6 +9,6 @@
   "parameters": [],
   "log": false,
   "ephemeral": false,
-  "response": "code",
+  "response": "text",
   "permissions": ["all"]
 }
