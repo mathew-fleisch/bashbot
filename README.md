@@ -69,7 +69,7 @@ bashbot --help
 #   -log-format string
 #         Display logs as json or text (default "text")
 #   -log-level string
-#         Log elevel to display (info,debug,warn,error) (default "info")
+#         Log level to display (info,debug,warn,error) (default "info")
 #   -send-message-channel string
 #         Send stand-alone slack message to this channel (requires -send-message-text)
 #   -send-message-ephemeral
