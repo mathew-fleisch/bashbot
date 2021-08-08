@@ -660,8 +660,8 @@ to run bash commands or scripts based on a configuration file.
 }
 
 func main() {
-	flag.StringVar(&configFile, "config-file", "", "[REQUIRED] Filepath to config.json file")
-	flag.StringVar(&slackToken, "slack-token", "", "[REQUIRED] Slack token used to authenticate with api")
+	flag.StringVar(&configFile, "config-file", "", "[REQUIRED] Filepath to config.json file (or environment variable BASHBOT_CONFIG_FILEPATH set)")
+	flag.StringVar(&slackToken, "slack-token", "", "[REQUIRED] Slack token used to authenticate with api (or environment variable SLACK_TOKEN set)")
 	flag.BoolVar(&installVendorDependenciesFlag, "install-vendor-dependencies", false, "Cycle through dependencies array in config file to install extra dependencies")
 	flag.StringVar(&sendMessageChannel, "send-message-channel", "", "Send stand-alone slack message to this channel (requires -send-message-text)")
 	flag.StringVar(&sendMessageText, "send-message-text", "", "Send stand-alone slack message (requires -send-message-channel)")
@@ -684,10 +684,16 @@ func main() {
 	}
 
 	initLog(logLevel, logFormat)
+	if configFile == "" && os.Getenv("BASHBOT_CONFIG_FILEPATH") != "" {
+		configFile = os.Getenv("BASHBOT_CONFIG_FILEPATH")
+	}
 	if configFile == "" {
 		usage()
 		log.Error("Must define a config.json file")
 		os.Exit(1)
+	}
+	if slackToken == "" && os.Getenv("SLACK_TOKEN") != "" {
+		slackToken = os.Getenv("SLACK_TOKEN")
 	}
 	if slackToken == "" {
 		usage()

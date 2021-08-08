@@ -1,0 +1,14 @@
+{
+  "name": "List Available Bashbot Commands",
+  "description": "List all of the possible commands stored in bashbot",
+  "help": "bashbot list",
+  "trigger": "list",
+  "location": "./",
+  "setup": "echo \"\"",
+  "command": "jq -r '.tools[] | .trigger' ${BASHBOT_CONFIG_FILEPATH}",
+  "parameters": [],
+  "log": false,
+  "ephemeral": false,
+  "response": "code",
+  "permissions": ["all"]
+}
