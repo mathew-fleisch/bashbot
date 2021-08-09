@@ -2,6 +2,8 @@
 
 In this example, a bash script is executed to return information about the environment Bashbot is running in, and the channel/user name/id from which it was executed.
 
+<img src="https://i.imgur.com/qC2ZnZ8.gif">
+
 ## Bashbot configuration
 
 This command is triggered by sending `bashbot info` in a slack channel where Bashbot is also a member. The script is expected to exist before execution at the relative path `./examples/version/get-info.sh` and requires no additional input to execute. It takes no arguments/parameters and returns `stdout` as a slack message, in the channel it was executed from.
