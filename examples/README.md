@@ -48,6 +48,9 @@ $ ./examples/remove-command.sh version
     - [Get File From Repository](get-file-from-repo)
         - \+ `./add-command.sh get-file-from-repo/get-config.json`
         - \- `./remove-command.sh get-config`
+    - [Trigger Github Action](github-action)
+        - \+ `./add-command.sh github-action/trigger-github-action.json`
+        - \- `./remove-command.sh trigger-github-action`
 
 
 
