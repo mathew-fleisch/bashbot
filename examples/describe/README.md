@@ -2,6 +2,8 @@
 
 In this example, the configuration json file for Bashbot is parsed via [jq](https://stedolan.github.io/jq/) to display the trigger and name of each command in the file.
 
+<img src="https://i.imgur.com/bQZKRjX.gif">
+
 ## Bashbot Configuration
 
 This command is triggered by sending `bashbot describe [command]` in a slack channel where Bashbot is also a member. There is no external script for this command, and expects jq to already be installed on the host machine. One argument/parameter is required to run this command and is used to select and print specific commands from the configuration json using jq. The `command` parameter is used to  `.tools[].trigger`
