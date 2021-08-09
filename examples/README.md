@@ -4,18 +4,19 @@ This directory contains a few sample Bashbot commands that can be applied to a c
 
 
 ```bash
-$ export BASHBOT_CONFIG_FILEPATH=${PWD}/config.json
+# From Bashbot source root
+export BASHBOT_CONFIG_FILEPATH=${PWD}/config.json
 
-$ ./examples/add-command.sh examples/version/version.json              
+./examples/add-command.sh examples/version/version.json              
 # version added to /Users/user/bashbot/config.json
 
-$ ./add-command.sh version/version.json                                           
+./examples/add-command.sh version/version.json                                           
 # Trigger already exists: version
 
-$ ./remove-command.sh version                
+./examples/remove-command.sh version                
 # version removed from /Users/user/bashbot/config.json
 
-$ ./examples/remove-command.sh version
+./examples/remove-command.sh version
 # Trigger not found to remove: version
 ```
 
