@@ -45,7 +45,7 @@ export BASHBOT_CONFIG_FILEPATH=${PWD}/config.json
 
 # Get the version
 bashbot --version
-# bashbot-darwin-amd64  v1.4.13
+# bashbot-darwin-amd64  v1.5.3
 
 # Show the help dialog
 bashbot --help
@@ -210,7 +210,7 @@ Included in this repository two github actions are executed on git tags. The [![
 [![Build containers](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml) action will use the docker plugin, buildx, to build and push a container for amd64/arm64 to docker hub.
 
 ```bash
-# example semver bump: v1.4.13
-git tag v1.4.13
-git push origin v1.4.13
+# example semver bump: v1.5.3
+git tag v1.5.3
+git push origin v1.5.3
 ```
