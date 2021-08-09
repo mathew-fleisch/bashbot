@@ -1,7 +1,7 @@
 {
   "name": "Get User/Channel Info",
   "description": "Get information about the user and channel command is being run from",
-  "help": "info",
+  "help": "bashbot info",
   "trigger": "info",
   "location": "./examples/info",
   "setup": "echo \"\"",

@@ -118,7 +118,7 @@ docker run \
   -e SLACK_TOKEN=$SLACK_TOKEN \
   -e LOG_LEVEL="info" \
   -e LOG_FORMAT="text" \
-  -it mathewfleisch/bashbot:v1.5.0
+  -it mathewfleisch/bashbot:v1.5.3
 ```
 
 ### Run bashbot in kubernetes
@@ -158,7 +158,7 @@ spec:
           -
             name: BASHBOT_ENV_VARS_FILEPATH
             value: /bashbot/.env
-        image: mathewfleisch/bashbot:v1.5.0
+        image: mathewfleisch/bashbot:v1.5.3
         imagePullPolicy: IfNotPresent
         name: bashbot
         resources: {}
