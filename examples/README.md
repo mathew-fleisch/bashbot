@@ -10,7 +10,7 @@ export BASHBOT_CONFIG_FILEPATH=${PWD}/config.json
 ./examples/add-command.sh examples/version/version.json              
 # version added to /Users/user/bashbot/config.json
 
-./examples/add-command.sh version/version.json                                           
+./examples/add-command.sh examples/version/version.json                                           
 # Trigger already exists: version
 
 ./examples/remove-command.sh version                
