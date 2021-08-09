@@ -2,6 +2,8 @@
 
 In this example, a curl is used to determine the latest version of Bashbot through the github release api
 
+<img src="https://i.imgur.com/w3wouOR.gif">
+
 ## Bashbot configuration
 
 This command is triggered by sending `bashbot latest-release` in a slack channel where Bashbot is also a member. This command requires no external script and simply returns a formatted message including links to Bashbot's source code and latest release.

@@ -2,6 +2,8 @@
 
 In this example, a bash script is executed, attempting three methods of returning the currently running version of Bashbot.
 
+<img src="https://i.imgur.com/ZQmH672.gif">
+
 ## Bashbot configuration
 
 This command is triggered by sending `bashbot version` in a slack channel where Bashbot is also a member. The script is expected to exist before execution at the relative path `./examples/version/get-version.sh` and requires no additional input to execute. It takes no arguments/parameters and returns `stdout` as a slack message, in the channel it was executed from.
