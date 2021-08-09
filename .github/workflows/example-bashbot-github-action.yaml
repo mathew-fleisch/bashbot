@@ -1,4 +1,4 @@
-# Name:        example-bashbot-github-actions.yaml
+# Name:        example-bashbot-github-action.yaml
 # Author:      Mathew Fleisch <mathew.fleisch@gmail.com>
 # Description: This action demonstrates how to trigger a GitHub action from Bashbot.
 name: Example Bashbot Triggered GitHub Action

@@ -13,7 +13,7 @@ This command is triggered by sending `bashbot trigger-github-action` in a slack 
   "trigger": "trigger-github-action",
   "location": "./examples/github-action",
   "setup": "export REPO_OWNER=mathew-fleisch && export REPO_NAME=bashbot && export SLACK_CHANNEL=${TRIGGERED_CHANNEL_ID} && export SLACK_USERID=${TRIGGERED_USER_ID}",
-  "command": "./trigger.sh && echo \"Running this <https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/.github/workflows/example-bashbot-github-actions.yaml|example github action>\"",
+  "command": "./trigger.sh && echo \"Running this <https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/.github/workflows/example-bashbot-github-action.yaml|example github action>\"",
   "parameters": [],
   "log": false,
   "ephemeral": false,
