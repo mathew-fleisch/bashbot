@@ -32,8 +32,8 @@ build:
 	go mod vendor
 	$(GO_BUILD) -o $(BINARY)-$(GOOS)-$(GOARCH) $(SRC_LOCATION)
 
-.PHONY: run
-run:
+.PHONY: run-bashbot
+run-bashbot:
 	@go run $(SRC_LOCATION) --config-file $(BASHBOT_CONFIG_FILEPATH) --slack-token $(SLACK_TOKEN)
 
 .PHONY: run-version
