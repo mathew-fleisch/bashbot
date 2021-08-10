@@ -21,3 +21,5 @@ config.json
 
 tmp/*
 bin/*
+
+bashbot
