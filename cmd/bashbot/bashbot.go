@@ -384,13 +384,10 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
 	}
 
 	// Verify all required parameters are passed
-	if len(thisTool.Parameters) > 0 {
-		// fmt.Println("Passed cmds: " + strconv.Itoa(len(cmds)) + " ?= " + strconv.Itoa(len(thisTool.Parameters)))
-		if len(cmds) != len(thisTool.Parameters) {
-			reportToChannel(channel, "incorrect_parameters", "")
-			yell(channel, cmdHelp)
-			return true
-		}
+	if len(cmds) != len(thisTool.Parameters) {
+		reportToChannel(channel, "incorrect_parameters", "")
+		yell(channel, cmdHelp)
+		return true
 	}
 
 	// Validate parameters against whitelist
