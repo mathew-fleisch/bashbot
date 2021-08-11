@@ -110,7 +110,7 @@ The config.json file is defined as an array of json objects keyed by 'tools' and
       "trigger": "list-commands",
       "location": "./",
       "setup": "echo \"\"",
-      "command": "jq -r '.tools[] | .trigger' config.json",
+      "command": "jq -r '.tools[] | .trigger' ${BASHBOT_CONFIG_FILEPATH}",
       "parameters": [],
       "log": false,
       "ephemeral": false,
