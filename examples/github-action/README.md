@@ -52,7 +52,7 @@ curl -s \
 
 ### github-action.sh
 
-This script uses curl to ge tthe latest version and job id from the github api, then uses wget to get the latest version of bashbot. Finally this script uses the Bashbot binary to send a message back to slack (simulating a long running job).
+This script uses curl to get the latest version and job id from the github api, then uses wget to get the latest version of bashbot. Finally this script uses the Bashbot binary to send a message back to slack (simulating a long running job).
 
 ```bash
 github_base="${github_base:-api.github.com}"
