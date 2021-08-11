@@ -110,7 +110,7 @@ The config.json file is defined as an array of json objects keyed by 'tools' and
       "trigger": "list-commands",
       "location": "./",
       "setup": "echo \"\"",
-      "command": "jq -r '.tools[] config.json | .trigger'",
+      "command": "jq -r '.tools[] | .trigger' config.json",
       "parameters": [],
       "log": false,
       "ephemeral": false,
@@ -121,7 +121,7 @@ The config.json file is defined as an array of json objects keyed by 'tools' and
   "dependencies": [
     {
       "name": "BashBot scripts Scripts",
-      "install": "git clone https://github.com/mathew-fleisch/bashbot-scripts.git"
+      "install": "rm -rf bashbot-scripts || true && git clone https://github.com/mathew-fleisch/bashbot-scripts.git"
     }
   ]
 }
