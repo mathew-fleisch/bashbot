@@ -109,7 +109,6 @@ The config.json file is defined as an array of json objects keyed by 'tools' and
       "help": "bashbot list-commands",
       "trigger": "list-commands",
       "location": "./",
-      "setup": "echo \"\"",
       "command": ["jq -r '.tools[] | .trigger' ${BASHBOT_CONFIG_FILEPATH}"],
       "parameters": [],
       "log": false,
@@ -133,7 +132,6 @@ Each object in the tools array defines the parameters of a single command.
 name, description and help provide human readable information about the specific command
 trigger:      unique alphanumeric word that represents the command
 location:     absolute or relative path to dependency directory (use "./" for no dependency)
-setup:        command that is run before the main command. (use "echo \"\"" as a default)
 command:      bash command using ${parameter-name} to inject white-listed parameters or environment variables
 parameters:   array of parameter objects. (more detail below)
 log:          define whether the command should be logged in log channel
@@ -152,7 +150,6 @@ Parameters passed to Bashbot cannot be arbitrary/free-form text and must come fr
   "help": "bashbot time",
   "trigger": "time",
   "location": "./",
-  "setup": "echo \"\"",
   "command": ["${command}"],
   "parameters": [
     {
@@ -176,7 +173,6 @@ In this next example, the command is derived by the output of another command. T
   "help": "bashbot describe [command]",
   "trigger": "describe",
   "location": "./",
-  "setup": "echo \"\"",
   "command": ["jq '.tools[] | select(.trigger==\"${command}\")' ${BASHBOT_CONFIG_FILEPATH}"],
   "parameters": [
     {
