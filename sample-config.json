@@ -52,8 +52,12 @@
       "help": "bashbot help",
       "trigger": "help",
       "location": "./",
-      "setup": "echo \"BashBot is a tool for infrastructure/devops teams to automate tasks triggered by slash-command-like declarative configuration\"",
-      "command": "echo \"\\`\\`\\`\" && jq -r -c '.tools[] | \"\\(.help) - \\(.description)\"' ${BASHBOT_CONFIG_FILEPATH} && echo \"\\`\\`\\`\"",
+      "command": [
+        "echo \"BashBot is a tool for infrastructure/devops teams to automate tasks triggered by slash-command-like declarative configuration\"",
+        "echo \"\\`\\`\\`\"",
+        "&& jq -r -c '.tools[] | \"\\(.help) - \\(.description)\"' ${BASHBOT_CONFIG_FILEPATH}",
+        "&& echo \"\\`\\`\\`\""
+      ],
       "parameters": [],
       "log": false,
       "ephemeral": false,
@@ -68,8 +72,7 @@
       "help": "bashbot info",
       "trigger": "info",
       "location": "./example/info",
-      "setup": "echo \"\"",
-      "command": "./get-info.sh",
+      "command": ["./get-info.sh"],
       "parameters": [],
       "log": false,
       "ephemeral": false,
@@ -84,8 +87,7 @@
       "help": "bashbot list",
       "trigger": "list",
       "location": "./",
-      "setup": "echo \"\"",
-      "command": "jq -r '.tools[] | .trigger + \" - \" + .name' ${BASHBOT_CONFIG_FILEPATH}",
+      "command": ["jq -r '.tools[] | .trigger + \" - \" + .name' ${BASHBOT_CONFIG_FILEPATH}"],
       "parameters": [],
       "log": false,
       "ephemeral": false,
@@ -100,14 +102,13 @@
       "help": "bashbot describe [command]",
       "trigger": "describe",
       "location": "./",
-      "setup": "echo \"\"",
-      "command": "jq '.tools[] | select(.trigger==\"${command}\")' ${BASHBOT_CONFIG_FILEPATH}",
+      "command": ["jq '.tools[] | select(.trigger==\"${command}\")' ${BASHBOT_CONFIG_FILEPATH}"],
       "parameters": [
         {
           "name": "command",
           "allowed": [],
           "description": "a command to describe ('bashbot list')",
-          "source": "jq -r '.tools[] | .trigger' ${BASHBOT_CONFIG_FILEPATH}"
+          "source": ["jq -r '.tools[] | .trigger' ${BASHBOT_CONFIG_FILEPATH}"]
         }
       ],
       "log": false,
@@ -123,8 +124,10 @@
       "help": "bashbot test [command]",
       "trigger": "test",
       "location": "./",
-      "setup": "echo \"\"",
-      "command": "echo \"Username[id]: ${TRIGGERED_USER_NAME}[${TRIGGERED_USER_ID}]\" && echo \" Channel[id]: ${TRIGGERED_CHANNEL_NAME}[${TRIGGERED_CHANNEL_ID}]\"",
+      "command": [
+        "echo \"Username[id]: ${TRIGGERED_USER_NAME}[${TRIGGERED_USER_ID}]\"",
+        "&& echo \" Channel[id]: ${TRIGGERED_CHANNEL_NAME}[${TRIGGERED_CHANNEL_ID}]\""
+      ],
       "parameters": [],
       "log": false,
       "ephemeral": false,
@@ -137,11 +140,17 @@
   "dependencies": [
     {
       "name": "BashBot scripts Scripts",
-      "install": "rm -rf bashbot-scripts || true && git clone https://github.com/mathew-fleisch/bashbot-scripts.git"
+      "install": [
+        "rm -rf bashbot-scripts || true",
+        "&& git clone https://github.com/mathew-fleisch/bashbot-scripts.git"
+      ]
     },
     {
       "name": "Cards Against Humanity",
-      "install": "rm -rf against-humanity || true && git clone https://github.com/nodanaonlyzuul/against-humanity.git"
+      "install": [
+        "rm -rf against-humanity || true",
+        "&& git clone https://github.com/nodanaonlyzuul/against-humanity.git"
+      ]
     }
   ]
 }

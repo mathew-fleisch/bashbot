@@ -121,6 +121,29 @@ docker run \
   -it mathewfleisch/bashbot:v1.5.4
 ```
 
+#### Build bashbot docker container
+
+```bash
+# Build bashbot container locally
+docker build -t bashbot-local .
+
+# Run local bashbot container
+docker run \
+  -v ${BASHBOT_CONFIG_FILEPATH}:/bashbot/config.json \
+  -e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
+  -e SLACK_TOKEN=${SLACK_TOKEN} \
+  -e LOG_LEVEL="info" \
+  -e LOG_FORMAT="text" \
+  --name bashbot --rm \
+  -it bashbot-local:latest
+
+# Exec into bashbot container
+docker exec -it $(docker ps -aqf "name=bashbot") bash
+
+# Remove existing bashbot container
+docker rm $(docker ps -aqf "name=bashbot")
+```
+
 ### Run bashbot in kubernetes
 
 ***Requirements***
