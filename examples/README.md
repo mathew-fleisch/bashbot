@@ -120,7 +120,10 @@ The config.json file is defined as an array of json objects keyed by 'tools' and
   "dependencies": [
     {
       "name": "BashBot scripts Scripts",
-      "install": "rm -rf bashbot-scripts || true && git clone https://github.com/mathew-fleisch/bashbot-scripts.git"
+      "install": [
+        "rm -rf bashbot-scripts || true",
+        "git clone https://github.com/mathew-fleisch/bashbot-scripts.git"
+      ]
     }
   ]
 }
