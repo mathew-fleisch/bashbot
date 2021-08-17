@@ -79,8 +79,7 @@ type Tool struct {
 	Help        string      `json:"help"`
 	Trigger     string      `json:"trigger"`
 	Location    string      `json:"location"`
-	Setup       string      `json:"setup"`
-	Command     string      `json:"command"`
+	Command     []string    `json:"command"`
 	Permissions []string    `json:"permissions"`
 	Log         bool        `json:"log"`
 	Ephemeral   bool        `json:"ephemeral"`
@@ -92,7 +91,7 @@ type Parameter struct {
 	Name        string   `json:"name"`
 	Allowed     []string `json:"allowed"`
 	Description string   `json:"description,omitempty"`
-	Source      string   `json:"source,omitempty"`
+	Source      []string `json:"source,omitempty"`
 }
 
 type Dependencies struct {
@@ -100,8 +99,8 @@ type Dependencies struct {
 }
 
 type Dependency struct {
-	Name    string `json:"name"`
-	Install string `json:"install"`
+	Name    string   `json:"name"`
+	Install []string `json:"install"`
 }
 
 type Channel struct {
@@ -215,7 +214,7 @@ func installVendorDependencies() bool {
 	for i := 0; i < len(Dependencies.Dependencies); i++ {
 		log.Info(Dependencies.Dependencies[i].Name)
 
-		words := strings.Fields(Dependencies.Dependencies[i].Install)
+		words := strings.Fields(strings.Join(Dependencies.Dependencies[i].Install, " "))
 		var tcmd []string
 
 		for index, element := range words {
@@ -318,7 +317,7 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
 		log.Info(fmt.Printf("%s\n", err))
 		return true
 	}
-	thisTool.Command = reEmail.ReplaceAllLiteralString(thisTool.Command, thisUser.Profile.Email)
+	commandJoined := reEmail.ReplaceAllLiteralString(strings.Join(thisTool.Command, " "), thisUser.Profile.Email)
 
 	log.Debug("Tool Name:        " + thisTool.Name)
 	log.Debug("Tool Description: " + thisTool.Description)
@@ -326,8 +325,7 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
 	log.Debug("Tool Help:        " + thisTool.Help)
 	log.Debug("Tool Trigger:     " + thisTool.Trigger)
 	log.Debug("Tool Location:    " + thisTool.Location)
-	log.Debug("Tool Setup:       " + thisTool.Setup)
-	log.Debug("Tool Command:     " + thisTool.Command)
+	log.Debug("Tool Command:     " + commandJoined)
 	log.Debug("Tool Ephemeral:   " + strconv.FormatBool(thisTool.Ephemeral))
 	log.Debug("Tool Response:    " + thisTool.Response)
 	var allowedChannels []string = getChannelNames(thisTool.Permissions)
@@ -367,8 +365,8 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
 			derivedSource := thisTool.Parameters[j].Source
 			tmpHelp = fmt.Sprintf("%s\n%s: [%s%s]", tmpHelp, thisTool.Parameters[j].Name, strings.Join(thisTool.Parameters[j].Allowed, "|"), thisTool.Parameters[j].Description)
 			if len(derivedSource) > 0 {
-				log.Debug("No hard-coded allowed values. Deriving source: " + derivedSource)
-				allowedOut := shellOut([]string{"bash", "-c", "cd " + thisTool.Location + " && " + derivedSource})
+				log.Debug("No hard-coded allowed values. Deriving source: " + strings.Join(derivedSource, " "))
+				allowedOut := shellOut([]string{"bash", "-c", "cd " + thisTool.Location + " && " + strings.Join(derivedSource, " ")})
 				log.Debug("Derived: " + allowedOut)
 				thisTool.Parameters[j].Allowed = strings.Split(allowedOut, "\n")
 			}
@@ -402,7 +400,7 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
 		}
 	}
 
-	buildCmd := thisTool.Command
+	buildCmd := commandJoined
 	for x := 0; x < len(cmds); x++ {
 		if !validParams[x] {
 			reportToChannel(channel, "invalid_parameter", thisTool.Parameters[x].Name)
@@ -411,7 +409,7 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
 		re := regexp.MustCompile(`\${` + thisTool.Parameters[x].Name + `}`)
 		buildCmd = re.ReplaceAllString(buildCmd, cmds[x])
 	}
-	buildCmd = getUserChannelInfo(user, thisUser.Name, channel, timestamp) + " && cd " + thisTool.Location + " && " + thisTool.Setup + " && " + buildCmd
+	buildCmd = getUserChannelInfo(user, thisUser.Name, channel, timestamp) + " && cd " + thisTool.Location + " && " + buildCmd
 	splitOn := regexp.MustCompile(`\s\&\&`)
 	displayCmd := splitOn.ReplaceAllString(buildCmd, " \\\n        &&")
 	log.Info("Triggered Command:")
@@ -729,7 +727,7 @@ func main() {
 
 	log.Info(admin.AppName + " Started: " + time.Now().String())
 
-	var matchTrigger string = fmt.Sprintf("^%s .", admin.Trigger)
+	var matchTrigger string = fmt.Sprintf("(?i)^%s .", admin.Trigger)
 
 	// Regular expressions we'll use a whole lot.
 	// Should probably be in an intialization function to the side.

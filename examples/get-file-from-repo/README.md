@@ -10,11 +10,17 @@ This command is triggered by sending `bashbot get-cofnig` in a slack channel whe
 {
   "name": "Update running configuration",
   "description": "Pulls a fresh configuration json file from github (could be private repo with GIT_TOKEN environment variable set)",
-  "help": "get-config",
+  "help": "bashbot get-config",
   "trigger": "get-config",
   "location": "./examples/get-file-from-repo",
-  "setup": "github_org=mathew-fleisch && github_repo=bashbot && github_filename=sample-config.json && github_branch=main && output_filename=${BASHBOT_CONFIG_FILEPATH}",
-  "command": "./get-file-from-repo.sh",
+  "command": [
+    "github_org=mathew-fleisch",
+    "&& github_repo=bashbot",
+    "&& github_filename=sample-config.json",
+    "&& github_branch=main",
+    "&& output_filename=${BASHBOT_CONFIG_FILEPATH}"
+  ],
+  "": "./get-file-from-repo.sh",
   "parameters": [],
   "log": false,
   "ephemeral": false,

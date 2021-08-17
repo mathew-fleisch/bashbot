@@ -15,14 +15,13 @@ This command is triggered by sending `bashbot describe [command]` in a slack cha
   "help": "bashbot describe [command]",
   "trigger": "describe",
   "location": "./",
-  "setup": "echo \"\"",
-  "command": "jq '.tools[] | select(.trigger==\"${command}\")' ${BASHBOT_CONFIG_FILEPATH}",
+  "command": ["jq '.tools[] | select(.trigger==\"${command}\")' ${BASHBOT_CONFIG_FILEPATH}"],
   "parameters": [
     {
       "name": "command",
       "allowed": [],
       "description": "a command to describe ('bashbot list')",
-      "source": "jq -r '.tools[] | .trigger' ${BASHBOT_CONFIG_FILEPATH}"
+      "source": ["jq -r '.tools[] | .trigger' ${BASHBOT_CONFIG_FILEPATH}"]
     }
   ],
   "log": false,

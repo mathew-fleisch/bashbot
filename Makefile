@@ -34,7 +34,7 @@ build:
 
 .PHONY: run-bashbot
 run-bashbot:
-	@go run $(SRC_LOCATION) --config-file $(BASHBOT_CONFIG_FILEPATH) --slack-token $(SLACK_TOKEN)
+	@go run $(SRC_LOCATION)
 
 .PHONY: run-version
 run:
