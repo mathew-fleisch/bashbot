@@ -2,7 +2,7 @@
 # shellcheck disable=SC2086
 
 COMMAND_FILEPATH="$1"
-trigger=$(basename -s .json "$COMMAND_FILEPATH")
+trigger=$(basename "$COMMAND_FILEPATH" .json)
 BASHBOT_CONFIG_FILEPATH=${BASHBOT_CONFIG_FILEPATH:-config.json}
 tmpconfig=${tmpconfig:-tmp-config.json}
 if ! [[ -f "${COMMAND_FILEPATH}" ]]; then
