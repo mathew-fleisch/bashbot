@@ -31,6 +31,9 @@ export BASHBOT_CONFIG_FILEPATH=${PWD}/config.json
     - [Get Caller Information](info)
         - \+ `./add-command.sh info/info.json`
         - \- `./remove-command.sh info`
+    - [Get asdf Plugins](asdf)
+        - \+ `./add-command.sh asdf/asdf.json`
+        - \- `./remove-command.sh asdf`
 3. Run golang script
     - [Get Running Version](version)
         - \+ `./add-command.sh version/version.json`
