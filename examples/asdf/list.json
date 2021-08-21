@@ -1,0 +1,20 @@
+{
+  "name": "List asdf plugins",
+  "description": "List the pre-installed asdf plugins",
+  "help": "bashbot asdf",
+  "trigger": "asdf",
+  "location": "./",
+  "command": [
+    ". $ASDF_DATA_DIR/asdf.sh",
+    "&& echo \"asdf plugin | version\"",
+    "&& echo \"------------|--------\"",
+    "&& asdf plugin list | xargs -I {} bash -c 'printf \"%10s  | %s\" \"{}\" \"$(asdf list {} | awk '\"'\"'{print $1}'\"'\"')\" && echo'"
+  ],
+  "parameters": [],
+  "log": true,
+  "ephemeral": false,
+  "response": "code",
+  "permissions": [
+    "all"
+  ]
+}
