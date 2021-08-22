@@ -82,8 +82,8 @@
       ]
     },
     {
-      "name": "List Available Bashbot Commands",
-      "description": "List all of the possible commands stored in bashbot",
+      "name": "List Installed Bashbot Commands",
+      "description": "List all configured bashbot commands",
       "help": "bashbot list",
       "trigger": "list",
       "location": "./",
@@ -129,6 +129,75 @@
         "&& echo \" Channel[id]: ${TRIGGERED_CHANNEL_NAME}[${TRIGGERED_CHANNEL_ID}]\""
       ],
       "parameters": [],
+      "log": false,
+      "ephemeral": false,
+      "response": "code",
+      "permissions": [
+        "all"
+      ]
+    },
+    {
+      "name": "List Example Commands",
+      "description": "List commands from bashbot example commands",
+      "help": "bashbot list-examples",
+      "trigger": "list-examples",
+      "location": "./examples",
+      "command": [
+        "find . -name \"*.json\"",
+        "| xargs -I {} bash -c",
+          "'export example=$(basename {} .json)",
+          "&& printf \"%21s - %s\" \"$example\" \"https://github.com/mathew-fleisch/bashbot/tree/main/examples/$example\"",
+          "&& echo'",
+        "| sort -k 2"
+      ],
+      "parameters": [],
+      "log": false,
+      "ephemeral": false,
+      "response": "code",
+      "permissions": [
+        "all"
+      ]
+    },
+    {
+      "name": "Add Example Command",
+      "description": "Add command from bashbot example commands",
+      "help": "bashbot add-example",
+      "trigger": "add-example",
+      "location": "./examples",
+      "command": [
+        "./add-example/add-command.sh $(find . -name \"${add_command}.json\")"
+      ],
+      "parameters": [
+        {
+          "name": "add_command",
+          "allowed": [],
+          "description": "a command to add to bashbot config ('bashbot list-examples')",
+          "source": ["find . -name \"*.json\" | xargs -I {} basename {} .json"]
+        }
+      ],
+      "log": false,
+      "ephemeral": false,
+      "response": "code",
+      "permissions": [
+        "all"
+      ]
+    },
+    {
+      "name": "Remove Example Command",
+      "description": "Remove command from bashbot example commands",
+      "help": "bashbot remove-example",
+      "trigger": "remove-example",
+      "location": "./examples",
+      "command": ["./remove-example/remove-command.sh ${remove_command}"
+      ],
+      "parameters": [
+        {
+          "name": "remove_command",
+          "allowed": [],
+          "description": "a command to remove to bashbot config ('bashbot list-examples')",
+          "source": ["find . -name \"*.json\" | xargs -I {} basename {} .json"]
+        }
+      ],
       "log": false,
       "ephemeral": false,
       "response": "code",

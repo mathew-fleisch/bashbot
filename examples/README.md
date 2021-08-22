@@ -59,10 +59,10 @@ export BASHBOT_CONFIG_FILEPATH=${PWD}/config.json
         - \+ `./add-example/add-command.sh latest-release/latest-release.json`
         - \- `./remove-example/remove-command.sh latest-release`
     - [Get File From Repository](get-file-from-repo)
-        - \+ `./add-example/add-command.sh get-file-from-repo/get-config.json`
-        - \- `./remove-example/remove-command.sh get-config`
-    - [Trigger Github Action](github-action)
-        - \+ `./add-example/add-command.sh github-action/trigger-github-action.json`
+        - \+ `./add-example/add-command.sh get-file-from-repo/get-file-from-repo.json`
+        - \- `./remove-example/remove-command.sh get-file-from-repo`
+    - [Trigger Github Action](trigger-github-action)
+        - \+ `./add-example/add-command.sh trigger-github-action/trigger-github-action.json`
         - \- `./remove-example/remove-command.sh trigger-github-action`
 
 
