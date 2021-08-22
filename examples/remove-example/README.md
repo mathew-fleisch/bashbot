@@ -6,7 +6,7 @@ In this example, a json example can be removed from a running configuration.
 
 ## Bashbot Configuration
 
-This command is triggered by sending `bashbot asdf` in a slack channel where Bashbot is also a member. There is no external script for this command, takes no arugments/parameters, and expects Bashbot's examples directory to exist. The valid arguments for this command come from the output of `bashbot list-examples`
+This command is triggered by sending `bashbot remove-example [command]` in a slack channel where Bashbot is also a member. There is no external script for this command and expects Bashbot's examples directory to exist. The valid arguments for this command come from the output of `bashbot list-examples` [list-examples read-me](../list-examples)
 
 ```json
 {

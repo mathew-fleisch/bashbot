@@ -1,12 +1,12 @@
-# Bashbot Example - Add Example Command
+# Bashbot Example - List Example Commands
 
-In this example, a json example can be added to a running configuration json. 
+In this example, all of the json filenames are aggregated and sorted as a list. The values listed can be passed to the commands [add-example](../add-example) and [remove-example](../remove-example)
 
 ***Note: This will not work when the configuration json is mounted as a configmap. Use the seed method if bashbot is deployed in kubernetes to use this example***
 
 ## Bashbot Configuration
 
-This command is triggered by sending `bashbot asdf` in a slack channel where Bashbot is also a member. There is no external script for this command, takes no arugments/parameters, and expects Bashbot's examples directory to exist. This command takes no arguments.
+This command is triggered by sending `bashbot list-examples` in a slack channel where Bashbot is also a member. There is no external script for this command, takes no arugments/parameters, and expects Bashbot's examples directory to exist. This command takes no arguments.
 
 ```json
 {
