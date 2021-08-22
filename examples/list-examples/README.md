@@ -16,7 +16,8 @@ This command is triggered by sending `bashbot asdf` in a slack channel where Bas
   "trigger": "list-examples",
   "location": "./examples",
   "command": [
-    "find . -name \"*.json\" | xargs -I {} basename {} .json"
+    "find . -name \"*.json\" | xargs -I {} basename {} .json",
+    "| sort"
   ],
   "parameters": [],
   "log": false,

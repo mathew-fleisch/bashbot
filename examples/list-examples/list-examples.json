@@ -1,0 +1,18 @@
+{
+  "name": "List Example Commands",
+  "description": "List commands from bashbot example commands",
+  "help": "bashbot list-examples",
+  "trigger": "list-examples",
+  "location": "./examples",
+  "command": [
+    "find . -name \"*.json\" | xargs -I {} basename {} .json",
+    "| sort"
+  ],
+  "parameters": [],
+  "log": false,
+  "ephemeral": false,
+  "response": "code",
+  "permissions": [
+    "all"
+  ]
+}
