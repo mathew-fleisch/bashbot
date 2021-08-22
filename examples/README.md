@@ -34,6 +34,15 @@ export BASHBOT_CONFIG_FILEPATH=${PWD}/config.json
     - [Get asdf Plugins](asdf)
         - \+ `./add-example/add-command.sh asdf/asdf.json`
         - \- `./remove-example/remove-command.sh asdf`
+    - [Get add-example Plugins](add-example)
+        - \+ `./add-example/add-command.sh add-example/add-example.json`
+        - \- `./remove-example/remove-command.sh add-example`
+    - [Get remove-example Plugins](remove-example)
+        - \+ `./add-example/add-command.sh remove-example/remove-example.json`
+        - \- `./remove-example/remove-command.sh remove-example`
+    - [Get list-examples Plugins](list-examples)
+        - \+ `./add-example/add-command.sh list-examples/list-examples.json`
+        - \- `./remove-example/remove-command.sh list-examples`
 3. Run golang script
     - [Get Running Version](version)
         - \+ `./add-example/add-command.sh version/version.json`
