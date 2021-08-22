@@ -16,8 +16,12 @@ This command is triggered by sending `bashbot list-examples` in a slack channel 
   "trigger": "list-examples",
   "location": "./examples",
   "command": [
-    "find . -name \"*.json\" | xargs -I {} basename {} .json",
-    "| sort"
+    "find . -name \"*.json\"",
+    "| xargs -I {} bash -c",
+      "'export example=$(basename {} .json)",
+      "&& printf \"%21s - %s\" \"$example\" \"https://github.com/mathew-fleisch/bashbot/tree/main/examples/$example\"",
+      "&& echo'",
+    "| sort -k 2"
   ],
   "parameters": [],
   "log": false,
