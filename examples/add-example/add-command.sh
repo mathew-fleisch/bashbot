@@ -18,7 +18,7 @@ fi
 
 if [[ -n "$(jq '.tools[] | select(.trigger=="'${trigger}'")' ${BASHBOT_CONFIG_FILEPATH})" ]]; then
   echo "Trigger already exists: ${trigger}"
-  exit 1
+  exit 0
 fi
 add="$(jq -c '.' ${COMMAND_FILEPATH})"
 jq '.tools += ['"${add}"']' ${BASHBOT_CONFIG_FILEPATH} > ${tmpconfig}

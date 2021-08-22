@@ -13,7 +13,7 @@ tmpconfig=${tmpconfig:-tmp-config.json}
 
 if [[ -z "$(jq '.tools[] | select(.trigger=="'${trigger}'")' ${BASHBOT_CONFIG_FILEPATH})" ]]; then
   echo "Trigger not found to remove: ${trigger}"
-  exit 1
+  exit 0
 fi
 
 
