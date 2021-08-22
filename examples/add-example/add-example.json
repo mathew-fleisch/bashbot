@@ -1,0 +1,22 @@
+{
+  "name": "Add Example Command",
+  "description": "Add command from Bashbot example commands",
+  "help": "bashbot add-example",
+  "trigger": "add-example",
+  "location": "./examples",
+  "command": ["./add-example/add-command.sh $(find . -name \"${add_command}.json\")"],
+  "parameters": [
+    {
+      "name": "add_command",
+      "allowed": [],
+      "description": "a command to add to bashbot config ('bashbot list-examples')",
+      "source": ["find . -name \"*.json\" | xargs -I {} basename {} .json"]
+    }
+  ],
+  "log": false,
+  "ephemeral": false,
+  "response": "code",
+  "permissions": [
+    "all"
+  ]
+}
