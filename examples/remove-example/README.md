@@ -12,7 +12,7 @@ This command is triggered by sending `bashbot remove-example [command]` in a sla
 {
   "name": "Remove Example Command",
   "description": "Remove command from bashbot example commands",
-  "help": "bashbot remove-example",
+  "help": "bashbot remove-example [command]",
   "trigger": "remove-example",
   "location": "./examples",
   "command": ["./remove-command.sh ${remove_command}"

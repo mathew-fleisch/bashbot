@@ -1,7 +1,7 @@
 {
   "name": "Remove Example Command",
   "description": "Remove command from bashbot example commands",
-  "help": "bashbot remove-example",
+  "help": "bashbot remove-example [command]",
   "trigger": "remove-example",
   "location": "./examples",
   "command": ["./remove-command.sh ${remove_command}"

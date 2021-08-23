@@ -12,7 +12,7 @@ This command is triggered by sending `bashbot add-example [command]` in a slack 
 {
   "name": "Add Example Command",
   "description": "Add command from Bashbot example commands",
-  "help": "bashbot add-example",
+  "help": "bashbot add-example [command]",
   "trigger": "add-example",
   "location": "./examples",
   "command": ["./add-example/add-command.sh $(find . -name \"${add_command}.json\")"],
