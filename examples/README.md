@@ -48,6 +48,9 @@ export BASHBOT_CONFIG_FILEPATH=${PWD}/config.json
         - \+ `./add-example/add-command.sh version/version.json`
         - \- `./remove-example/remove-command.sh version`
 4. Parse json via jq
+    - [Show Help Dialog](help)
+        - \+ `./add-example/add-command.sh help/help.json`
+        - \- `./remove-example/remove-command.sh help`
     - [List Available Commands](list)
         - \+ `./add-example/add-command.sh list/list.json`
         - \- `./remove-example/remove-command.sh list`

@@ -6,7 +6,7 @@ In this example, the configuration json file for Bashbot is parsed via [jq](http
 
 ## Bashbot Configuration
 
-This command is triggered by sending `bashbot list` in a slack channel where Bashbot is also a member. There is no external script for this command, takes no arugments/parameters, and expects jq to already be installed on the host machine.
+This command is triggered by sending `bashbot list` in a slack channel where Bashbot is also a member. There is no external script for this command, takes no arugments/parameters, and expects jq to already be installed, and the environment variable `BASHBOT_CONFIG_FILEPATH` to be pointing at the running configuration, on the host machine.
 
 ```json
 {

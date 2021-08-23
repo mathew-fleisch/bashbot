@@ -1,0 +1,15 @@
+{
+  "name": "BashBot Help",
+  "description": "Show this message",
+  "help": "bashbot help",
+  "trigger": "help",
+  "location": "./",
+  "command": ["jq -r '.tools[] | \"\\(.help) - \\(.description)\"' ${BASHBOT_CONFIG_FILEPATH}"],
+  "parameters": [],
+  "log": false,
+  "ephemeral": false,
+  "response": "code",
+  "permissions": [
+    "all"
+  ]
+}
