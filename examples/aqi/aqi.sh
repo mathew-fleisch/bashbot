@@ -2,7 +2,7 @@
 
 if [ -z "$AIRQUALITY_API_KEY" ]; then
   echo "Missing Air Now API Key..."
-  echo "[Air Now API](https://docs.airnowapi.org/)"
+  echo "<https://docs.airnowapi.org/|Air Now API>"
   exit 0
 fi
 
@@ -15,7 +15,7 @@ fi
 response=$(curl -s "http://www.airnowapi.org/aq/observation/zipCode/current/?zipCode=${zip}&distance=5&format=application/json&API_KEY=${AIRQUALITY_API_KEY}")
 
 if [[ "$response" == "[]" ]]; then
-  echo "There is no [aqi value](https://docs.airnowapi.org/) for this zip: $zip"
+  echo "There is no <https://docs.airnowapi.org/|aqi value> for this zip: $zip"
   exit 0
 fi
 
