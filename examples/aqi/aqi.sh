@@ -13,7 +13,12 @@ if [ -z "$zip" ]; then
 fi
 
 response=$(curl -s "http://www.airnowapi.org/aq/observation/zipCode/current/?zipCode=${zip}&distance=5&format=application/json&API_KEY=${AIRQUALITY_API_KEY}")
-echo "'$response'"
+
+if [[ "$response" == "[]" ]]; then
+  echo "There is no [aqi value](https://docs.airnowapi.org/) for this zip: $zip"
+  exit 0
+fi
+
 aqi=$(echo "$response" | jq '.[0]')
 reporting_area=$(echo "$aqi" | jq -r '.ReportingArea')
 aqi_value=$(echo "$aqi" | jq -r '.aqi_value')
@@ -27,8 +32,5 @@ case $category in
   "Very Unhealthy") emoji=":large_purple_circle:";;
   "Hazardous") emoji=":black_circle:";;
 esac
-if [[ "$aqi_value" != "null" ]]; then
-  echo "Could not find an aqi_value for this zip code";
-else
-  echo "$emoji The <https://docs.airnowapi.org/aq101|Air Quality Index> in $reporting_area is $aqi_value ($category) as of $time_stamp";
-fi
+
+echo "$emoji The <https://docs.airnowapi.org/aq101|Air Quality Index> in $reporting_area is $aqi_value ($category) as of $time_stamp";
