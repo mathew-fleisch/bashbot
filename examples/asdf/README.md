@@ -2,7 +2,7 @@
 
 In this example, a few asdf commands are combined to display the installed versions for each of the pre-installed ([in container](.tool-versions)) asdf plugins.
 
-<img src="https://i.imgur.com/Q4aWuH5.png" />
+<img src="https://i.imgur.com/v1aqdj6.png" />
 
 ## Bashbot Configuration
 
@@ -11,7 +11,7 @@ This command is triggered by sending `bashbot asdf` in a slack channel where Bas
 ```json
 {
   "name": "List asdf plugins",
-  "description": "List the pre-installed asdf plugins",
+  "description": "List the installed asdf plugins and their versions",
   "help": "bashbot asdf",
   "trigger": "asdf",
   "location": "./",
@@ -19,12 +19,12 @@ This command is triggered by sending `bashbot asdf` in a slack channel where Bas
     ". $ASDF_DATA_DIR/asdf.sh",
     "&& echo \"•──────────────────────────────•\"",
     "&& echo \"│ <https://asdf-vm.com/|asdf version: $(asdf version)> |\"",
-    "&& echo \"├────────────────┰─────────────┤\"",
-    "&& echo \"│    asdf plugin │ version     │\"",
-    "&& echo \"├────────────────┼─────────────┤\"",
+    "&& echo \"├───────────────────┰──────────┤\"",
+    "&& echo \"│       asdf plugin │ version  │\"",
+    "&& echo \"├───────────────────┼──────────┤\"",
     "&& asdf plugin list",
       "| xargs -I {} bash -c",
-        "'printf \"│ %14s │ %-11s │\"",
+        "'printf \"│ %17s │ %-8s │\"",
         "\"{}\"",
         "\"$(asdf list {} | awk '\"'\"'{print $1}'\"'\"')\"",
         "&& echo'",
