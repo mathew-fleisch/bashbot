@@ -77,3 +77,40 @@ esac
 echo "$emoji The <https://docs.airnowapi.org/aq101|Air Quality Index> in $reporting_area is $aqi_value ($category) as of $time_stamp";
 
 ```
+
+The raw json response from the [Air Now API](https://docs.airnowapi.org/) before [aqi.sh](aqi.sh) parses the values that are displayed in slack:
+
+```json
+[
+  {
+    "DateObserved": "2021-08-25 ",
+    "HourObserved": 3,
+    "LocalTimeZone": "PST",
+    "ReportingArea": "San Francisco",
+    "StateCode": "CA",
+    "Latitude": 37.75,
+    "Longitude": -122.43,
+    "ParameterName": "O3",
+    "AQI": 32,
+    "Category": {
+      "Number": 1,
+      "Name": "Good"
+    }
+  },
+  {
+    "DateObserved": "2021-08-25 ",
+    "HourObserved": 3,
+    "LocalTimeZone": "PST",
+    "ReportingArea": "San Francisco",
+    "StateCode": "CA",
+    "Latitude": 37.75,
+    "Longitude": -122.43,
+    "ParameterName": "PM2.5",
+    "AQI": 30,
+    "Category": {
+      "Number": 1,
+      "Name": "Good"
+    }
+  }
+]
+```
