@@ -21,7 +21,7 @@ fi
 
 aqi=$(echo "$response" | jq '.[0]')
 reporting_area=$(echo "$aqi" | jq -r '.ReportingArea')
-aqi_value=$(echo "$aqi" | jq -r '.aqi_value')
+aqi_value=$(echo "$aqi" | jq -r '.AQI')
 time_stamp="$(echo "$aqi" | jq -r '.DateObserved')$(echo "$aqi" | jq -r '.HourObserved'):00"
 category=$(echo "$aqi" | jq -r '.Category.Name')
 case $category in
