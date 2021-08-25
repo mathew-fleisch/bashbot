@@ -213,13 +213,6 @@
         "rm -rf bashbot-scripts || true",
         "&& git clone https://github.com/mathew-fleisch/bashbot-scripts.git"
       ]
-    },
-    {
-      "name": "Cards Against Humanity",
-      "install": [
-        "rm -rf against-humanity || true",
-        "&& git clone https://github.com/nodanaonlyzuul/against-humanity.git"
-      ]
     }
   ]
 }
