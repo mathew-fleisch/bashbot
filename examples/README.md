@@ -67,6 +67,9 @@ export BASHBOT_CONFIG_FILEPATH=${PWD}/config.json
     - [Trigger Github Action](trigger-github-action)
         - \+ `./add-example/add-command.sh trigger-github-action/trigger-github-action.json`
         - \- `./remove-example/remove-command.sh trigger-github-action`
+    - [Get Air Quality Index By Zip](aqi)
+        - \+ `./add-example/add-command.sh aqi/aqi.json`
+        - \- `./remove-example/remove-command.sh aqi`
 
 
 
