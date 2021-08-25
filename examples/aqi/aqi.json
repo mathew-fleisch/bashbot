@@ -1,0 +1,25 @@
+{
+  "name": "Air Quality Index",
+  "description": "Get air quality index by zip code",
+  "help": "bashbot aqi [zip-code]",
+  "trigger": "aqi",
+  "location": "./vendor/bashbot/examples",
+  "command": [
+    "source .env",
+    "./aqi.sh ${zip}"
+  ],
+  "parameters": [
+    {
+      "name": "zip",
+      "allowed": [],
+      "description": "any integer between 10000 through 99999",
+      "source": ["for i in {10000..99999}; do echo $i; done"]
+    }
+  ],
+  "log": true,
+  "ephemeral": false,
+  "response": "text",
+  "permissions": [
+    "all"
+  ]
+}
