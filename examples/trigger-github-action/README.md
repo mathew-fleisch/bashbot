@@ -6,7 +6,7 @@ In this example, a curl is executed via bash script and triggers a github action
 
 ## Bashbot configuration
 
-This command is triggered by sending `bashbot trigger-github-action` in a slack channel where Bashbot is also a member. The script is expected to exist before execution at the relative path `./examples/github-action/trigger-github-action` and requires the following environment variables to be set: `BASHBOT_CONFIG_FILEPATH SLACK_TOKEN SLACK_CHANNEL SLACK_USERID REPO_OWNER REPO_NAME GITHUB_TOKEN GITHUB_RUN_ID`
+This command is triggered by sending `bashbot trigger-github-action` in a slack channel where Bashbot is also a member. The script is expected to exist before execution at the relative path `./examples/trigger-github-action/trigger-github-action` and requires the following environment variables to be set: `BASHBOT_CONFIG_FILEPATH SLACK_TOKEN SLACK_CHANNEL SLACK_USERID REPO_OWNER REPO_NAME GITHUB_TOKEN GITHUB_RUN_ID`
 ```json
 {
   "name": "Trigger a Github Action",

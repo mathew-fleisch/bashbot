@@ -4,7 +4,7 @@ In this example, a bash script is executed to download a file from a repository 
 
 ## Bashbot configuration
 
-This command is triggered by sending `bashbot get-cofnig` in a slack channel where Bashbot is also a member. The script is expected to exist before execution at the relative path `./examples/get-file-from-repo/get-file-from-repo.sh` and requires the following environment variables to be set: `github_token github_org github_repo github_branch github_filename output_filename`
+This command is triggered by sending `bashbot get-file-from-repo` in a slack channel where Bashbot is also a member. The script is expected to exist before execution at the relative path `./examples/get-file-from-repo/get-file-from-repo.sh` and requires the following environment variables to be set: `github_token github_org github_repo github_branch github_filename output_filename`
 
 ```json
 {

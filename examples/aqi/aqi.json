@@ -3,10 +3,10 @@
   "description": "Get air quality index by zip code",
   "help": "bashbot aqi [zip-code]",
   "trigger": "aqi",
-  "location": "./vendor/bashbot/examples",
+  "location": "./examples/aqi",
   "command": [
-    "source .env",
-    "./aqi.sh ${zip}"
+    "source /bashbot/.env",
+    "&& ./aqi.sh ${zip}"
   ],
   "parameters": [
     {
