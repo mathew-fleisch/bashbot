@@ -6,9 +6,18 @@
   "location": "./",
   "command": [
     ". $ASDF_DATA_DIR/asdf.sh",
-    "&& echo \"asdf plugin | version\"",
-    "&& echo \"------------|--------\"",
-    "&& asdf plugin list | xargs -I {} bash -c 'printf \"%10s  | %s\" \"{}\" \"$(asdf list {} | awk '\"'\"'{print $1}'\"'\"')\" && echo'"
+    "&& echo \"•──────────────────────────────•\"",
+    "&& echo \"│ <https://asdf-vm.com/|asdf version: $(asdf version)> |\"",
+    "&& echo \"├─────────────┰────────────────┤\"",
+    "&& echo \"│ asdf plugin │ version        │\"",
+    "&& echo \"├─────────────┼────────────────┤\"",
+    "&& asdf plugin list",
+      "| xargs -I {} bash -c",
+        "'printf \"│ %11s │ %-14s │\"",
+        "\"{}\"",
+        "\"$(asdf list {} | awk '\"'\"'{print $1}'\"'\"')\"",
+        "&& echo'",
+    "&& echo \"•──────────────────────────────•\""
   ],
   "parameters": [],
   "log": true,

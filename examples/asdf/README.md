@@ -2,7 +2,7 @@
 
 In this example, a few asdf commands are combined to display the installed versions for each of the pre-installed ([in container](.tool-versions)) asdf plugins.
 
-<img src="https://i.imgur.com/iq4wSsl.png" />
+<img src="https://i.imgur.com/Q4aWuH5.png" />
 
 ## Bashbot Configuration
 
@@ -17,9 +17,18 @@ This command is triggered by sending `bashbot asdf` in a slack channel where Bas
   "location": "./",
   "command": [
     ". $ASDF_DATA_DIR/asdf.sh",
-    "&& echo \"asdf plugin | version\"",
-    "&& echo \"------------|--------\"",
-    "&& asdf plugin list | xargs -I {} bash -c 'printf \"%10s  | %s\" \"{}\" \"$(asdf list {} | awk '\"'\"'{print $1}'\"'\"')\" && echo'"
+    "&& echo \"•──────────────────────────────•\"",
+    "&& echo \"│ <https://asdf-vm.com/|asdf version: $(asdf version)> |\"",
+    "&& echo \"├─────────────┰────────────────┤\"",
+    "&& echo \"│ asdf plugin │ version        │\"",
+    "&& echo \"├─────────────┼────────────────┤\"",
+    "&& asdf plugin list",
+      "| xargs -I {} bash -c",
+        "'printf \"│ %11s │ %-14s │\"",
+        "\"{}\"",
+        "\"$(asdf list {} | awk '\"'\"'{print $1}'\"'\"')\"",
+        "&& echo'",
+    "&& echo \"•──────────────────────────────•\""
   ],
   "parameters": [],
   "log": true,
