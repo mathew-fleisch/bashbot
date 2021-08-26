@@ -1,6 +1,6 @@
 # Bashbot Example - List asdf Plugins
 
-In this example, a few asdf commands are combined to display the installed versions for each of the pre-installed ([in container](.tool-versions)) asdf plugins.
+In this example, a few asdf commands are combined to display the installed versions for each of the pre-installed ([in container](../../.tool-versions)) asdf plugins.
 
 <img src="https://i.imgur.com/v1aqdj6.png" />
 

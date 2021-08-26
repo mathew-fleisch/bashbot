@@ -110,7 +110,7 @@ export SLACK_TOKEN=xoxb-xxxxxxxxx-xxxxxxx
 export BASHBOT_CONFIG_FILEPATH=${PWD}/config.json
 
 # Set environment variables and run bashbot
-docker run \
+docker run --rm \
   -v ${PWD}/config.json:/bashbot/config.json \
   -v ${PWD}/.env:/bashbot/.env \
   -e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
@@ -119,6 +119,12 @@ docker run \
   -e LOG_LEVEL="info" \
   -e LOG_FORMAT="text" \
   -it mathewfleisch/bashbot:v1.6.2
+
+# Exec into bashbot container
+docker exec -it $(docker ps -aqf "name=bashbot") bash
+
+# Remove existing bashbot container
+docker rm $(docker ps -aqf "name=bashbot")
 ```
 
 #### Build bashbot docker container
@@ -128,7 +134,7 @@ docker run \
 docker build -t bashbot-local .
 
 # Run local bashbot container
-docker run \
+docker run --rm \
   -v ${BASHBOT_CONFIG_FILEPATH}:/bashbot/config.json \
   -e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
   -e SLACK_TOKEN=${SLACK_TOKEN} \
@@ -136,22 +142,88 @@ docker run \
   -e LOG_FORMAT="text" \
   --name bashbot --rm \
   -it bashbot-local:latest
-
-# Exec into bashbot container
-docker exec -it $(docker ps -aqf "name=bashbot") bash
-
-# Remove existing bashbot container
-docker rm $(docker ps -aqf "name=bashbot")
 ```
+
+--------------------------------------------------
 
 ### Run bashbot in kubernetes
 
 ***Requirements***
 
 - kubernetes
+- configmaps
+  - id_rsa, id_rsa.pub (deploy key to bashbot config json)
+  - config json
+  - .env file (with `SLACK_TOKEN` and `BASHBOT_CONFIG_FILEPATH` set)
+
+In this deployment method, a "seed" configuration is set as the default configuration json for bashbot. The seed configuration will use a pem file, to clone a private repository, with the actual configuration. The seed configuration is executed when a bashbot pod first spins up, and replaces itself with the latest from a configuration repository (that you set up and can/should be private). This method ensures bashbot is using the latest configuration everytime a new pod spins up (deleting a pod will update the running configuration), and is not baked into the container running the bashbot go-binary. A `.env` file is also injected as a configmap containing the `SLACK_TOKEN` and `BASHBOT_CONFIG_FILEPATH` and any other passwords or tokens exported as environment variables. After the seed configuration json is replaced with a configuration json from the private repository `bashbot-configuration` the bashbot binary is used to install any tools or packages defined in the `dependencies` section of the json using the `--install-vendor-dependencies` flag. It is also possible to mount the main configuration json as a configmap as well, but the seed method allows the configuration json to be modified in place. If the configuration json is mounted directly (via configmap), commands like [add-example](examples/add-example) and [remove-example](examples/remove-example) would not be able to modify the configmap holding the configuration json and would error. Note: If the configuration json is mounted directly, remove `cp seed.json config.json &&` from the args value in the deployment yaml.
+
+Start by pushing the [sample-config.json](sample-config.json) file to a private repository and set up a [deploy key](https://docs.github.com/en/developers/overview/managing-deploy-keys) `ssh-keygen -t rsa -b 4096` (Don't overwrite your personal sshkey). Next, create configmaps for four files:
+  - id_rsa
+  - id_rsa.pub
+  - seed/config.json
+  - .env
+
+```bash
+bot_name=bashbot
+kubectl create configmap ${bot_name}-env        --from-file=.env
+kubectl create configmap ${bot_name}-config     --from-file=seed/config.json
+kubectl create configmap ${bot_name}-id-rsa     --from-file=id_rsa
+kubectl create configmap ${bot_name}-id-rsa-pub --from-file=id_rsa.pub
+```
+
+Example .env
+
+```bash
+export SLACK_TOKEN=xoxb-xxxxxxxxx-xxxxxxx
+export BASHBOT_CONFIG_FILEPATH=/bashbot/config.json
+export AIRQUALITY_API_KEY=1234567890
+```
+
+Example seed/config.json (Note: filename must be config.json to match deployment yaml)
+
+```json
+{
+  "admins": [
+    {
+      "trigger": "bashbot",
+      "appName": "BashBotSeed",
+      "userIds": [],
+      "privateChannelId": "",
+      "logChannelId": ""
+    }],
+  "messages": [],
+  "tools": [],
+  "dependencies": [
+    {
+      "name": "Private configuration repository",
+      "install": [
+        "if [[ -f /root/.ssh/keys/id_rsa ]]; then",
+          "cp /root/.ssh/keys/id_rsa /root/.ssh/id_rsa",
+          "&& cp /root/.ssh/keys/id_rsa.pub /root/.ssh/id_rsa.pub",
+          "&& chmod 600 /root/.ssh/id_rsa",
+          "&& ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts",
+          "&& git config user.name bashbot-github-user",
+          "&& git config user.email bashbot-github-user@company.com",
+          "&& rm -rf bashbot-configuration || true",
+          "&& git clone git@github.com:org/bashbot-configuration.git",
+          "&& source /bashbot/.env",
+          "&& cp bashbot-configuration/bashbot/config.json $BASHBOT_CONFIG_FILEPATH",
+          "&& cd /bashbot",
+          "&& bashbot --install-vendor-dependencies",
+          "&& echo \"Bashbot's configuration is up to date\";",
+        "else",
+          "echo \"id_rsa missing, skipping private repo: bashbot-configuration\";",
+        "fi"
+      ]
+    }
+  ]
+}
+```
+
+Example deloyment yaml
 
 ```yaml
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -162,7 +234,7 @@ metadata:
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 0
   selector:
     matchLabels:
       app: bashbot
@@ -175,37 +247,52 @@ spec:
         app: bashbot
     spec:
       containers:
-      containers:
-      -
-        env:
-          -
-            name: BASHBOT_ENV_VARS_FILEPATH
-            value: /bashbot/.env
-        image: mathewfleisch/bashbot:v1.6.2
-        imagePullPolicy: IfNotPresent
-        name: bashbot
-        resources: {}
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
-        workingDir: /bashbot
-        volumeMounts:
-        - name: config-json
-          mountPath: /bashbot/config.json
-        - name: env-vars
-          mountPath: /bashbot/.env
+        - env:
+            - name: BASHBOT_ENV_VARS_FILEPATH
+              value: /bashbot/.env
+          image: mathewfleisch/bashbot:v1.6.2
+          imagePullPolicy: IfNotPresent
+          name: bashbot
+          # To override entrypoint and poke around:
+          # command: ["/bin/sh"]
+          # args: ["-c", "while true; do echo hello; sleep 10;done"]
+          command: ["/bin/sh"]
+          args: ["-c", "cp seed.json config.json && ./entrypoint.sh"]
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          workingDir: /bashbot
+          volumeMounts:
+            - name: config-json
+              mountPath: /bashbot/seed.json
+              subPath: config.json
+            - name: id-rsa
+              mountPath: /root/.ssh/keys/id_rsa
+              subPath: id_rsa
+            - name: id-rsa-pub
+              mountPath: /root/.ssh/keys/id_rsa.pub
+              subPath: id_rsa.pub
+            - name: env-vars
+              mountPath: /bashbot/.env
+              subPath: .env
       volumes:
+        - name: id-rsa
+          configMap:
+            name: bashbot-id-rsa
+        - name: id-rsa-pub
+          configMap:
+            name: bashbot-id-rsa-pub
         - name: config-json
-          hostPath:
-            path: /tmp/bashbot-configs/bashbot/config.json
+          configMap:
+            name: bashbot-config
         - name: env-vars
-          hostPath:
-            path: /tmp/bashbot-configs/bashbot/.env
+          configMap:
+            name: bashbot-env
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 0
-
 ```
 
 
