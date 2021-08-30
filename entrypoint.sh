@@ -6,14 +6,14 @@ if ! command -v bashbot > /dev/null; then
   exit 1
 fi
 
-if ! [ -f "$BASHBOT_CONFIG_FILEPATH" ]; then
-  echo "bashbot config file not found. Please create one and try again."
-  exit 1
-fi
-
 # If .env file is present, load it.
 if [ -f "$BASHBOT_ENV_VARS_FILEPATH" ]; then
   . "$BASHBOT_ENV_VARS_FILEPATH"
+fi
+
+if ! [ -f "$BASHBOT_CONFIG_FILEPATH" ]; then
+  echo "bashbot config file not found. Please create one and try again."
+  exit 1
 fi
 
 if [ -z "$SLACK_TOKEN" ]; then
@@ -28,7 +28,9 @@ LOG_LEVEL=${LOG_LEVEL:-info}
 LOG_FORMAT=${LOG_FORMAT:-text}
 
 # Run install-vendor-dependencies path
-bashbot --install-vendor-dependencies
+bashbot --install-vendor-dependencies \
+  --log-level "$LOG_LEVEL" \
+  --log-format "$LOG_FORMAT"
 
 # Run Bashbot binary passing the config file and the Slack token
 bashbot \
