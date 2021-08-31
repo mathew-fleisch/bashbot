@@ -8,6 +8,7 @@ kustomize 4.2.0
 rclone 1.56.0
 shellcheck 0.7.2
 shfmt 3.3.0
+sops 3.7.1
 terraform 1.0.3
 tflint 0.30.0
 yq v4.9.3
