@@ -5,8 +5,7 @@
   "trigger": "asdf",
   "location": "./",
   "command": [
-    ". $ASDF_DATA_DIR/asdf.sh",
-    "&& echo \"•──────────────────────────────•\"",
+    "echo \"•──────────────────────────────•\"",
     "&& echo \"│ <https://asdf-vm.com/|asdf version: $(asdf version)> |\"",
     "&& echo \"├───────────────────┰──────────┤\"",
     "&& echo \"│       asdf plugin │ version  │\"",
