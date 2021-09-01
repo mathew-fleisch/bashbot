@@ -20,23 +20,22 @@ Bashbot can be run as a go binary or as a container and requires a slack-token a
 
 ***Note about slack-token***
 
-Slack's permissions model for the "[Real-Time-Messaging (RTM)](https://api.slack.com/rtm)" socket connection, requires a "classic app" to be configured to get the correct type of token to run Bashbot. After logging into slack via browser, visit [https://api.slack.com/apps?new_classic_app=1](https://api.slack.com/apps?new_classic_app=1) to set up a new "legacy bot user" and "Bot User OAuth Access Token." Finally, add bashbot to your workspace and invite to a channel.
+Slack's permissions model for the "[Real-Time-Messaging (RTM)](https://api.slack.com/rtm)" socket connection, requires a "classic app" to be configured to get the correct type of token to run Bashbot. After logging into slack via browser, visit [https://api.slack.com/apps?new_classic_app=1](https://api.slack.com/apps?new_classic_app=1) to set up a new "legacy bot user" and "Bot User OAuth Access Token." Finally, add bashbot to your workspace and invite to a channel. See the [Setup/Deployment Examples Repository](https://github.com/mathew-fleisch/bashbot-example) for more detailed information about how to deploy Bashbot in your infrastructure.
 
 
 ***Quick start***
 
 ```bash
+# Set `Bot User OAuth Access Token` as SLACK_TOKEN environment variable
+export SLACK_TOKEN=xoxb-xxxxxxxxx-xxxxxxx
+
 # Get the sample config.json
 wget -O config.json https://raw.githubusercontent.com/mathew-fleisch/bashbot/main/sample-config.json
 
-# Set environment variables
-export SLACK_TOKEN=xoxb-xxxxxxxxx-xxxxxxx
-export BASHBOT_CONFIG_FILEPATH=${PWD}/config.json
-
-# Pass environment variables to docker run
+# Pass environment variable and mount configuration json to run container
 docker run --rm \
    --name bashbot \
-   -v ${BASHBOT_CONFIG_FILEPATH}:/bashbot/config.json \
+   -v ${PWD}/config.json:/bashbot/config.json \
    -e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
    -e SLACK_TOKEN=${SLACK_TOKEN} \
    -e LOG_LEVEL="info" \
