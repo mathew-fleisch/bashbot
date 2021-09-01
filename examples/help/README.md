@@ -2,6 +2,8 @@
 
 In this example, the configuration json file for Bashbot is parsed via [jq](https://stedolan.github.io/jq/) to display the help and description values for each command
 
+<img src="https://i.imgur.com/sJxh2Qk.gif" />
+
 ## Bashbot Configuration
 
 This command is triggered by sending `bashbot help` in a slack channel where Bashbot is also a member. There is no external script for this command, takes no arugments/parameters, and expects jq to already be installed, and the environment variable `BASHBOT_CONFIG_FILEPATH` to be pointing at the running configuration, on the host machine.
