@@ -11,4 +11,4 @@ shfmt 3.3.0
 sops 3.7.1
 terraform 1.0.3
 tflint 0.30.0
-yq v4.9.3
+yq v4.12.1

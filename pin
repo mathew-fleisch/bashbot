@@ -1,4 +1,4 @@
 bats v1.3.0
 terraform 0.12.30
 terraform latest
-yq v4.9.3
+yq v4.12.1
