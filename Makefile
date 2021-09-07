@@ -56,3 +56,12 @@ install-latest:
 gif:
 	@echo "Generating gif"
 	@ffmpeg -i examples/$(example)/$(example).mov -r 10 -pix_fmt rgb24 examples/$(example)/$(example).gif
+
+.PHONY: update-asdf-dependencies
+update-asdf-dependencies:
+	@curl -s -H "Accept: application/vnd.github.everest-preview+json" \
+	    -H "Authorization: token $(GIT_TOKEN)" \
+	    --request POST \
+	    --data '{"event_type": "trigger-asdf-update"}' \
+	    https://api.github.com/repos/mathew-fleisch/bashbot/dispatches
+	@echo "Updating asdf dependencies via github-action: https://github.com/mathew-fleisch/bashbot/actions/workflows/update-asdf-versions.yaml"
