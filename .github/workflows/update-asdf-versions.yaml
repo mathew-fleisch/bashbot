@@ -1,0 +1,28 @@
+# Name:        update-asdf-versions.yaml
+# Author:      Mathew Fleisch <mathew.fleisch@gmail.com>
+# Description: This action will iterate through the .tool-versions file
+#              and grab the latest version for each line, unless it is pinned
+#              in the pin file. If there are changes to the .tool-versions file
+#              the action will automatically tag a new version number.
+name: Update asdf versions
+on:
+  schedule: # trigger daily at 12:20am PT (19:20UTC)
+    - cron: '20 19 * * *'
+  repository_dispatch:
+    types:
+      - trigger-asdf-update
+jobs:
+  build:
+    name: Update asdf versions
+    runs-on: generic-runner
+    steps:
+      - name: "Update asdf versions"
+        env:
+          GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
+          REPO_OWNER: mathew-fleisch
+          REPO_NAME: bashbot
+          REPO_BRANCH: main
+        # See the tools repo for more information: https://github.com/mathew-fleisch/tools
+        run: wget -qO- https://raw.githubusercontent.com/mathew-fleisch/tools/main/scripts/update-asdf-to-latest.sh | bash
+
+
