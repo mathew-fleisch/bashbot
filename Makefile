@@ -3,6 +3,7 @@ GOARCH?=$(shell go env GOARCH)
 VERSION?=$(shell git describe --abbrev=0 --tags)
 LATEST_VERSION?=$(shell curl -s https://api.github.com/repos/mathew-fleisch/bashbot/releases/latest | grep tag_name | cut -d '"' -f 4)
 BINARY?=bin/bashbot
+CGO_ENABLED=0
 SRC_LOCATION?=cmd/bashbot/bashbot.go
 LDFLAGS="-X main.Version=${VERSION}"
 GO_BUILD=go build -ldflags=$(LDFLAGS)
@@ -51,3 +52,8 @@ install-latest:
 	chmod +x /usr/local/bin/bashbot
 	bashbot --version
 	bashbot --help
+
+.PHONY: gif
+gif:
+	@echo "Generating gif"
+	@ffmpeg -i examples/$(example)/$(example).mov -r 10 -pix_fmt rgb24 examples/$(example)/$(example).gif
