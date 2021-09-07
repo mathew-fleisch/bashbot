@@ -50,7 +50,7 @@ install-latest:
 	wget -q -O /usr/local/bin/bashbot https://github.com/mathew-fleisch/bashbot/releases/download/$(LATEST_VERSION)/bashbot-$(GOOS)-$(GOARCH)
 	chmod +x /usr/local/bin/bashbot
 	bashbot --version
-	bashbot --help
+	@echo "Run 'bashbot --help' for more information"
 
 .PHONY: gif
 gif:
