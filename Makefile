@@ -3,7 +3,6 @@ GOARCH?=$(shell go env GOARCH)
 VERSION?=$(shell git describe --abbrev=0 --tags)
 LATEST_VERSION?=$(shell curl -s https://api.github.com/repos/mathew-fleisch/bashbot/releases/latest | grep tag_name | cut -d '"' -f 4)
 BINARY?=bin/bashbot
-CGO_ENABLED=0
 SRC_LOCATION?=cmd/bashbot/bashbot.go
 LDFLAGS="-X main.Version=${VERSION}"
 GO_BUILD=go build -ldflags=$(LDFLAGS)
@@ -31,7 +30,7 @@ build:
 	rm -rf $(BINARY)-$(GOOS)-$(GOARCH)
 	go mod tidy
 	go mod vendor
-	$(GO_BUILD) -o $(BINARY)-$(GOOS)-$(GOARCH) $(SRC_LOCATION)
+	CGO_ENABLED=0 $(GO_BUILD) -o $(BINARY)-$(GOOS)-$(GOARCH) $(SRC_LOCATION)
 
 .PHONY: run-bashbot
 run-bashbot:
