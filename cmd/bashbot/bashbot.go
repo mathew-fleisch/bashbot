@@ -297,6 +297,10 @@ func processCommand(event *slack.MessageEvent) bool {
 	case "cmd":
 		reportToChannel(event.Channel, "processing_raw_command", "")
 		return processRawCommand(cmd, event.Channel, event.User)
+	case "die":
+		yell(event.Channel, "My battery is low and it's getting dark.")
+		os.Exit(0)
+		return false
 	default:
 		reportToChannel(event.Channel, "command_not_found", "")
 		return false
