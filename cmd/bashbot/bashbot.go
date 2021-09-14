@@ -297,7 +297,17 @@ func processCommand(event *slack.MessageEvent) bool {
 	case "cmd":
 		reportToChannel(event.Channel, "processing_raw_command", "")
 		return processRawCommand(cmd, event.Channel, event.User)
-	case "die":
+	case "exit":
+		if len(words) == 3 {
+			switch words[2] {
+			case "0":
+				yell(event.Channel, "exiting: success")
+				os.Exit(0)
+			default:
+				yell(event.Channel, "exiting: failure")
+				os.Exit(1)
+			}
+		}
 		yell(event.Channel, "My battery is low and it's getting dark.")
 		os.Exit(0)
 		return false
@@ -440,6 +450,7 @@ func getUserChannelInfo(userid string, username string, channel string, timestam
 
 // Raw commands
 func processRawCommand(cmds []string, channel string, user string) bool {
+
 	if stringInSlice(user, admin.UserIds) && channel == admin.PrivateChannelId {
 		tmpCmd := html.UnescapeString(strings.Join(cmds, " "))
 		// fmt.Println("Combined cmd: " + tmpCmd)
