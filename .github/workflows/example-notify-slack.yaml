@@ -1,0 +1,33 @@
+# Name:        example-notify-slack.yaml
+# Author:      Mathew Fleisch <mathew.fleisch@gmail.com>
+# Description: This action demonstrates how to trigger a Slack Notification from Bashbot.
+name: Example Bashbot Notify slack
+on:
+  repository_dispatch:
+    types:
+      - trigger-slack-notify
+
+jobs:
+  build:
+    name: Example Bashbot Notify slack
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      - 
+        name: Install Golang via asdf
+        uses: asdf-vm/actions/install@v1
+        with:
+          tool_versions: bashbot latest
+      -
+        name: Send Slack Message With Bashbot Binary
+        env:
+          BASHBOT_CONFIG_FILEPATH: .github/workflows/example-config.json
+          SLACK_TOKEN: ${{ secrets.RELEASE_SLACK_TOKEN }}
+        run: |
+          bashbot \
+            --send-message-channel ${{ github.event.client_payload.channel }} \
+            --send-message-text "{{ github.event.client_payload.text }}"
+
+          
