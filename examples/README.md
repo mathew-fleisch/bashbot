@@ -43,7 +43,7 @@ export BASHBOT_CONFIG_FILEPATH=${PWD}/config.json
     - [Get list-examples Plugins](list-examples)
         - \+ `./add-example/add-command.sh list-examples/list-examples.json`
         - \- `./remove-example/remove-command.sh list-examples`
-3. Run golang script
+3. Run go-lang script
     - [Get Running Version](version)
         - \+ `./add-example/add-command.sh version/version.json`
         - \- `./remove-example/remove-command.sh version`
@@ -70,7 +70,7 @@ export BASHBOT_CONFIG_FILEPATH=${PWD}/config.json
     - [Get Air Quality Index By Zip](aqi)
         - \+ `./add-example/add-command.sh aqi/aqi.json`
         - \- `./remove-example/remove-command.sh aqi`
-
+6. [Send message from github action](#send-message-from-github-action)
 
 
 -------------------------------------------------------------------------
@@ -209,3 +209,81 @@ In this next example, the command is derived by the output of another command. T
   "permissions": ["all"]
 }
 ```
+
+
+-----------------------
+
+
+## Send message from github action
+
+Bashbot's binary can also be used to send a single message to a slack channel. This can be useful at the end of existing automation as a notification of success/failure. In this example, a [github-action](../.github/workflows/example-notify-slack.yaml) is triggered via curl. The [github-action itself](../.github/workflows/example-notify-slack.yaml) will [install bashbot via asdf](https://github.com/mathew-fleisch/asdf-bashbot/), then send the message from the curl's payload to a specific channel also defined in the payload.
+
+```bash
+#!/bin/bash
+# shellcheck disable=SC2086
+
+REPO_OWNER=mathew-fleisch
+REPO_NAME=bashbot
+SLACK_CHANNEL=GPFMM5MD2
+SLACK_MESSAGE="Custom Notification from Github Action"
+
+github_base="${github_base:-api.github.com}"
+expected_variables="SLACK_CHANNEL SLACK_MESSAGE REPO_OWNER REPO_NAME GITHUB_TOKEN"
+for expect in $expected_variables; do
+  if [[ -z "${!expect}" ]]; then
+    echo "Missing environment variable $expect"
+    echo "Expected: $expected_variables"
+    exit 0
+  fi
+done
+
+DATA='{"event_type":"trigger-slack-notify","client_payload": {"channel":"'${SLACK_CHANNEL}'", "text":"'${SLACK_MESSAGE}'"}}'
+DATA=$(echo "${DATA}" | jq -c .)
+curl \
+  -X POST \
+  -H "Accept: application/vnd.github.everest-preview+json" \
+  -H "Authorization: token ${GITHUB_TOKEN}" \
+  --data "${DATA}" \
+  https://${github_base}/repos/${REPO_OWNER}/${REPO_NAME}/dispatches
+
+```
+
+The above script will trigger the [github action](../.github/workflows/example-notify-slack.yaml) (also copied below). After installing bashbot via asdf, bashbot's binary can be executed using environment variables and passing values from the curl's payload. This method of installing executing Bashbot can be used in any github action pipeline.
+
+```yaml
+# Name:        example-notify-slack.yaml
+# Author:      Mathew Fleisch <mathew.fleisch@gmail.com>
+# Description: This action demonstrates how to trigger a Slack Notification from Bashbot.
+name: Example Bashbot Notify Slack
+on:
+  repository_dispatch:
+    types:
+      - trigger-slack-notify
+
+jobs:
+  build:
+    name: Example Bashbot Notify Slack
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Install Bashbot via asdf
+        uses: asdf-vm/actions/install@v1
+        with:
+          tool_versions: bashbot 1.6.15
+      -
+        name: Send Slack Message With Bashbot Binary
+        env:
+          BASHBOT_CONFIG_FILEPATH: ./config.json
+          SLACK_TOKEN: ${{ secrets.RELEASE_SLACK_TOKEN }}
+        run: |
+          echo '{"admins":[{"trigger":"bashbotexample","appName":"Bashbot Example","userIds":[""],"privateChannelId":"","logChannelId":""}],"messages":[],"tools":[],"dependencies":[]}' > $BASHBOT_CONFIG_FILEPATH
+          bashbot \
+            --send-message-channel ${{ github.event.client_payload.channel }} \
+            --send-message-text "${{ github.event.client_payload.text }}"
+```
+
+Executing this action has logs/output that looks similar to this
+
+<img src="https://i.imgur.com/blZLZmR.png" />
+
+<img src="https://i.imgur.com/kkaClWJ.png" />
