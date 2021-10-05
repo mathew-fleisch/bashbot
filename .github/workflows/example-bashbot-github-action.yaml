@@ -25,5 +25,5 @@ jobs:
           REPO_OWNER: mathew-fleisch
           REPO_NAME: bashbot
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./examples/github-action/github-action.sh
+        run: ./examples/trigger-github-action/github-action.sh
           
