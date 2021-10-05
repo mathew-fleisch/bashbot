@@ -82,6 +82,8 @@ docker run --rm \
         - [Get File From Repository](examples/get-file-from-repo)
         - [Trigger Github Action](examples/trigger-github-action)
         - [Get Air Quality Index By Zip](examples/aqi)
+    6. [Send message from github action](examples/#send-message-from-github-action)
+
 
 
 ***Steps To Prove It's Working***
