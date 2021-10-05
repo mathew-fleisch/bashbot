@@ -19,7 +19,7 @@ jobs:
         name: Install Golang via asdf
         uses: asdf-vm/actions/install@v1
         with:
-          tool_versions: bashbot latest
+          tool_versions: bashbot 1.6.15
       -
         name: Send Slack Message With Bashbot Binary
         env:
