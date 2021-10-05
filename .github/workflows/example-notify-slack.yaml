@@ -28,6 +28,6 @@ jobs:
         run: |
           bashbot \
             --send-message-channel ${{ github.event.client_payload.channel }} \
-            --send-message-text "{{ github.event.client_payload.text }}"
+            --send-message-text "${{ github.event.client_payload.text }}"
 
           
