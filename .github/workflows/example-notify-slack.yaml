@@ -16,7 +16,7 @@ jobs:
         name: Checkout
         uses: actions/checkout@v2
       - 
-        name: Install Golang via asdf
+        name: Install Bashbot via asdf
         uses: asdf-vm/actions/install@v1
         with:
           tool_versions: bashbot 1.6.15
