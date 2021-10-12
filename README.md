@@ -10,7 +10,7 @@ See the [examples](examples) directory for more information about configuring an
 
 See the [Setup/Deployment Examples Repository](https://github.com/mathew-fleisch/bashbot-example) for more information about how to deploy Bashbot in your infrastructure.
 
-<img src="https://i.imgur.com/s0cf2Hl.gif" />
+<img src="https://i.imgur.com/P6IL10y.gif" />
 
 --------------------------------------------------
 
