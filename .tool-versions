@@ -12,4 +12,4 @@ sops 3.7.1
 terraform 0.12.30
 terraform latest
 tflint 0.32.1
-yq v4.12.1
+yq 4.12.1
