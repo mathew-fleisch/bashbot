@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"html"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -92,6 +91,7 @@ type Parameter struct {
 	Allowed     []string `json:"allowed"`
 	Description string   `json:"description,omitempty"`
 	Source      []string `json:"source,omitempty"`
+	Match       string   `json:"match,omitempty"`
 }
 
 type Dependencies struct {
@@ -267,6 +267,12 @@ func processCommand(event *slack.MessageEvent) bool {
 	var cmd []string
 
 	for index, element := range words {
+		// This is ugly. condense these regexes.
+		element = regexp.MustCompile(`<http(.*)>`).ReplaceAllString(element, "http$1")
+		element = regexp.MustCompile(`“`).ReplaceAllString(element, "\"")
+		element = regexp.MustCompile(`”`).ReplaceAllString(element, "\"")
+		element = regexp.MustCompile(`‘`).ReplaceAllString(element, "'")
+		element = regexp.MustCompile(`’`).ReplaceAllString(element, "'")
 		log.Info(strconv.Itoa(index) + ": " + element)
 		if index > 1 {
 			cmd = append(cmd, element)
@@ -293,10 +299,7 @@ func processCommand(event *slack.MessageEvent) bool {
 	switch words[1] {
 	case triggered:
 		reportToChannel(event.Channel, "processing_command", "")
-		return processWhitelistedCommand(cmd, thisTool, event.Channel, event.User, event.Timestamp)
-	case "cmd":
-		reportToChannel(event.Channel, "processing_raw_command", "")
-		return processRawCommand(cmd, event.Channel, event.User)
+		return processValidCommand(cmd, thisTool, event.Channel, event.User, event.Timestamp)
 	case "exit":
 		if len(words) == 3 {
 			switch words[2] {
@@ -318,8 +321,8 @@ func processCommand(event *slack.MessageEvent) bool {
 	}
 }
 
-// Whitelisted commands
-func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, user string, timestamp string) bool {
+// Valid commands
+func processValidCommand(cmds []string, thisTool Tool, channel string, user string, timestamp string) bool {
 	validParams := make([]bool, len(thisTool.Parameters))
 	var tmpHelp string
 	authorized := false
@@ -333,21 +336,21 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
 	}
 	commandJoined := reEmail.ReplaceAllLiteralString(strings.Join(thisTool.Command, " "), thisUser.Profile.Email)
 
-	log.Debug("Tool Name:        " + thisTool.Name)
-	log.Debug("Tool Description: " + thisTool.Description)
-	log.Debug("Tool Log:         " + strconv.FormatBool(thisTool.Log))
-	log.Debug("Tool Help:        " + thisTool.Help)
-	log.Debug("Tool Trigger:     " + thisTool.Trigger)
-	log.Debug("Tool Location:    " + thisTool.Location)
-	log.Debug("Tool Command:     " + commandJoined)
-	log.Debug("Tool Ephemeral:   " + strconv.FormatBool(thisTool.Ephemeral))
-	log.Debug("Tool Response:    " + thisTool.Response)
+	log.Debug(" ----> Param Name:        " + thisTool.Name)
+	log.Debug(" ----> Param Description: " + thisTool.Description)
+	log.Debug(" ----> Param Log:         " + strconv.FormatBool(thisTool.Log))
+	log.Debug(" ----> Param Help:        " + thisTool.Help)
+	log.Debug(" ----> Param Trigger:     " + thisTool.Trigger)
+	log.Debug(" ----> Param Location:    " + thisTool.Location)
+	log.Debug(" ----> Param Command:     " + commandJoined)
+	log.Debug(" ----> Param Ephemeral:   " + strconv.FormatBool(thisTool.Ephemeral))
+	log.Debug(" ----> Param Response:    " + thisTool.Response)
 	var allowedChannels []string = getChannelNames(thisTool.Permissions)
 	if admin.PrivateChannelId == channel {
 		authorized = true
 	} else {
 		for j := 0; j < len(thisTool.Permissions); j++ {
-			log.Debug("Tool Permissions[" + strconv.Itoa(j) + "]: " + thisTool.Permissions[j])
+			log.Debug(" ----> Param Permissions[" + strconv.Itoa(j) + "]: " + thisTool.Permissions[j])
 			if thisTool.Permissions[j] == channel || thisTool.Permissions[j] == "all" {
 				authorized = true
 			}
@@ -373,21 +376,16 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
 	}
 
 	if len(thisTool.Parameters) > 0 {
-		log.Debug("Tool Parameters Count: " + strconv.Itoa(len(thisTool.Parameters)))
+		log.Debug(" ----> Param Parameters Count: " + strconv.Itoa(len(thisTool.Parameters)))
 		for j := 0; j < len(thisTool.Parameters); j++ {
-			log.Debug("Tool Parameters[" + strconv.Itoa(j) + "]: " + thisTool.Parameters[j].Name)
+			log.Debug(" ----> Param Parameters[" + strconv.Itoa(j) + "]: " + thisTool.Parameters[j].Name)
 			derivedSource := thisTool.Parameters[j].Source
 			tmpHelp = fmt.Sprintf("%s\n%s: [%s%s]", tmpHelp, thisTool.Parameters[j].Name, strings.Join(thisTool.Parameters[j].Allowed, "|"), thisTool.Parameters[j].Description)
 			if len(derivedSource) > 0 {
-				log.Debug("No hard-coded allowed values. Deriving source: " + strings.Join(derivedSource, " "))
-				allowedOut := shellOut([]string{"bash", "-c", "cd " + thisTool.Location + " && " + strings.Join(derivedSource, " ")})
-				log.Debug("Derived: " + allowedOut)
-				thisTool.Parameters[j].Allowed = strings.Split(allowedOut, "\n")
+				log.Debug("Deriving allowed parameters: " + strings.Join(derivedSource, " "))
+				allowedOut := strings.Split(shellOut([]string{"bash", "-c", "cd " + thisTool.Location + " && " + strings.Join(derivedSource, " ")}), "\n")
+				thisTool.Parameters[j].Allowed = append(thisTool.Parameters[j].Allowed, allowedOut...)
 			}
-			// tmpHelp = fmt.Sprintf("%s\n%s: [%s]", tmpHelp, thisTool.Parameters[j].Name, strings.Join(thisTool.Parameters[j].Allowed, "|"))
-			// for h := 0; h < len(thisTool.Parameters[j].Allowed); h++ {
-			//   fmt.Println("Tool Parameters[" + strconv.Itoa(j) + "].Allowed[" + strconv.Itoa(h) + "]: " + thisTool.Parameters[j].Allowed[h])
-			// }
 		}
 	}
 
@@ -395,33 +393,44 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
 		chatOpsLog(channel, user, thisTool.Trigger+" "+strings.Join(cmds, " "))
 	}
 
-	// Verify all required parameters are passed
-	if len(cmds) != len(thisTool.Parameters) {
-		reportToChannel(channel, "incorrect_parameters", "")
-		yell(channel, cmdHelp)
-		return true
-	}
-
 	// Validate parameters against whitelist
 	if len(thisTool.Parameters) > 0 {
 		for j := 0; j < len(thisTool.Parameters); j++ {
+			log.Debug(" ====> Param Name: " + thisTool.Parameters[j].Name)
 			validParams[j] = false
-			for h := 0; h < len(thisTool.Parameters[j].Allowed); h++ {
-				if thisTool.Parameters[j].Allowed[h] == cmds[j] {
+
+			if len(thisTool.Parameters[j].Match) > 0 {
+				log.Debug(" ====> Parameter[" + strconv.Itoa(j) + "].Regex: " + thisTool.Parameters[j].Match)
+				restOfCommand := strings.Join(cmds[j:], " ")
+				if regexp.MustCompile(thisTool.Parameters[j].Match).MatchString(restOfCommand) {
+					log.Debug("Parameter(s): '" + restOfCommand + "' matches regex: '" + thisTool.Parameters[j].Match + "'")
 					validParams[j] = true
+				} else {
+					log.Debug("Parameter: " + cmds[j] + " does not match regex: " + thisTool.Parameters[j].Match)
+				}
+			} else {
+				for h := 0; h < len(thisTool.Parameters[j].Allowed); h++ {
+					log.Debug(" ====> Parameter[" + strconv.Itoa(j) + "].Allowed[" + strconv.Itoa(h) + "]: " + thisTool.Parameters[j].Allowed[h])
+					if thisTool.Parameters[j].Allowed[h] == cmds[j] {
+						validParams[j] = true
+					}
 				}
 			}
 		}
 	}
 
 	buildCmd := commandJoined
-	for x := 0; x < len(cmds); x++ {
+	for x := 0; x < len(thisTool.Parameters); x++ {
 		if !validParams[x] {
 			reportToChannel(channel, "invalid_parameter", thisTool.Parameters[x].Name)
 			return false
 		}
 		re := regexp.MustCompile(`\${` + thisTool.Parameters[x].Name + `}`)
-		buildCmd = re.ReplaceAllString(buildCmd, cmds[x])
+		if len(thisTool.Parameters[x].Match) > 0 {
+			buildCmd = re.ReplaceAllString(buildCmd, strings.Join(cmds[x:], " "))
+		} else {
+			buildCmd = re.ReplaceAllString(buildCmd, cmds[x])
+		}
 	}
 	buildCmd = getUserChannelInfo(user, thisUser.Name, channel, timestamp) + " && cd " + thisTool.Location + " && " + buildCmd
 	splitOn := regexp.MustCompile(`\s\&\&`)
@@ -446,25 +455,6 @@ func processWhitelistedCommand(cmds []string, thisTool Tool, channel string, use
 }
 func getUserChannelInfo(userid string, username string, channel string, timestamp string) string {
 	return "export TRIGGERED_AT=" + timestamp + " && export TRIGGERED_USER_ID=" + userid + " && export TRIGGERED_USER_NAME=" + username + " && export TRIGGERED_CHANNEL_ID=" + channel + " && export TRIGGERED_CHANNEL_NAME=" + strings.Join(getChannelNames([]string{channel}), "")
-}
-
-// Raw commands
-func processRawCommand(cmds []string, channel string, user string) bool {
-
-	if stringInSlice(user, admin.UserIds) && channel == admin.PrivateChannelId {
-		tmpCmd := html.UnescapeString(strings.Join(cmds, " "))
-		// fmt.Println("Combined cmd: " + tmpCmd)
-		tmpCmds := []string{"bash", "-c", tmpCmd}
-		ret := shellOut(tmpCmds)
-		yell(channel, ret)
-		chatOpsLog(channel, user, ret)
-		return true
-	} else {
-		reportToChannel(channel, "unauthorized", "")
-		chatOpsLog(channel, user, strings.Join(cmds, " "))
-		chatOpsLog(channel, user, "Unauthorized raw command!!!")
-		return true
-	}
 }
 
 func shellOut(cmdArgs []string) string {
@@ -760,7 +750,7 @@ func main() {
 	for msg := range rtm.IncomingEvents {
 		switch ev := msg.Data.(type) {
 		case *slack.ConnectedEvent:
-			log.Info("Bashbot is now connected to slack. Primary trigger: `" + admin.AppName + "`")
+			log.Info("Bashbot is now connected to slack. Primary trigger: `" + admin.Trigger + "`")
 
 		case *slack.MessageEvent:
 			handleMessage(ev)
