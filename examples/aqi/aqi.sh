@@ -12,6 +12,16 @@ if [ -z "$zip" ]; then
   exit 0
 fi
 
+RESPONSES_420=("alright, alright, alright" "pass that shit" "AQI: hazy for dayyzzz" "420 blaze it!" "marijuana... marijuana... marijuana..." "how much for a zip? lul")
+EMOJIS_420=("stoned_moon" "partyweed" "nice" "lolface" "hehehe" "fingerguns" "dancing-waggle" "blazeit420" "420")
+if [ "$zip" == "42069" ] || [ "$zip" == "69420" ]; then
+  stoned_emoji=":${EMOJIS_420[$RANDOM % ${#EMOJIS_420[@]}]}:"
+  stoned_response=${RESPONSES_420[$RANDOM % ${#RESPONSES_420[@]}]}
+
+  echo "$stoned_emoji $stoned_response"
+  exit 0
+fi
+
 response=$(curl -s "http://www.airnowapi.org/aq/observation/zipCode/current/?zipCode=${zip}&distance=5&format=application/json&API_KEY=${AIRQUALITY_API_KEY}")
 
 if [[ "$response" == "[]" ]]; then
