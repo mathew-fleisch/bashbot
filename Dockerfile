@@ -15,12 +15,12 @@ RUN apk add --update bash curl git make go jq docker python3 py3-pip openssh vim
 WORKDIR /root
 COPY .tool-versions /root/.tool-versions
 COPY pin /root/pin
+# && asdf update \
 RUN mkdir -p $ASDF_DATA_DIR \
-    && git clone --depth 1 https://github.com/asdf-vm/asdf.git $ASDF_DATA_DIR \
+    && git clone --depth 1 https://github.com/asdf-vm/asdf.git $ASDF_DATA_DIR --branch v0.8.1 \
     && . $ASDF_DATA_DIR/asdf.sh \
     && echo -e '\n. $ASDF_DATA_DIR/asdf.sh' >> $HOME/.bashrc \
     && echo -e '\n. $ASDF_DATA_DIR/asdf.sh' >> $HOME/.profile \
-    && asdf update \
     && while IFS= read -r line; do asdf plugin add $(echo "$line" | awk '{print $1}'); done < .tool-versions \
     && asdf install
 
