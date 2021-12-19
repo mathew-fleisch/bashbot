@@ -1,8 +1,8 @@
 awscli 2.4.6
 bat 0.18.3
-gcloud 366.0.0
+gcloud 367.0.0
 helm 3.7.2
-kubectl 1.23.0
+kubectl 1.23.1
 kubectx 0.9.4
 kustomize 4.4.1
 rclone 1.57.0
@@ -11,5 +11,5 @@ shfmt 3.4.1
 sops 3.7.1
 terraform 0.12.30
 terraform latest
-tflint 0.33.2
-yq 4.16.1
+tflint 0.34.0
+yq 4.9.8
