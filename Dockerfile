@@ -30,6 +30,7 @@ RUN mkdir -p vendor
 RUN . ${ASDF_DATA_DIR}/asdf.sh \
     && make build \
     && mv bin/bashbot-* /usr/local/bin/bashbot \
-    && chmod +x /usr/local/bin/bashbot
+    && chmod +x /usr/local/bin/bashbot \
+    && rm -rf /tmp/*
 
 CMD /bin/sh -c ". ${ASDF_DATA_DIR}/asdf.sh && ./entrypoint.sh"
