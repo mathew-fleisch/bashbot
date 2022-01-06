@@ -7,7 +7,7 @@ ENV LOG_LEVEL "info"
 ENV LOG_FORMAT "text"
 ENV ASDF_DATA_DIR /root/.asdf
 
-RUN apk add --update bash curl git make go jq docker python3 py3-pip openssh vim \
+RUN apk add --update bash curl git make go jq python3 py3-pip openssh vim \
     && rm /bin/sh && ln -s /bin/bash /bin/sh \
     && ln -s /usr/bin/python3 /usr/local/bin/python
 
@@ -15,7 +15,6 @@ RUN apk add --update bash curl git make go jq docker python3 py3-pip openssh vim
 WORKDIR /root
 COPY .tool-versions /root/.tool-versions
 COPY pin /root/pin
-# && asdf update \
 RUN mkdir -p $ASDF_DATA_DIR \
     && git clone --depth 1 https://github.com/asdf-vm/asdf.git $ASDF_DATA_DIR --branch v0.8.1 \
     && . $ASDF_DATA_DIR/asdf.sh \
@@ -31,6 +30,7 @@ RUN mkdir -p vendor
 RUN . ${ASDF_DATA_DIR}/asdf.sh \
     && make build \
     && mv bin/bashbot-* /usr/local/bin/bashbot \
-    && chmod +x /usr/local/bin/bashbot
+    && chmod +x /usr/local/bin/bashbot \
+    && rm -rf /tmp/*
 
 CMD /bin/sh -c ". ${ASDF_DATA_DIR}/asdf.sh && ./entrypoint.sh"
