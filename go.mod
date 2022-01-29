@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/sirupsen/logrus v1.8.1
-	github.com/slack-go/slack v0.10.1
+	github.com/slack-go/slack v0.10.2-0.20220114092220-4ee274fffdb5
 )
 
 require (
