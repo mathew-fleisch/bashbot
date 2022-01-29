@@ -7,7 +7,7 @@ ENV LOG_LEVEL "info"
 ENV LOG_FORMAT "text"
 ENV ASDF_DATA_DIR /root/.asdf
 
-RUN apk add --update bash curl git make go jq python3 py3-pip openssh vim \
+RUN apk add --update bash curl git make go jq python3 py3-pip openssh \
     && rm /bin/sh && ln -s /bin/bash /bin/sh \
     && ln -s /usr/bin/python3 /usr/local/bin/python
 
