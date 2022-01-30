@@ -43,6 +43,16 @@
       "active": true,
       "name": "unauthorized",
       "text": ":skull_and_crossbones: You are not authorized to use this command in this channel.\nAllowed in: [%s]"
+    },
+    {
+      "active": true,
+      "name": "missingenvvar",
+      "text": ":skull_and_crossbones: This command requires this environment variable to be set: [%s]"
+    },
+    {
+      "active": true,
+      "name": "missingdependency",
+      "text": ":skull_and_crossbones: This command requires: [%s]"
     }
   ],
   "tools": [
