@@ -1,6 +1,6 @@
 # Bashbot Example - Remove Example Command
 
-In this example, a json example can be removed from a running configuration. 
+In this example, a json example can be removed from a running configuration.
 
 ***Note: This will not work when the configuration json is mounted as a configmap. Use the seed method if bashbot is deployed in kubernetes to use this example***
 
@@ -12,6 +12,8 @@ This command is triggered by sending `bashbot remove-example [command]` in a sla
 {
   "name": "Remove Example Command",
   "description": "Remove command from bashbot example commands",
+  "envvars": [],
+  "dependencies": [],
   "help": "bashbot remove-example [command]",
   "trigger": "remove-example",
   "location": "./examples",

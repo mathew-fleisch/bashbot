@@ -12,6 +12,8 @@ This command is triggered by sending `bashbot info` in a slack channel where Bas
 {
   "name": "Get User/Channel Info",
   "description": "Get information about the user and channel command is being run from",
+  "envvars": [],
+  "dependencies": [],
   "help": "info",
   "trigger": "info",
   "location": "./examples/info",

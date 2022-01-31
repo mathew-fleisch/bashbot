@@ -73,17 +73,19 @@ type Tools struct {
 }
 
 type Tool struct {
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	Help        string      `json:"help"`
-	Trigger     string      `json:"trigger"`
-	Location    string      `json:"location"`
-	Command     []string    `json:"command"`
-	Permissions []string    `json:"permissions"`
-	Log         bool        `json:"log"`
-	Ephemeral   bool        `json:"ephemeral"`
-	Response    string      `json:"response"`
-	Parameters  []Parameter `json:"parameters"`
+	Name         string      `json:"name"`
+	Description  string      `json:"description"`
+	Help         string      `json:"help"`
+	Trigger      string      `json:"trigger"`
+	Location     string      `json:"location"`
+	Command      []string    `json:"command"`
+	Permissions  []string    `json:"permissions"`
+	Log          bool        `json:"log"`
+	Ephemeral    bool        `json:"ephemeral"`
+	Response     string      `json:"response"`
+	Parameters   []Parameter `json:"parameters"`
+	Envvars      []string    `json:"envvars"`
+	Dependencies []string    `json:"dependencies"`
 }
 
 type Parameter struct {
@@ -326,6 +328,24 @@ func processValidCommand(cmds []string, thisTool Tool, channel string, user stri
 	validParams := make([]bool, len(thisTool.Parameters))
 	var tmpHelp string
 	authorized := false
+
+	// checking if all required environment variables exist.
+	for _, envvar := range thisTool.Envvars {
+		if os.Getenv(envvar) == "" {
+			reportToChannel(channel, "missingenvvar", envvar)
+			return false
+		}
+	}
+
+	// checking if all required dependencies are installed on the
+	// machine / os.
+	for _, dependency := range thisTool.Dependencies {
+		_, err := exec.LookPath(dependency)
+		if err != nil {
+			reportToChannel(channel, "missingdependency", dependency)
+			return false
+		}
+	}
 
 	// inject email if exists in command
 	reEmail := regexp.MustCompile(`\${email}`)

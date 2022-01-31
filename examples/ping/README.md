@@ -12,6 +12,8 @@ This command is triggered by sending `bashbot ping` in a slack channel where Bas
 {
   "name": "Ping/Pong",
   "description": "Return pong on pings",
+  "envvars": [],
+  "dependencies": [],
   "help": "ping",
   "trigger": "ping",
   "location": "./",
@@ -23,4 +25,3 @@ This command is triggered by sending `bashbot ping` in a slack channel where Bas
   "permissions": ["all"]
 }
 ```
-

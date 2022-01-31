@@ -6,12 +6,14 @@ In this example, a curl is used to determine the latest version of Bashbot throu
 
 ## Bashbot configuration
 
-This command is triggered by sending `bashbot latest-release` in a slack channel where Bashbot is also a member. This command requires no external script and simply returns a formatted message including links to Bashbot's source code and latest release.
+This command is triggered by sending `bashbot latest-release` in a slack channel where Bashbot is also a member. This command requires no external script and simply returns a formatted message including links to Bashbot's source code and latest release. This command requires [curl](https://curl.se/) to be installed on the host machine.
 
 ```json
 {
   "name": "Get Latest Bashbot Version",
   "description": "Returns the latest version of Bashbot via curl",
+  "envvars": [],
+  "dependencies": ["curl"],
   "help": "bashbot latest-release",
   "trigger": "latest-release",
   "location": "./",
@@ -26,4 +28,3 @@ This command is triggered by sending `bashbot latest-release` in a slack channel
   "permissions": ["all"]
 }
 ```
-

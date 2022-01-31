@@ -12,6 +12,8 @@ This command is triggered by sending `bashbot list-examples` in a slack channel 
 {
   "name": "List Example Commands",
   "description": "List commands from bashbot example commands",
+  "envvars": [],
+  "dependencies": [],
   "help": "bashbot list-examples",
   "trigger": "list-examples",
   "location": "./examples",
