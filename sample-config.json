@@ -59,6 +59,8 @@
     {
       "name": "BashBot Help",
       "description": "Show this message",
+      "envvars": ["BASHBOT_CONFIG_FILEPATH"],
+      "dependencies": ["jq"],
       "help": "bashbot help",
       "trigger": "help",
       "location": "./",
@@ -79,6 +81,8 @@
     {
       "name": "Get User/Channel Info",
       "description": "Get information about the user and channel command is being run from",
+      "envvars": [],
+      "dependencies": [],
       "help": "bashbot info",
       "trigger": "info",
       "location": "./example/info",
@@ -94,6 +98,8 @@
     {
       "name": "List Installed Bashbot Commands",
       "description": "List all configured bashbot commands",
+      "envvars": ["BASHBOT_CONFIG_FILEPATH"],
+      "dependencies": ["jq"],
       "help": "bashbot list",
       "trigger": "list",
       "location": "./",
@@ -109,6 +115,8 @@
     {
       "name": "Describe Bashbot [command]",
       "description": "Show the json object for a specific command",
+      "envvars": ["BASHBOT_CONFIG_FILEPATH"],
+      "dependencies": ["jq"],
       "help": "bashbot describe [command]",
       "trigger": "describe",
       "location": "./",
@@ -131,6 +139,8 @@
     {
       "name": "TEST Command",
       "description": "Show the json object for a specific command",
+      "envvars": ["TRIGGERED_USER_NAME", "TRIGGERED_USER_ID", "TRIGGERED_CHANNEL_NAME", "TRIGGERED_CHANNEL_ID"],
+      "dependencies": [],
       "help": "bashbot test [command]",
       "trigger": "test",
       "location": "./",
@@ -149,6 +159,8 @@
     {
       "name": "List Example Commands",
       "description": "List commands from bashbot example commands",
+      "envvars": [],
+      "dependencies": [],
       "help": "bashbot list-examples",
       "trigger": "list-examples",
       "location": "./examples",
@@ -171,6 +183,8 @@
     {
       "name": "Add Example Command",
       "description": "Add command from bashbot example commands",
+      "envvars": [],
+      "dependencies": ["jq"],
       "help": "bashbot add-example",
       "trigger": "add-example",
       "location": "./examples",
@@ -195,10 +209,13 @@
     {
       "name": "Remove Example Command",
       "description": "Remove command from bashbot example commands",
+      "envvars": [],
+      "dependencies": [],
       "help": "bashbot remove-example",
       "trigger": "remove-example",
       "location": "./examples",
-      "command": ["./remove-example/remove-command.sh ${remove_command}"
+      "command": [
+        "./remove-example/remove-command.sh ${remove_command}"
       ],
       "parameters": [
         {

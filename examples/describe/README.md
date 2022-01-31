@@ -12,6 +12,8 @@ This command is triggered by sending `bashbot describe [command]` in a slack cha
 {
   "name": "Describe Bashbot [command]",
   "description": "Show the json object for a specific command",
+  "envvars": ["BASHBOT_CONFIG_FILEPATH"],
+  "dependencies": ["jq"],
   "help": "bashbot describe [command]",
   "trigger": "describe",
   "location": "./",

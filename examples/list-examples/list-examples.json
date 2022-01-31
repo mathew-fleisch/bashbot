@@ -1,6 +1,8 @@
 {
   "name": "List Example Commands",
   "description": "List commands from bashbot example commands",
+  "envvars": [],
+  "dependencies": [],
   "help": "bashbot list-examples",
   "trigger": "list-examples",
   "location": "./examples",

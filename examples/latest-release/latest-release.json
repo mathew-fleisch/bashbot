@@ -1,6 +1,8 @@
 {
   "name": "Get Latest Bashbot Version",
   "description": "Returns the latest version of Bashbot via curl",
+  "envvars": [],
+  "dependencies": ["curl"],
   "help": "bashbot latest-release",
   "trigger": "latest-release",
   "location": "./",

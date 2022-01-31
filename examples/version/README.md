@@ -12,6 +12,8 @@ This command is triggered by sending `bashbot version` in a slack channel where 
 {
   "name": "Get Bashbot Version",
   "description": "Displays the currently running version of Bashbot",
+  "envvars": [],
+  "dependencies": [],
   "help": "bashbot version",
   "trigger": "version",
   "location": "./examples/version",

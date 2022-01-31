@@ -1,6 +1,8 @@
 {
   "name": "Ping/Pong",
   "description": "Return pong on pings",
+  "envvars": [],
+  "dependencies": [],
   "help": "bashbot ping",
   "trigger": "ping",
   "location": "./",

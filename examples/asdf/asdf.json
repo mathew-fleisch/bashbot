@@ -1,6 +1,8 @@
 {
   "name": "List asdf plugins",
   "description": "List the installed asdf plugins and their versions",
+  "envvars": [],
+  "dependencies": ["asdf"],
   "help": "bashbot asdf",
   "trigger": "asdf",
   "location": "./",

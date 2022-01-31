@@ -1,6 +1,8 @@
 {
   "name": "Get User/Channel Info",
   "description": "Get information about the user and channel command is being run from",
+  "envvars": [],
+  "dependencies": [],
   "help": "bashbot info",
   "trigger": "info",
   "location": "./examples/info",

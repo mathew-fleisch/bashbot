@@ -12,6 +12,8 @@ This command is triggered by sending `bashbot list` in a slack channel where Bas
 {
   "name": "List Available Bashbot Commands",
   "description": "List all of the possible commands stored in bashbot",
+  "envvars": ["BASHBOT_CONFIG_FILEPATH"],
+  "dependencies": ["jq"],
   "help": "bashbot list",
   "trigger": "list",
   "location": "./",

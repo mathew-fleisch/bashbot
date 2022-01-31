@@ -1,6 +1,8 @@
 {
   "name": "Air Quality Index",
   "description": "Get air quality index by zip code",
+  "envvars": ["AIRQUALITY_API_KEY"],
+  "dependencies": ["curl","jq"],
   "help": "bashbot aqi [zip-code]",
   "trigger": "aqi",
   "location": "./examples/aqi",
