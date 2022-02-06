@@ -1,10 +1,10 @@
-awscli 2.4.15
+awscli 2.4.16
 bat 0.19.0
-gcloud 370.0.0
+gcloud 371.0.0
 helm 3.8.0
 kubectl 1.23.3
 kubectx 0.9.4
-kustomize 4.4.1
+kustomize 4.5.1
 rclone 1.57.0
 shellcheck 0.8.0
 shfmt 3.4.2
