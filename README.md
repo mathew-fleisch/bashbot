@@ -110,3 +110,4 @@ git push origin v1.6.15
 ```
 
 There are also automated anchore container scans and codeql static analysis done on every push to the main branch.
+
