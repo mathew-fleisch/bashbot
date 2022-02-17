@@ -17,9 +17,11 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/slack-go/slack"
+	"github.com/slack-go/slack/slackevents"
+	"github.com/slack-go/slack/socketmode"
 )
 
-var specials []func(event *slack.MessageEvent) bool
+var specials []func(event *slackevents.MessageEvent) bool
 
 // Slacking off with global vars
 var Version = "development"
@@ -27,6 +29,7 @@ var help bool
 var getVersion bool
 var configFile string
 var slackToken string
+var slackAppToken string
 var installVendorDependenciesFlag bool
 var sendMessageChannel string
 var sendMessageText string
@@ -35,7 +38,6 @@ var sendMessageUser string
 var logLevel string
 var logFormat string
 var api *slack.Client
-var rtm *slack.RTM
 var channelsByName map[string]string
 var countkey string
 var emojiPattern *regexp.Regexp
@@ -231,15 +233,6 @@ func installVendorDependencies() bool {
 	return true
 }
 
-func stringInSlice(a string, list []string) bool {
-	for _, b := range list {
-		if b == a {
-			return true
-		}
-	}
-	return false
-}
-
 func truncateString(str string, num int) string {
 	bnoden := str
 	if len(str) > num {
@@ -252,7 +245,7 @@ func truncateString(str string, num int) string {
 }
 
 // Slack Command Processing
-func processCommand(event *slack.MessageEvent) bool {
+func processCommand(event *slackevents.MessageEvent) bool {
 	if !cmdPattern.MatchString(event.Text) {
 		return false
 	}
@@ -261,7 +254,7 @@ func processCommand(event *slack.MessageEvent) bool {
 	log.Debug(event)
 	log.Info("Channel: " + event.Channel)
 	log.Info("User: " + event.User)
-	log.Info("Timestamp: " + event.Timestamp)
+	log.Info("Timestamp: " + event.TimeStamp)
 
 	words := strings.Fields(event.Text)
 	var triggered string
@@ -301,7 +294,7 @@ func processCommand(event *slack.MessageEvent) bool {
 	switch words[1] {
 	case triggered:
 		reportToChannel(event.Channel, "processing_command", "")
-		return processValidCommand(cmd, thisTool, event.Channel, event.User, event.Timestamp)
+		return processValidCommand(cmd, thisTool, event.Channel, event.User, event.TimeStamp)
 	case "exit":
 		if len(words) == 3 {
 			switch words[2] {
@@ -621,9 +614,22 @@ func splitOut(output string, responseType string) string {
 	}
 }
 
-func handleMessage(event *slack.MessageEvent) {
-	// log.Debug("handleMessage()")
-	// log.Debug(event)
+func handleEventsAPIEvent(event slackevents.EventsAPIEvent) error {
+	switch event.Type {
+	case slackevents.CallbackEvent:
+		innerEvent := event.InnerEvent
+
+		switch ev := innerEvent.Data.(type) {
+		case *slackevents.MessageEvent:
+			handleMessage(ev)
+		}
+	default:
+		return fmt.Errorf("unhandled event type: %s", event.Type)
+	}
+	return nil
+}
+
+func handleMessage(event *slackevents.MessageEvent) {
 	// To Do: By bypassing this next check for a bot_message, we can test the bot's functionaltiy in a test slack channel
 	if event.SubType == "bot_message" {
 		return
@@ -682,6 +688,7 @@ to run bash commands or scripts based on a configuration file.
 func main() {
 	flag.StringVar(&configFile, "config-file", "", "[REQUIRED] Filepath to config.json file (or environment variable BASHBOT_CONFIG_FILEPATH set)")
 	flag.StringVar(&slackToken, "slack-token", "", "[REQUIRED] Slack token used to authenticate with api (or environment variable SLACK_TOKEN set)")
+	flag.StringVar(&slackAppToken, "slack-app-token", "", "[REQUIRED] Slack app token used to authenticate with slack app (or environment variable SLACK_APP_TOKEN set)")
 	flag.BoolVar(&installVendorDependenciesFlag, "install-vendor-dependencies", false, "Cycle through dependencies array in config file to install extra dependencies")
 	flag.StringVar(&sendMessageChannel, "send-message-channel", "", "Send stand-alone slack message to this channel (requires -send-message-text)")
 	flag.StringVar(&sendMessageText, "send-message-text", "", "Send stand-alone slack message (requires -send-message-channel)")
@@ -729,6 +736,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	if slackAppToken == "" && os.Getenv("SLACK_APP_TOKEN") != "" {
+		slackAppToken = os.Getenv("SLACK_APP_TOKEN")
+	}
+	if slackAppToken == "" {
+		usage()
+		log.Error("Must define a slack app token")
+		log.Error("Export the slack app token as the environment variable SLACK_APP_TOKEN")
+		log.Error("export SLACK_APP_TOKEN=xapp-xxxxxxxxx-xxxxxxx")
+		os.Exit(1)
+	}
+
 	if installVendorDependenciesFlag {
 		if !installVendorDependencies() {
 			log.Error("Failed to install dependencies")
@@ -738,7 +756,7 @@ func main() {
 	}
 
 	admin = getAdmin()
-	api = slack.New(slackToken)
+	api = slack.New(slackToken, slack.OptionAppLevelToken(slackAppToken))
 
 	// Send simple text message to slack
 	if sendMessageChannel != "" && sendMessageText != "" {
@@ -762,35 +780,32 @@ func main() {
 	cmdPattern = regexp.MustCompile(matchTrigger)
 
 	// Our special handlers. If they handled a message, they return true.
-	specials = []func(event *slack.MessageEvent) bool{processCommand}
+	specials = []func(event *slackevents.MessageEvent) bool{processCommand}
 
-	rtm := api.NewRTM()
-	go rtm.ManageConnection()
+	client := socketmode.New(api)
+	go client.Run()
 
-	for msg := range rtm.IncomingEvents {
-		switch ev := msg.Data.(type) {
-		case *slack.ConnectedEvent:
+	for event := range client.Events {
+		switch event.Type {
+		case socketmode.EventTypeEventsAPI:
+			data := event.Data.(slackevents.EventsAPIEvent)
+			client.Ack(*event.Request)
+			handleEventsAPIEvent(data)
+
+		case socketmode.EventTypeConnected:
 			log.Info("Bashbot is now connected to slack. Primary trigger: `" + admin.Trigger + "`")
 
-		case *slack.MessageEvent:
-			handleMessage(ev)
+		case socketmode.EventTypeConnectionError:
+			log.Error("Slack socket connection error")
 
-		case *slack.PresenceChangeEvent:
-			log.Info("Presence Change: " + ev.Presence)
+		case socketmode.EventTypeErrorBadMessage:
+			log.Error("Bad message received")
 
-		case *slack.RTMError:
-			log.Error("Slack API RTM Error: " + ev.Error())
-
-		case *slack.InvalidAuthEvent:
-			log.Error("Invalid credentials (slack-token)")
-
-		case *slack.ConnectionErrorEvent:
-			log.Error("Can't connect to slack...")
-			log.Error(msg)
+		case socketmode.EventTypeHello:
+			// do nothing
 
 		default:
-			// Ignore other events..
-			// log.Debug("Unhandled Event: " + msg.Type)
+			log.Debug("unhandled event: %#v", event)
 		}
 	}
 }
