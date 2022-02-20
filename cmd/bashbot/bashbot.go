@@ -28,7 +28,7 @@ var Version = "development"
 var help bool
 var getVersion bool
 var configFile string
-var slackToken string
+var slackBotToken string
 var slackAppToken string
 var installVendorDependenciesFlag bool
 var sendMessageChannel string
@@ -687,7 +687,7 @@ to run bash commands or scripts based on a configuration file.
 
 func main() {
 	flag.StringVar(&configFile, "config-file", "", "[REQUIRED] Filepath to config.json file (or environment variable BASHBOT_CONFIG_FILEPATH set)")
-	flag.StringVar(&slackToken, "slack-token", "", "[REQUIRED] Slack token used to authenticate with api (or environment variable SLACK_TOKEN set)")
+	flag.StringVar(&slackBotToken, "slack-bot-token", "", "[REQUIRED] Slack bot token used to authenticate with api (or environment variable SLACK_BOT_TOKEN set)")
 	flag.StringVar(&slackAppToken, "slack-app-token", "", "[REQUIRED] Slack app token used to authenticate with slack app (or environment variable SLACK_APP_TOKEN set)")
 	flag.BoolVar(&installVendorDependenciesFlag, "install-vendor-dependencies", false, "Cycle through dependencies array in config file to install extra dependencies")
 	flag.StringVar(&sendMessageChannel, "send-message-channel", "", "Send stand-alone slack message to this channel (requires -send-message-text)")
@@ -719,19 +719,19 @@ func main() {
 		log.Error("Must define a config.json file")
 		os.Exit(1)
 	}
-	if slackToken == "" && os.Getenv("SLACK_TOKEN") != "" {
-		slackToken = os.Getenv("SLACK_TOKEN")
+	if slackBotToken == "" && os.Getenv("SLACK_BOT_TOKEN") != "" {
+		slackBotToken = os.Getenv("SLACK_BOT_TOKEN")
 	}
-	if slackToken == "" {
+	if slackBotToken == "" {
 		usage()
 		operatingSystem := runtime.GOOS
 		systemArchitecture := runtime.GOARCH
-		log.Error("Must define a slack token")
+		log.Error("Must define a slack bot token")
 		log.Error("After logging into slack, visit https://api.slack.com/apps?new_classic_app=1")
 		log.Error("to set up a new \"legacy bot user\" and \"Bot User OAuth Access Token\"")
-		log.Error("Export the slack token as the environment variable SLACK_TOKEN")
-		log.Error("export SLACK_TOKEN=xoxb-xxxxxxxxx-xxxxxxx")
-		log.Error("bashbot-" + operatingSystem + "-" + systemArchitecture + " -config-file ./config.json -slack-token $SLACK_TOKEN")
+		log.Error("Export the slack bot token as the environment variable SLACK_BOT_TOKEN")
+		log.Error("export SLACK_BOT_TOKEN=xoxb-xxxxxxxxx-xxxxxxx")
+		log.Error("bashbot-" + operatingSystem + "-" + systemArchitecture + " -config-file ./config.json -slack-token $SLACK_BOT_TOKEN")
 		log.Error("See Read-me file for more detailed instructions: http://github.com/mathew-fleisch/bashbot")
 		os.Exit(1)
 	}
@@ -756,7 +756,7 @@ func main() {
 	}
 
 	admin = getAdmin()
-	api = slack.New(slackToken, slack.OptionAppLevelToken(slackAppToken))
+	api = slack.New(slackBotToken, slack.OptionAppLevelToken(slackAppToken))
 
 	// Send simple text message to slack
 	if sendMessageChannel != "" && sendMessageText != "" {
