@@ -25,8 +25,8 @@ Slack's permissions model for the "[Socket Mode](https://api.slack.com/apis/conn
 ***Quick start***
 
 ```bash
-# Set `Bot User OAuth Access Token` as SLACK_TOKEN environment variable
-export SLACK_TOKEN=xoxb-xxxxxxxxx-xxxxxxx
+# Set `Bot User OAuth Access Token` as SLACK_BOT_TOKEN environment variable
+export SLACK_BOT_TOKEN=xoxb-xxxxxxxxx-xxxxxxx
 # Set `Bot App Access Token` as SLACK_APP_TOKEN environment variable
 export SLACK_APP_TOKEN=xapp-xxxxxxxxx-xxxxxxx
 
@@ -38,7 +38,7 @@ docker run --rm \
    --name bashbot \
    -v ${PWD}/config.json:/bashbot/config.json \
    -e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
-   -e SLACK_TOKEN=${SLACK_TOKEN} \
+   -e SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN} \
    -e SLACK_APP_TOKEN=${SLACK_APP_TOKEN} \
    -e LOG_LEVEL="info" \
    -e LOG_FORMAT="text" \
