@@ -137,6 +137,23 @@
       ]
     },
     {
+      "name": "List asdf dependencies",
+      "description": "Return a list of the dependencies installed from asdf",
+      "envvars": [],
+      "dependencies": [],
+      "help": "bashbot asdf-list",
+      "trigger": "asdf-list",
+      "location": "./",
+      "command": [". /usr/asdf/asdf.sh && asdf list"],
+      "parameters": [],
+      "log": false,
+      "ephemeral": false,
+      "response": "code",
+      "permissions": [
+        "all"
+      ]
+    },
+    {
       "name": "TEST Command",
       "description": "Show the json object for a specific command",
       "envvars": ["TRIGGERED_USER_NAME", "TRIGGERED_USER_ID", "TRIGGERED_CHANNEL_NAME", "TRIGGERED_CHANNEL_ID"],
@@ -234,6 +251,20 @@
     }
   ],
   "dependencies": [
+    {
+      "name": "Install Dependencies with asdf",
+      "install": [
+        "mkdir -p /usr/asdf",
+        " && git clone --depth 1 https://github.com/asdf-vm/asdf.git /usr/asdf --branch v0.8.1",
+        " && . /usr/asdf/asdf.sh",
+        " && while IFS= read -r line; do",
+          " asdf plugin add $(echo \"${line}\" | awk '{print $1}');",
+        " done < /bashbot/.tool-versions",
+        " && asdf install",
+        " && echo \"ASDF installed and configured!\"",
+        " && asdf list"
+      ]
+    },
     {
       "name": "BashBot scripts Scripts",
       "install": [

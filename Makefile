@@ -61,6 +61,31 @@ docker-run-upstream:
 		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
 		mathewfleisch/bashbot:$(LATEST_VERSION)
 
+.PHONY: kind-test
+kind-test: docker-build
+	kind create cluster
+	kind load docker-image bashbot:local
+	helm install bashbot helm/bashbot \
+		--namespace bashbot \
+		--create-namespace \
+		--set image.repository=bashbot \
+		--set image.tag=local
+
+.PHONY: kind-test-upgrade
+kind-test-upgrade:
+	helm upgrade bashbot helm/bashbot \
+		--namespace bashbot \
+		--create-namespace \
+		--set image.repository=bashbot \
+		--set image.tag=local
+	kubectl -n bashbot delete pod \
+		$(shell kubectl get pod --template '{{range .items}}{{.metadata.name}}{{end}}' --selector=app=bashbot)
+
+.PHONY: kind-test-cleanup
+kind-test-cleanup:
+	helm delete bashbot
+	kind delete cluster
+
 .PHONY: go-setup
 go-setup:
 	go mod tidy
