@@ -8,7 +8,8 @@ FROM alpine:latest
 LABEL maintainer="Mathew Fleisch <mathew.fleisch@gmail.com>"
 ENV BASHBOT_CONFIG_FILEPATH=/bashbot/config.json
 ENV BASHBOT_ENV_VARS_FILEPATH ""
-ENV SLACK_TOKEN ""
+ENV SLACK_BOT_TOKEN ""
+ENV SLACK_APP_TOKEN ""
 ENV LOG_LEVEL "info"
 ENV LOG_FORMAT "text"
 

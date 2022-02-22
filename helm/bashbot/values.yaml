@@ -4,6 +4,9 @@
 
 botname: bashbot
 namespace: bashbot
+log_level: info
+log_format: text
+
 image:
   repository: mathewfleisch/bashbot
   pullPolicy: IfNotPresent
@@ -11,8 +14,6 @@ image:
   # tag: latest
 
 imagePullSecrets: []
-# nameOverride: ""
-# fullnameOverride: ""
 
 serviceAccount:
   # Specifies whether a service account should be created (necessary for running kubectl commands).

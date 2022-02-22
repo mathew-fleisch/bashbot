@@ -16,8 +16,13 @@ if ! [ -f "$BASHBOT_CONFIG_FILEPATH" ]; then
   exit 1
 fi
 
-if [ -z "$SLACK_TOKEN" ]; then
-  echo "SLACK_TOKEN is not set. Please set it and try again."
+if [ -z "$SLACK_BOT_TOKEN" ]; then
+  echo "SLACK_BOT_TOKEN is not set. Please set it and try again."
+  exit 1
+fi
+
+if [ -z "$SLACK_APP_TOKEN" ]; then
+  echo "SLACK_APP_TOKEN is not set. Please set it and try again."
   exit 1
 fi
 mkdir -p vendor

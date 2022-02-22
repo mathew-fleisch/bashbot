@@ -1,2 +1,3 @@
-export SLACK_TOKEN=
+export SLACK_BOT_TOKEN=
+export SLACK_APP_TOKEN=
 export GIT_TOKEN=

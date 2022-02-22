@@ -24,6 +24,10 @@ spec:
         - env:
             - name: BASHBOT_ENV_VARS_FILEPATH
               value: /bashbot/.env
+            - name: LOG_LEVEL
+              value: {{ .Values.log_level }}
+            - name: LOG_FORMAT
+              value: {{ .Values.format }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: IfNotPresent
           name: {{ .Values.botname }}

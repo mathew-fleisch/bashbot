@@ -20,7 +20,8 @@ docker-run-local:
 		-v $(PWD)/config.json:/bashbot/config.json \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
 		-v $(PWD)/.tool-versions:/bashbot/.tool-versions \
-		-e SLACK_TOKEN=$(SLACK_TOKEN) \
+		-e SLACK_BOT_TOKEN=$(SLACK_BOT_TOKEN) \
+		-e SLACK_APP_TOKEN=$(SLACK_APP_TOKEN) \
 		-e LOG_LEVEL="$(BASHBOT_LOG_LEVEL)" \
 		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
 		bashbot:local
@@ -31,7 +32,8 @@ docker-run-local-bash:
 		-v $(PWD)/config.json:/bashbot/config.json \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
 		-v $(PWD)/.tool-versions:/bashbot/.tool-versions \
-		-e SLACK_TOKEN=$(SLACK_TOKEN) \
+		-e SLACK_BOT_TOKEN=$(SLACK_BOT_TOKEN) \
+		-e SLACK_APP_TOKEN=$(SLACK_APP_TOKEN) \
 		-e LOG_LEVEL="$(BASHBOT_LOG_LEVEL)" \
 		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
 		bashbot:local
@@ -42,7 +44,8 @@ docker-run-upstream-bash:
 	@docker run -it --rm --entrypoint bash \
 		-v $(PWD)/config.json:/bashbot/config.json \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
-		-e SLACK_TOKEN=$(SLACK_TOKEN) \
+		-e SLACK_BOT_TOKEN=$(SLACK_BOT_TOKEN) \
+		-e SLACK_APP_TOKEN=$(SLACK_APP_TOKEN) \
 		-e LOG_LEVEL="$(BASHBOT_LOG_LEVEL)" \
 		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
 		mathewfleisch/bashbot:$(LATEST_VERSION)
@@ -52,7 +55,8 @@ docker-run-upstream:
 	@docker run -it --rm \
 		-v $(PWD)/config.json:/bashbot/config.json \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
-		-e SLACK_TOKEN=$(SLACK_TOKEN) \
+		-e SLACK_BOT_TOKEN=$(SLACK_BOT_TOKEN) \
+		-e SLACK_APP_TOKEN=$(SLACK_APP_TOKEN) \
 		-e LOG_LEVEL="$(BASHBOT_LOG_LEVEL)" \
 		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
 		mathewfleisch/bashbot:$(LATEST_VERSION)
