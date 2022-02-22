@@ -269,7 +269,7 @@ jobs:
         name: Install Bashbot via asdf
         uses: asdf-vm/actions/install@v1
         with:
-          tool_versions: bashbot 1.6.15
+          tool_versions: bashbot 1.8.0
       -
         name: Send Slack Message With Bashbot Binary
         env:

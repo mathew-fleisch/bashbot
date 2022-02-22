@@ -32,16 +32,11 @@ export SLACK_TOKEN=xoxb-xxxxxxxxx-xxxxxxx
 # Get the sample config.json
 wget -O config.json https://raw.githubusercontent.com/mathew-fleisch/bashbot/main/sample-config.json
 
-# Pass environment variable and mount configuration json to run container
-docker run --rm \
-   --name bashbot \
-   -v ${PWD}/config.json:/bashbot/config.json \
-   -e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
-   -e SLACK_TOKEN=${SLACK_TOKEN} \
-   -e LOG_LEVEL="info" \
-   -e LOG_FORMAT="text" \
-   -it mathewfleisch/bashbot:latest
+# Pass environment variable and mount configuration json to run docker container using make target
+make docker-run-upstream
 ```
+
+Check the [Makefile](Makefile) for convienence commands to build, run and install bashbot.
 
 -------------------------------------------------------------------------
 
@@ -104,9 +99,9 @@ Included in this repository two github actions are executed on git tags. The [![
 [![Build containers](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml) action will use the docker plugin, buildx, to build and push a container for amd64/arm64 to docker hub.
 
 ```bash
-# example semver bump: v1.6.15
-git tag v1.6.15
-git push origin v1.6.15
+# example semver bump: v1.8.0
+git tag v1.8.0
+git push origin v1.8.0
 ```
 
 There are also automated anchore container scans and codeql static analysis done on every push to the main branch.

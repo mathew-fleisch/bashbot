@@ -6,17 +6,67 @@ BINARY?=bin/bashbot
 SRC_LOCATION?=cmd/bashbot/bashbot.go
 LDFLAGS="-X main.Version=${VERSION}"
 GO_BUILD=go build -ldflags=$(LDFLAGS)
+BASHBOT_LOG_LEVEL?=info
+BASHBOT_LOG_TYPE?=text
 
-.PHONY: setup
-setup:
+.PHONY: docker-build
+docker-build:
+	docker build -t bashbot:local .
+
+
+.PHONY: docker-run-local
+docker-run-local:
+	@docker run -it --rm \
+		-v $(PWD)/config.json:/bashbot/config.json \
+		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
+		-v $(PWD)/.tool-versions:/bashbot/.tool-versions \
+		-e SLACK_TOKEN=$(SLACK_TOKEN) \
+		-e LOG_LEVEL="$(BASHBOT_LOG_LEVEL)" \
+		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
+		bashbot:local
+
+.PHONY: docker-run-local-bash
+docker-run-local-bash:
+	@docker run -it --rm --entrypoint bash \
+		-v $(PWD)/config.json:/bashbot/config.json \
+		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
+		-v $(PWD)/.tool-versions:/bashbot/.tool-versions \
+		-e SLACK_TOKEN=$(SLACK_TOKEN) \
+		-e LOG_LEVEL="$(BASHBOT_LOG_LEVEL)" \
+		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
+		bashbot:local
+
+
+.PHONY: docker-run-upstream-bash
+docker-run-upstream-bash:
+	@docker run -it --rm --entrypoint bash \
+		-v $(PWD)/config.json:/bashbot/config.json \
+		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
+		-e SLACK_TOKEN=$(SLACK_TOKEN) \
+		-e LOG_LEVEL="$(BASHBOT_LOG_LEVEL)" \
+		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
+		mathewfleisch/bashbot:$(LATEST_VERSION)
+
+.PHONY: docker-run-upstream
+docker-run-upstream:
+	@docker run -it --rm \
+		-v $(PWD)/config.json:/bashbot/config.json \
+		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
+		-e SLACK_TOKEN=$(SLACK_TOKEN) \
+		-e LOG_LEVEL="$(BASHBOT_LOG_LEVEL)" \
+		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
+		mathewfleisch/bashbot:$(LATEST_VERSION)
+
+.PHONY: go-setup
+go-setup:
 	go mod tidy
 	go mod vendor
 	go install -v ./...
 	go get github.com/slack-go/slack@master
 	go get github.com/sirupsen/logrus
 
-.PHONY: cross
-cross:
+.PHONY: go-build-cross-compile
+go-build-cross-compile:
 	rm -rf $(BINARY)*
 	go mod tidy
 	go mod vendor
@@ -25,19 +75,19 @@ cross:
 	GOOS=darwin  GOARCH=amd64 $(GO_BUILD) -o $(BINARY)-darwin-amd64 $(SRC_LOCATION)
 	GOOS=darwin  GOARCH=arm64 $(GO_BUILD) -o $(BINARY)-darwin-arm64 $(SRC_LOCATION)
 
-.PHONY: build
-build:
+.PHONY: go-build
+go-build:
 	rm -rf $(BINARY)-$(GOOS)-$(GOARCH)
 	go mod tidy
 	go mod vendor
 	CGO_ENABLED=0 $(GO_BUILD) -o $(BINARY)-$(GOOS)-$(GOARCH) $(SRC_LOCATION)
 
-.PHONY: run-bashbot
-run-bashbot:
+.PHONY: go-run
+go-run:
 	@go run $(SRC_LOCATION)
 
-.PHONY: run-version
-run:
+.PHONY: go-version
+go-version:
 	@go run $(SRC_LOCATION) --version
 
 .PHONY: clean
