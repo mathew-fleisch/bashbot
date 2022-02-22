@@ -4,10 +4,6 @@ go 1.15
 
 require (
 	github.com/sirupsen/logrus v1.8.1
-	github.com/slack-go/slack v0.10.2-0.20220114092220-4ee274fffdb5
-)
-
-require (
-	github.com/pkg/errors v0.9.1 // indirect
+	github.com/slack-go/slack v0.10.2
 	github.com/stretchr/testify v1.6.1 // indirect
 )

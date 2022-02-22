@@ -12,6 +12,8 @@ This command is triggered by sending `bashbot help` in a slack channel where Bas
 {
   "name": "BashBot Help",
   "description": "Show this message",
+  "envvars": ["BASHBOT_CONFIG_FILEPATH"],
+  "dependencies": ["jq"],
   "help": "bashbot help",
   "trigger": "help",
   "location": "./",

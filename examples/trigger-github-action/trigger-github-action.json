@@ -1,6 +1,17 @@
 {
   "name": "Trigger a Github Action",
   "description": "Triggers an example Github Action job by repository dispatch",
+  "envvars": [
+    "BASHBOT_CONFIG_FILEPATH", 
+    "SLACK_TOKEN", 
+    "SLACK_CHANNEL", 
+    "SLACK_USERID", 
+    "REPO_OWNER",
+    "REPO_NAME",
+    "GITHUB_TOKEN",
+    "GITHUB_RUN_ID"
+  ],
+  "dependencies": ["curl", "wget"],
   "help": "bashbot trigger-github-action",
   "trigger": "trigger-github-action",
   "location": "./examples/github-action",

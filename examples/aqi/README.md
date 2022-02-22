@@ -6,12 +6,14 @@ In this example, a curl is executed via bash script from the [Air Now API](https
 
 ## Bashbot configuration
 
-This command is triggered by sending `bashbot aqi [zip]` in a slack channel where Bashbot is also a member. The script is expected to exist before execution at the relative path `./examples/aqi` and requires the following environment variables to be set: `AIRQUALITY_API_KEY` The `zip` parameter is validated by building a list of all five digit integers with a for loop.
+This command is triggered by sending `bashbot aqi [zip]` in a slack channel where Bashbot is also a member. The script is expected to exist before execution at the relative path `./examples/aqi` and requires the following environment variables to be set: `AIRQUALITY_API_KEY` The `zip` parameter is validated by building a list of all five digit integers with a for loop. This command requires [jq](https://stedolan.github.io/jq/) and [curl](https://curl.se/) to be installed on the host machine.
 
 ```json
 {
   "name": "Air Quality Index",
   "description": "Get air quality index by zip code",
+  "envvars": ["AIRQUALITY_API_KEY"],
+  "dependencies": ["curl","jq"],
   "help": "bashbot aqi [zip-code]",
   "trigger": "aqi",
   "location": "./examples/aqi",

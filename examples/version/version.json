@@ -1,6 +1,8 @@
 {
   "name": "Get Bashbot Version",
   "description": "Displays the currently running version of Bashbot",
+  "envvars": [],
+  "dependencies": [],
   "help": "bashbot version",
   "trigger": "version",
   "location": "./examples/version",

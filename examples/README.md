@@ -2,7 +2,6 @@
 
 This directory contains a few sample Bashbot commands that can be applied to a configuration json by executing a helper script or by copy/pasting the json directly. Each example (directory) also contains a read-me file describing usage information. The [add-example/add-command.sh](add-example/add-command.sh) script expects the environment variable `BASH_CONFIG_FILEPATH` to be set and takes one argument (filepath of the command to add to the configuration json). The [remove-example/remove-command.sh](remove-example/remove-command.sh) script also expects the environment variable `BASH_CONFIG_FILEPATH` to be set and takes one argument (the value of the parameter `trigger` within the specific command).
 
-
 ```bash
 # From Bashbot source root
 export BASHBOT_CONFIG_FILEPATH=${PWD}/config.json
@@ -22,60 +21,59 @@ export BASHBOT_CONFIG_FILEPATH=${PWD}/config.json
 
 ## Examples
 
-
 1. Simple call/response
-    - [Ping/Pong](ping)
-        - \+ `./add-example/add-command.sh ping/ping.json`
-        - \- `./remove-example/remove-command.sh ping`
+   - [Ping/Pong](ping)
+     - \+ `./add-example/add-command.sh ping/ping.json`
+     - \- `./remove-example/remove-command.sh ping`
 2. Run bash script
-    - [Get Caller Information](info)
-        - \+ `./add-example/add-command.sh info/info.json`
-        - \- `./remove-example/remove-command.sh info`
-    - [Get asdf Plugins](asdf)
-        - \+ `./add-example/add-command.sh asdf/asdf.json`
-        - \- `./remove-example/remove-command.sh asdf`
-    - [Get add-example Plugins](add-example)
-        - \+ `./add-example/add-command.sh add-example/add-example.json`
-        - \- `./remove-example/remove-command.sh add-example`
-    - [Get remove-example Plugins](remove-example)
-        - \+ `./add-example/add-command.sh remove-example/remove-example.json`
-        - \- `./remove-example/remove-command.sh remove-example`
-    - [Get list-examples Plugins](list-examples)
-        - \+ `./add-example/add-command.sh list-examples/list-examples.json`
-        - \- `./remove-example/remove-command.sh list-examples`
+   - [Get Caller Information](info)
+     - \+ `./add-example/add-command.sh info/info.json`
+     - \- `./remove-example/remove-command.sh info`
+   - [Get asdf Plugins](asdf)
+     - \+ `./add-example/add-command.sh asdf/asdf.json`
+     - \- `./remove-example/remove-command.sh asdf`
+   - [Get add-example Plugins](add-example)
+     - \+ `./add-example/add-command.sh add-example/add-example.json`
+     - \- `./remove-example/remove-command.sh add-example`
+   - [Get remove-example Plugins](remove-example)
+     - \+ `./add-example/add-command.sh remove-example/remove-example.json`
+     - \- `./remove-example/remove-command.sh remove-example`
+   - [Get list-examples Plugins](list-examples)
+     - \+ `./add-example/add-command.sh list-examples/list-examples.json`
+     - \- `./remove-example/remove-command.sh list-examples`
 3. Run go-lang script
-    - [Get Running Version](version)
-        - \+ `./add-example/add-command.sh version/version.json`
-        - \- `./remove-example/remove-command.sh version`
+   - [Get Running Version](version)
+     - \+ `./add-example/add-command.sh version/version.json`
+     - \- `./remove-example/remove-command.sh version`
 4. Parse json via jq
-    - [Show Help Dialog](help)
-        - \+ `./add-example/add-command.sh help/help.json`
-        - \- `./remove-example/remove-command.sh help`
-    - [List Available Commands](list)
-        - \+ `./add-example/add-command.sh list/list.json`
-        - \- `./remove-example/remove-command.sh list`
-    - [Describe Command](describe)
-        - \+ `./add-example/add-command.sh describe/describe.json`
-        - \- `./remove-example/remove-command.sh describe`
+   - [Show Help Dialog](help)
+     - \+ `./add-example/add-command.sh help/help.json`
+     - \- `./remove-example/remove-command.sh help`
+   - [List Available Commands](list)
+     - \+ `./add-example/add-command.sh list/list.json`
+     - \- `./remove-example/remove-command.sh list`
+   - [Describe Command](describe)
+     - \+ `./add-example/add-command.sh describe/describe.json`
+     - \- `./remove-example/remove-command.sh describe`
 5. Curl/wget
-    - [Get Latest Bashbot Release](latest-release)
-        - \+ `./add-example/add-command.sh latest-release/latest-release.json`
-        - \- `./remove-example/remove-command.sh latest-release`
-    - [Get File From Repository](get-file-from-repo)
-        - \+ `./add-example/add-command.sh get-file-from-repo/get-file-from-repo.json`
-        - \- `./remove-example/remove-command.sh get-file-from-repo`
-    - [Trigger Github Action](trigger-github-action)
-        - \+ `./add-example/add-command.sh trigger-github-action/trigger-github-action.json`
-        - \- `./remove-example/remove-command.sh trigger-github-action`
-    - [Get Air Quality Index By Zip](aqi)
-        - \+ `./add-example/add-command.sh aqi/aqi.json`
-        - \- `./remove-example/remove-command.sh aqi`
+   - [Get Latest Bashbot Release](latest-release)
+     - \+ `./add-example/add-command.sh latest-release/latest-release.json`
+     - \- `./remove-example/remove-command.sh latest-release`
+   - [Get File From Repository](get-file-from-repo)
+     - \+ `./add-example/add-command.sh get-file-from-repo/get-file-from-repo.json`
+     - \- `./remove-example/remove-command.sh get-file-from-repo`
+   - [Trigger Github Action](trigger-github-action)
+     - \+ `./add-example/add-command.sh trigger-github-action/trigger-github-action.json`
+     - \- `./remove-example/remove-command.sh trigger-github-action`
+   - [Get Air Quality Index By Zip](aqi)
+     - \+ `./add-example/add-command.sh aqi/aqi.json`
+     - \- `./remove-example/remove-command.sh aqi`
 6. [Send message from github action](#send-message-from-github-action)
 
-
--------------------------------------------------------------------------
+---
 
 ### config.json
+
 [sample-config.json](../sample-config.json)
 The config.json file is defined as an array of json objects keyed by 'tools' and 'dependencies.' The dependencies section defines any resources that need to be downloaded or cloned from a repository before execution of commands. The following is a simplified example of a config.json file:
 
@@ -120,10 +118,20 @@ The config.json file is defined as an array of json objects keyed by 'tools' and
     "active": true,
     "name": "unauthorized",
     "text": ":skull_and_crossbones: You are not authorized to use this command in this channel.\nAllowed in: [%s]"
-  }],
+  },{
+      "active": true,
+      "name": "missingenvvar",
+      "text": ":skull_and_crossbones: This command requires this environment variable to be set: [%s]"
+    },{
+      "active": true,
+      "name": "missingdependency",
+      "text": ":skull_and_crossbones: This command requires: [%s]"
+    }],
   "tools": [{
       "name": "List Commands",
       "description": "List all of the possible commands stored in bashbot",
+      "envvars": ["BASHBOT_CONFIG_FILEPATH"],
+      "dependencies": ["jq"],
       "help": "bashbot list-commands",
       "trigger": "list-commands",
       "location": "./",
@@ -162,12 +170,15 @@ permissions:  array of strings. private channel ids to restrict command access t
 ```
 
 #### parameters
+
 Parameters passed to Bashbot cannot be arbitrary/free-form text and must come from a hard-coded list of values, or a dynamic list of values as the return of another command. In this first example a hard-coded list of values is used to print the current `date` or `uptime` by passing to bashbot `bashbot time date` or `bashbot time uptime`
 
 ```json
 {
   "name": "Date or Uptime",
   "description": "Show the current time or uptime",
+  "envvars": [],
+  "dependencies": [],
   "help": "bashbot time",
   "trigger": "time",
   "location": "./",
@@ -191,6 +202,8 @@ In this next example, the command is derived by the output of another command. T
 {
   "name": "Describe Bashbot [command]",
   "description": "Show the json object for a specific command",
+  "envvars": ["BASHBOT_CONFIG_FILEPATH"],
+  "dependencies": ["jq"],
   "help": "bashbot describe [command]",
   "trigger": "describe",
   "location": "./",
@@ -210,9 +223,7 @@ In this next example, the command is derived by the output of another command. T
 }
 ```
 
-
------------------------
-
+---
 
 ## Send message from github action
 

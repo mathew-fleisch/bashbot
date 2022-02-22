@@ -1,6 +1,8 @@
 {
   "name": "Add Example Command",
   "description": "Add command from Bashbot example commands",
+  "envvars": [],
+  "dependencies": ["jq"],
   "help": "bashbot add-example [command]",
   "trigger": "add-example",
   "location": "./examples",

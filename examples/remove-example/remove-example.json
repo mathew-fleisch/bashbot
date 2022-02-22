@@ -1,6 +1,8 @@
 {
   "name": "Remove Example Command",
   "description": "Remove command from bashbot example commands",
+  "envvars": [],
+  "dependencies": [],
   "help": "bashbot remove-example [command]",
   "trigger": "remove-example",
   "location": "./examples",
