@@ -231,7 +231,7 @@
     {
       "name": "TEST Command",
       "description": "Show the json object for a specific command",
-      "envvars": [],
+      "envvars": ["TRIGGERED_USER_NAME", "TRIGGERED_USER_ID", "TRIGGERED_CHANNEL_NAME", "TRIGGERED_CHANNEL_ID"],
       "dependencies": [],
       "help": "!bashbot test",
       "trigger": "test",
