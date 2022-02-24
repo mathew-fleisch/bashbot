@@ -1,6 +1,14 @@
 #!/bin/bash
 # shellcheck disable=SC1090
 
+echo "
+ ____            _     ____        _   
+|  _ \          | |   |  _ \      | |  
+| |_) | __ _ ___| |__ | |_) | ___ | |_ 
+|  _ < / _' / __| '_ \|  _ < / _ \| __|
+| |_) | (_| \__ \ | | | |_) | (_) | |_ 
+|____/ \__,_|___/_| |_|____/ \___/ \__|"
+
 if ! command -v bashbot > /dev/null; then
   echo "bashbot is not installed. Please install bashbot and try again."
   exit 1

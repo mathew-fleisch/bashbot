@@ -62,9 +62,15 @@ docker-run-upstream:
 		mathewfleisch/bashbot:$(LATEST_VERSION)
 
 .PHONY: kind-test
-kind-test: docker-build
+kind-test: kind-setup kind-test-install
+
+.PHONY: kind-setup
+kind-setup: docker-build
 	kind create cluster
 	kind load docker-image bashbot:local
+
+.PHONY: kind-test-install
+kind-test-install:
 	helm install bashbot helm/bashbot \
 		--namespace bashbot \
 		--create-namespace \
@@ -79,7 +85,14 @@ kind-test-upgrade:
 		--set image.repository=bashbot \
 		--set image.tag=local
 	kubectl -n bashbot delete pod \
-		$(shell kubectl get pod --template '{{range .items}}{{.metadata.name}}{{end}}' --selector=app=bashbot)
+		$(shell kubectl get pod --template '{{range .items}}{{.metadata.name}}{{end}}' --selector=app=bashbot) \
+		--ignore-not-found=true
+
+.PHONY: kind-test-logs
+kind-test-logs:
+	kubectl -n bashbot logs -f \
+		$(shell kubectl get pod --template '{{range .items}}{{.metadata.name}}{{end}}' --selector=app=bashbot) \
+		| sed -e 's/\\n/\n/g'
 
 .PHONY: kind-test-cleanup
 kind-test-cleanup:
