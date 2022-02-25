@@ -107,6 +107,7 @@ kubectl --namespace bashbot get pods
 kubectl --namespace bashbot get configmaps
 kubectl --namespace bashbot get serviceaccounts
 kubectl --namespace bashbot get clusterrolebinding
+kubectl --namespace bashbot get secrets
 ```
 
 ---

@@ -1,0 +1,34 @@
+# Name:        kind-test.yaml
+# Author:      Mathew Fleisch <mathew.fleisch@gmail.com>
+# Description: This action will build a docker container and test
+#              it against a kind cluster.
+name: KinD Test
+on:
+  pull_request:
+    branches:
+      - main
+      - v2
+
+jobs:
+  build:
+    name: KinD Test
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      -
+        name: KinD Test
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_APP_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
+          GIT_TOKEN: not-used
+        run: |
+          cp sample-config.json helm/bashbot/config.json
+          cp .tool-versions helm/bashbot/.tool-versions
+          cat sample-env-file | envsubst > helm/bashbot/.env \
+            && make kind-test \
+            && make kind-test-cleanup \
+            && rm -rf helm/bashbot/.env

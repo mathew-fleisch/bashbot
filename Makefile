@@ -110,7 +110,7 @@ kind-test-logs:
 
 .PHONY: kind-test-cleanup
 kind-test-cleanup:
-	helm delete bashbot
+	helm delete bashbot || true
 	kind delete cluster
 
 .PHONY: go-setup
