@@ -8,6 +8,7 @@ on:
     branches:
       - main
       - v2
+      - helm
 
 jobs:
   build:
@@ -30,5 +31,5 @@ jobs:
           cp .tool-versions helm/bashbot/.tool-versions
           cat sample-env-file | envsubst > helm/bashbot/.env \
             && make kind-test \
-            && make kind-test-cleanup \
             && rm -rf helm/bashbot/.env
+          make kind-test-cleanup
