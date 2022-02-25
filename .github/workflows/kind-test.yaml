@@ -31,5 +31,5 @@ jobs:
           cat sample-env-file | envsubst > helm/bashbot/.env \
             && make kind-test \
             && rm -rf helm/bashbot/.env \
-            && echo "Deployment assets removed"
-          make kind-test-cleanup
+            && make kind-test-cleanup \
+            && echo "Deployment assets and KinD cluster removed"
