@@ -13,7 +13,6 @@ BASHBOT_LOG_TYPE?=text
 docker-build:
 	docker build -t bashbot:local .
 
-
 .PHONY: docker-run-local
 docker-run-local:
 	@docker run -it --rm \
@@ -110,7 +109,7 @@ kind-test-logs:
 
 .PHONY: kind-test-cleanup
 kind-test-cleanup:
-	helm delete bashbot || true
+	helm --namespace bashbot delete bashbot || true
 	kind delete cluster
 
 .PHONY: go-setup
