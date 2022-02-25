@@ -1,6 +1,0 @@
-helm 3.7.2
-kubectl 1.23.2
-kustomize 4.4.1
-sops 3.7.1
-yq 4.9.8
-# eof

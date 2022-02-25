@@ -38,7 +38,6 @@ docker-run-local-bash:
 		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
 		bashbot:local
 
-
 .PHONY: docker-run-upstream-bash
 docker-run-upstream-bash:
 	@docker run -it --rm --entrypoint bash \
@@ -63,6 +62,15 @@ docker-run-upstream:
 
 .PHONY: kind-test
 kind-test: kind-setup kind-test-install
+	@echo "Waiting for bashbot to come up..."
+	sleep 1
+	./helm/bashbot/test-deployment.sh
+
+.PHONY: kind-test-again
+kind-test-again: kind-test-upgrade
+	@echo "Waiting for bashbot to come up..."
+	sleep 1
+	./helm/bashbot/test-deployment.sh
 
 .PHONY: kind-setup
 kind-setup: docker-build
@@ -76,6 +84,9 @@ kind-test-install:
 		--create-namespace \
 		--set image.repository=bashbot \
 		--set image.tag=local
+# To override entrypoint, uncomment following two lines
+# --set 'image.command={/bin/bash}' \
+# --set 'image.args={-c,echo \"hello\" && sleep 3600}'
 
 .PHONY: kind-test-upgrade
 kind-test-upgrade:
@@ -84,6 +95,9 @@ kind-test-upgrade:
 		--create-namespace \
 		--set image.repository=bashbot \
 		--set image.tag=local
+# To override entrypoint, uncomment following two lines
+# --set 'image.command={/bin/bash}' \
+# --set 'image.args={-c,echo \"hello\" && sleep 3600}'
 	kubectl -n bashbot delete pod \
 		$(shell kubectl get pod --template '{{range .items}}{{.metadata.name}}{{end}}' --selector=app=bashbot) \
 		--ignore-not-found=true
