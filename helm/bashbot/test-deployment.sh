@@ -16,7 +16,7 @@ main() {
   local ns=${1:-bashbot}
   local dn=${2:-bashbot}
   # Retry loop (20/$i with 3 second delay between loops)
-  for i in {20..1}; do
+  for i in {30..1}; do
     # Get the expected number of replicas for this deployment
     expectedReplicas=$(kubectl --namespace ${ns} -o jsonpath='{.status.replicas}' get deployment ${dn})
     # If the '.status.replicas' value is empty/not-set, set the default number of replicas to '1'

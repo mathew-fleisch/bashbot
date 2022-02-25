@@ -8,7 +8,6 @@ on:
     branches:
       - main
       - v2
-      - helm
 
 jobs:
   build:
@@ -31,5 +30,6 @@ jobs:
           cp .tool-versions helm/bashbot/.tool-versions
           cat sample-env-file | envsubst > helm/bashbot/.env \
             && make kind-test \
-            && rm -rf helm/bashbot/.env
+            && rm -rf helm/bashbot/.env \
+            && echo "Deployment assets removed"
           make kind-test-cleanup
