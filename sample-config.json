@@ -1,7 +1,7 @@
 {
   "admins": [
     {
-      "trigger": "bashbat",
+      "trigger": "!bashbot",
       "appName": "BashBot",
       "userIds": ["ADMIN-USER-ID"],
       "privateChannelId": "PRIVATE-CHANNEL-ID",
@@ -9,6 +9,11 @@
     }
   ],
   "messages": [
+    {
+      "active": true,
+      "name": "welcome",
+      "text": "Witness the power of %s"
+    },
     {
       "active": true,
       "name": "processing_command",
@@ -61,12 +66,12 @@
       "description": "Show this message",
       "envvars": ["BASHBOT_CONFIG_FILEPATH"],
       "dependencies": ["jq"],
-      "help": "bashbot help",
+      "help": "!bashbot help",
       "trigger": "help",
       "location": "./",
       "command": [
         "echo \"BashBot is a tool for infrastructure/devops teams to automate tasks triggered by slash-command-like declarative configuration\"",
-        "echo \"\\`\\`\\`\"",
+        "&& echo \"\\`\\`\\`\"",
         "&& jq -r -c '.tools[] | \"\\(.help) - \\(.description)\"' ${BASHBOT_CONFIG_FILEPATH}",
         "&& echo \"\\`\\`\\`\""
       ],
@@ -83,9 +88,9 @@
       "description": "Get information about the user and channel command is being run from",
       "envvars": [],
       "dependencies": [],
-      "help": "bashbot info",
+      "help": "!bashbot info",
       "trigger": "info",
-      "location": "./example/info",
+      "location": "./vendor/bashbot/examples/info",
       "command": ["./get-info.sh"],
       "parameters": [],
       "log": false,
@@ -96,14 +101,14 @@
       ]
     },
     {
-      "name": "List Installed Bashbot Commands",
-      "description": "List all configured bashbot commands",
-      "envvars": ["BASHBOT_CONFIG_FILEPATH"],
-      "dependencies": ["jq"],
-      "help": "bashbot list",
-      "trigger": "list",
+      "name": "Display Configuration",
+      "description": "dump configuration as json blob",
+      "envvars": [],
+      "dependencies": [],
+      "help": "!bashbot dump",
+      "trigger": "dump",
       "location": "./",
-      "command": ["jq -r '.tools[] | .trigger + \" - \" + .name' ${BASHBOT_CONFIG_FILEPATH}"],
+      "command": ["jq -r '.' ${BASHBOT_CONFIG_FILEPATH}"],
       "parameters": [],
       "log": false,
       "ephemeral": false,
@@ -113,11 +118,98 @@
       ]
     },
     {
+      "name": "List Available Bashbot Commands",
+      "description": "List all of the possible commands stored in bashbot",
+      "envvars": ["BASHBOT_CONFIG_FILEPATH"],
+      "dependencies": ["jq"],
+      "help": "!bashbot list",
+      "trigger": "list",
+      "location": "./",
+      "command": ["jq -r '.tools[] | .trigger' ${BASHBOT_CONFIG_FILEPATH}"],
+      "parameters": [],
+      "log": false,
+      "ephemeral": false,
+      "response": "code",
+      "permissions": [
+        "all"
+      ]
+    },
+    {
+      "name": "List Example Commands",
+      "description": "List commands from bashbot example commands",
+      "envvars": [],
+      "dependencies": [],
+      "help": "!bashbot list-examples",
+      "trigger": "list-examples",
+      "location": "./vendor/bashbot/examples",
+      "command": [
+        "find . -name \"*.json\"",
+        "| xargs -I {} bash -c",
+          "'export example=$(basename {} .json)",
+          "&& printf \"%21s - %s\" \"$example\" \"https://github.com/mathew-fleisch/bashbot/tree/main/examples/$example\"",
+          "&& echo'",
+        "| sort -k 2"
+      ],
+      "parameters": [],
+      "log": false,
+      "ephemeral": false,
+      "response": "code",
+      "permissions": [
+        "all"
+      ]
+    },
+    {
+      "name": "Testing the regex",
+      "description": "Testing that regex",
+      "envvars": [],
+      "dependencies": [],
+      "help": "!bashbot regex hopefully a bunch of free form text",
+      "trigger": "regex",
+      "location": "./",
+      "command": [". /usr/asdf/asdf.sh && echo \"${command}\" || true"],
+      "parameters": [
+        {
+          "name": "command",
+          "allowed": [],
+          "description": "This should just allow any text to be used as input",
+          "match": ".*"
+        }
+      ],
+      "log": false,
+      "ephemeral": false,
+      "response": "code",
+      "permissions": [
+        "GPFMM5MD2"
+      ]
+    },
+    {
+      "name": "Curl Example",
+      "description": "Pass a valid url to curl",
+      "envvars": [],
+      "dependencies": ["curl"],
+      "help": "!bashbot curl [url]",
+      "trigger": "curl",
+      "location": "./",
+      "command": ["curl -s ${url}"],
+      "parameters": [
+        {
+          "name": "url",
+          "allowed": [],
+          "description": "A valid url",
+          "match": "(http|ftp|https)://([\\w_-]+(?:(?:\\.[\\w_-]+)+))([\\w.,@?^=%&:/~+#-]*[\\w@?^=%&/~+#-])?"
+        }
+      ],
+      "log": false,
+      "ephemeral": false,
+      "response": "code",
+      "permissions": ["all"]
+    },
+    {
       "name": "Describe Bashbot [command]",
       "description": "Show the json object for a specific command",
       "envvars": ["BASHBOT_CONFIG_FILEPATH"],
       "dependencies": ["jq"],
-      "help": "bashbot describe [command]",
+      "help": "!bashbot describe [command]",
       "trigger": "describe",
       "location": "./",
       "command": ["jq '.tools[] | select(.trigger==\"${command}\")' ${BASHBOT_CONFIG_FILEPATH}"],
@@ -141,14 +233,17 @@
       "description": "Show the json object for a specific command",
       "envvars": ["TRIGGERED_USER_NAME", "TRIGGERED_USER_ID", "TRIGGERED_CHANNEL_NAME", "TRIGGERED_CHANNEL_ID"],
       "dependencies": [],
-      "help": "bashbot test [command]",
+      "help": "!bashbot test",
       "trigger": "test",
       "location": "./",
       "command": [
         "echo \"Username[id]: ${TRIGGERED_USER_NAME}[${TRIGGERED_USER_ID}]\"",
-        "&& echo \" Channel[id]: ${TRIGGERED_CHANNEL_NAME}[${TRIGGERED_CHANNEL_ID}]\""
+        "&& echo \" Channel[id]: ${TRIGGERED_CHANNEL_NAME}[${TRIGGERED_CHANNEL_ID}] <@${TRIGGERED_USER_ID}>\""
       ],
-      "parameters": [],
+      "parameters": [{
+        "name": "blah",
+        "allowed": ["yup", "nope"]
+      }],
       "log": false,
       "ephemeral": false,
       "response": "code",
@@ -157,46 +252,21 @@
       ]
     },
     {
-      "name": "List Example Commands",
-      "description": "List commands from bashbot example commands",
+      "name": "Date or Uptime",
+      "description": "Show the current time or uptime",
       "envvars": [],
       "dependencies": [],
-      "help": "bashbot list-examples",
-      "trigger": "list-examples",
-      "location": "./examples",
-      "command": [
-        "find . -name \"*.json\"",
-        "| xargs -I {} bash -c",
-          "'export example=$(basename {} .json)",
-          "&& printf \"%21s - %s\" \"$example\" \"https://github.com/mathew-fleisch/bashbot/tree/main/examples/$example\"",
-          "&& echo'",
-        "| sort -k 2"
-      ],
-      "parameters": [],
-      "log": false,
-      "ephemeral": false,
-      "response": "code",
-      "permissions": [
-        "all"
-      ]
-    },
-    {
-      "name": "Add Example Command",
-      "description": "Add command from bashbot example commands",
-      "envvars": [],
-      "dependencies": ["jq"],
-      "help": "bashbot add-example",
-      "trigger": "add-example",
-      "location": "./examples",
-      "command": [
-        "./add-example/add-command.sh $(find . -name \"${add_command}.json\")"
-      ],
+      "help": "!bashbot time",
+      "trigger": "time",
+      "location": "./",
+      "command": ["${command}"],
       "parameters": [
         {
-          "name": "add_command",
-          "allowed": [],
-          "description": "a command to add to bashbot config ('bashbot list-examples')",
-          "source": ["find . -name \"*.json\" | xargs -I {} basename {} .json"]
+          "name": "command",
+          "allowed": [
+            "date",
+            "uptime"
+          ]
         }
       ],
       "log": false,
@@ -207,38 +277,265 @@
       ]
     },
     {
-      "name": "Remove Example Command",
-      "description": "Remove command from bashbot example commands",
+      "name": "Get Bashbot Version",
+      "description": "Displays the currently running version of Bashbot",
       "envvars": [],
       "dependencies": [],
-      "help": "bashbot remove-example",
-      "trigger": "remove-example",
-      "location": "./examples",
-      "command": [
-        "./remove-example/remove-command.sh ${remove_command}"
-      ],
-      "parameters": [
-        {
-          "name": "remove_command",
-          "allowed": [],
-          "description": "a command to remove to bashbot config ('bashbot list-examples')",
-          "source": ["find . -name \"*.json\" | xargs -I {} basename {} .json"]
-        }
-      ],
+      "help": "!bashbot version",
+      "trigger": "version",
+      "location": "./vendor/bashbot/examples/version",
+      "command": ["./get-version.sh"],
+      "parameters": [],
       "log": false,
       "ephemeral": false,
       "response": "code",
       "permissions": [
         "all"
+      ]
+    },
+    {
+      "name": "Ping/Pong",
+      "description": "Return pong on pings",
+      "help": "!bashbot ping",
+      "trigger": "ping",
+      "location": "./",
+      "command": ["echo \"pong\""],
+      "parameters": [],
+      "log": false,
+      "ephemeral": false,
+      "response": "text",
+      "permissions": [
+        "all"
+      ]
+    },
+    {
+      "name": "List asdf dependencies",
+      "description": "Return a list of the dependencies installed from asdf",
+      "envvars": [],
+      "dependencies": [],
+      "help": "!bashbot asdf-list",
+      "trigger": "asdf-list",
+      "location": "./",
+      "command": [". /usr/asdf/asdf.sh && asdf list"],
+      "parameters": [],
+      "log": false,
+      "ephemeral": false,
+      "response": "code",
+      "permissions": [
+        "all"
+      ]
+    },
+    {
+      "name": "Kubectl cluster-info",
+      "description": "Return cluster-info by kubectl command",
+      "envvars": [],
+      "dependencies": [],
+      "help": "!bashbot k-info",
+      "trigger": "k-info",
+      "location": "./",
+      "command": [". /usr/asdf/asdf.sh && kubectl cluster-info"],
+      "parameters": [],
+      "log": false,
+      "ephemeral": false,
+      "response": "code",
+      "permissions": [
+        "all"
+      ]
+    },
+    {
+      "name": "kubectl get pods --all-namespaces",
+      "description": "Get all pods in all namespaces",
+      "envvars": [],
+      "dependencies": [],
+      "help": "!bashbot k-get-pods",
+      "trigger": "k-get-pods",
+      "location": "./",
+      "command": [
+        ". /usr/asdf/asdf.sh",
+        " && kubectl get pods --all-namespaces"
+      ],
+      "parameters": [],
+      "log": false,
+      "ephemeral": false,
+      "response": "code",
+      "permissions": [
+        "all"
+      ]
+    },
+    {
+      "name": "kubectl -n [namespace] delete pod [podname]",
+      "description": "Delete a pod",
+      "envvars": [],
+      "dependencies": [],
+      "help": "!bashbot k-delete-pod [namespace] [podname]",
+      "trigger": "k-delete-pod",
+      "location": "./",
+      "command": [
+        ". /usr/asdf/asdf.sh",
+        " && kubectl -n ${namespace} delete pod ${podname} --ignore-not-found=true"
+      ],
+      "parameters": [{
+        "name": "namespace",
+        "allowed": [],
+        "description": "List all of the namespaces in the cluster",
+        "source": [
+          ". /usr/asdf/asdf.sh",
+          " && kubectl get namespaces | grep -v NAME | awk '{print $1}'"
+        ]
+      },{
+        "name": "podname",
+        "allowed": [],
+        "description": "List all of the pods in the cluster by name",
+        "source": [
+          ". /usr/asdf/asdf.sh",
+          " && kubectl get pods -A | grep -v NAME | awk '{print $2}'"
+        ]
+      }],
+      "log": false,
+      "ephemeral": false,
+      "response": "code",
+      "permissions": [
+        "all"
+      ]
+    },
+    {
+      "name": "kubectl -n [namespace] describe pod [podname]",
+      "description": "Return pod information",
+      "envvars": [],
+      "dependencies": [],
+      "help": "!bashbot k-describe-pod [namespace] [podname]",
+      "trigger": "k-describe-pod",
+      "location": "./",
+      "command": [
+        ". /usr/asdf/asdf.sh",
+        " && kubectl -n ${namespace} describe pod ${podname}"
+      ],
+      "parameters": [{
+        "name": "namespace",
+        "allowed": [],
+        "description": "List all of the namespaces in the cluster",
+        "source": [
+          ". /usr/asdf/asdf.sh",
+          " && kubectl get namespaces | grep -v NAME | awk '{print $1}'"
+        ]
+      },{
+        "name": "podname",
+        "allowed": [],
+        "description": "List all of the pods in the cluster by name",
+        "source": [
+          ". /usr/asdf/asdf.sh",
+          " && kubectl get pods -A | grep -v NAME | awk '{print $2}'"
+        ]
+      }],
+      "log": false,
+      "ephemeral": false,
+      "response": "code",
+      "permissions": [
+        "all"
+      ]
+    },
+    {
+      "name": "kubectl -n [namespace] logs --tail 10 [podname]",
+      "description": "Return last 10 lines of pod logs",
+      "envvars": [],
+      "dependencies": [],
+      "help": "!bashbot k-pod-logs [namespace] [podname]",
+      "trigger": "k-pod-logs",
+      "location": "./",
+      "command": [". /usr/asdf/asdf.sh",
+        " && kubectl -n ${namespace} logs --tail 10 ${podname}"
+      ],
+      "parameters": [{
+        "name": "namespace",
+        "allowed": [],
+        "description": "List all of the namespaces in the cluster",
+        "source": [
+          ". /usr/asdf/asdf.sh",
+          " && kubectl get namespaces | grep -v NAME | awk '{print $1}'"
+        ]
+      },{
+        "name": "podname",
+        "allowed": [],
+        "description": "List all of the pods in the cluster by name",
+        "source": [
+          ". /usr/asdf/asdf.sh",
+          " && kubectl get pods -A | grep -v NAME | awk '{print $2}'"
+        ]
+      }],
+      "log": false,
+      "ephemeral": false,
+      "response": "code",
+      "permissions": [
+        "all"
+      ]
+    },
+    {
+      "name": "Get Latest Bashbot Version",
+      "description": "Returns the latest version of Bashbot via curl",
+      "envvars": [],
+      "dependencies": [],
+      "help": "!bashbot latest-release",
+      "trigger": "latest-release",
+      "location": "./",
+      "command": [
+        "latest_version=$(curl -s https://api.github.com/repos/mathew-fleisch/bashbot/releases/latest | grep tag_name | cut -d '\"' -f 4)",
+        "&& echo \"The latest version of <https://github.com/mathew-fleisch/bashbot|Bashbot>: <https://github.com/mathew-fleisch/bashbot/releases/tag/$latest_version|$latest_version>\""
+      ],
+      "parameters": [],
+      "log": false,
+      "ephemeral": false,
+      "response": "text",
+      "permissions": [
+        "all"
+      ]
+    },
+    {
+      "name": "Trigger a Github Action",
+      "description": "Triggers an example Github Action job by repository dispatch",
+      "envvars": [],
+      "dependencies": [],
+      "help": "!bashbot trigger-github-action",
+      "trigger": "trigger-github-action",
+      "location": "./vendor/bashbot/examples/trigger-github-action",
+      "command": [
+        "export REPO_OWNER=mathew-fleisch",
+        "&& export REPO_NAME=bashbot",
+        "&& export SLACK_CHANNEL=${TRIGGERED_CHANNEL_ID}",
+        "&& export SLACK_USERID=${TRIGGERED_USER_ID}",
+        "&& ./trigger.sh"
+      ],
+      "parameters": [],
+      "log": false,
+      "ephemeral": false,
+      "response": "text",
+      "permissions": [
+        "GPFMM5MD2"
       ]
     }
   ],
   "dependencies": [
     {
-      "name": "BashBot scripts Scripts",
+      "name": "Install Dependencies with asdf",
       "install": [
-        "rm -rf bashbot-scripts || true",
-        "&& git clone https://github.com/mathew-fleisch/bashbot-scripts.git"
+        "mkdir -p /usr/asdf; ",
+        "git clone --depth 1 https://github.com/asdf-vm/asdf.git /usr/asdf --branch v0.8.1; ",
+        ". /usr/asdf/asdf.sh; ",
+        "cat /bashbot/.tool-versions ",
+          "| grep -vE '^#' ",
+          "| awk '{print $1}' ",
+          "| xargs -I {} asdf plugin add {}; ",
+        "asdf install; ",
+        "echo 'asdf installed and configured!'; ",
+        "echo 'Source asdf before command to use installed dependencies:'; ",
+        "echo '. /usr/asdf/asdf.sh'; ",
+        "asdf list"
+      ]
+    },
+    {
+      "name": "Bashbot Inception: download bashbot source code into vendor directory",
+      "install": [
+        "rm -rf bashbot || true",
+        "&& git clone https://github.com/mathew-fleisch/bashbot.git"
       ]
     }
   ]

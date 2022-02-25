@@ -28,7 +28,7 @@ This command is triggered by sending `bashbot version` in a slack channel where 
 
 ## Bashbot script
 
-The [get-version.sh](get-version.sh) first checks to see if Bashbot is already available via `$PATH` and prints that version, if possible. Next, if the binary is being run from the `./bin` directory, this script will grab the correct os/architecture from `uname` and attempt to print that version. If both of those methods fail, a [Makefile](../../Makefile) target (`run-version`) is executed, provided the Makefile and go source exists. If all of those methods are unsuccessful, an error message is returned to slack that the version could not be determined.
+The [get-version.sh](get-version.sh) first checks to see if Bashbot is already available via `$PATH` and prints that version, if possible. Next, if the binary is being run from the `./bin` directory, this script will grab the correct os/architecture from `uname` and attempt to print that version. If both of those methods fail, a [Makefile](../../Makefile) target (`go-version`) is executed, provided the Makefile and go source exists. If all of those methods are unsuccessful, an error message is returned to slack that the version could not be determined.
 
 ***Note: `exit 0` is used in success/failure states to ensure error messages are returned to slack. If `exit 1` is used for error states, a generic error message is returned to slack and `stderr` is suppressed.***
 
@@ -53,8 +53,8 @@ fi
 # Finally, check if bashbot go source exists and pull that version
 go_filename=cmd/bashbot/bashbot.go
 if [[ -f "./${go_filename}" ]] && [[ -f "./Makefile" ]]; then
-    make setup
-    make run-version
+    make go-setup
+    make go-version
     exit 0
 fi
 

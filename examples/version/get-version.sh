@@ -20,8 +20,8 @@ fi
 # Finally, check if bashbot go source exists and pull that version
 go_filename=cmd/bashbot/bashbot.go
 if [[ -f "./${go_filename}" ]] && [[ -f "./Makefile" ]]; then
-    make setup
-    make run-version
+    make go-setup
+    make go-version
     exit 0
 fi
 
