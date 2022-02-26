@@ -16,41 +16,44 @@ See the [Setup/Deployment Examples Repository](https://github.com/mathew-fleisch
 
 ## Installation and setup
 
-Bashbot can be run as a go binary or as a container and requires a slack-token, slack-app-token and a config.json. The go binary takes flags to set the slack-token, slack-app-token and path to the config.json file and the container uses environment variables to trigger a go binary by [entrypoint.sh](entrypoint.sh).
+Bashbot can be run as a go binary or as a container and requires a slack-bot-token, slack-app-token and a config.json. The go binary takes flags to set the slack-bot-token, slack-app-token and path to the config.json file and the container uses environment variables to trigger a go binary by [entrypoint.sh](entrypoint.sh).
 
-***Note about slack-token and slack-app-token*
+***Note about slack-bot-token and slack-app-token*
 
-Slack's permissions model for the "[Socket Mode](https://api.slack.com/apis/connections/sockethttps://api.slack.com/rtm)" socket connection, requires a "classic app" to be configured to get the correct type of token to run Bashbot. After logging into slack via browser, visit [https://api.slack.com/apps?new_classic_app=1](https://api.slack.com/apps?new_classic_app=1) to set up a new "legacy bot user", "Bot User OAuth Access Token" and "[App-Level Token](https://api.slack.com/authentication/token-types#app)". Turn on Socket Mode, **subscribe to bot events you want Bashbot to listen to**. Finally, add bashbot to your workspace and invite to a channel. See the [Setup/Deployment Examples Repository](https://github.com/mathew-fleisch/bashbot-example) for more detailed information about how to deploy Bashbot in your infrastructure.
+Bashbot uses the Slack API's "[Socket Mode](https://api.slack.com/apis/connections/socket)" to connect to the slack servers over a socket connection and uses ***no webhooks/ingress*** to trigger commands. Bashbot "subscribes" to message and emoji events and determins if a command should be executed and what command should be executed by parsing the data in each event. To run Bashbot, you must have a "[Bot User OAuth Token](https://api.slack.com/authentication/token-types#bot)" and an "[App-Level Token](https://api.slack.com/authentication/token-types#app)".
 
-***Quick start***
+- Click "Create New App" from the [Slack Apps](https://api.slack.com/apps) page and follow the "From Scratch" prompts to give your instance of bashbot a unique name and a workspace for it to be installed in
+- The "Basic Information" page gives controls to set a profile picture toward the bottom (make sure to save any changes)
+- Enable "Socket Mode" from the "Socket Mode" page and add the default scopes `conversations.read` and note the "[App-Level Token](https://api.slack.com/authentication/token-types#app)" that is generated to save in the .env file as `SLACK_APP_TOKEN`
+- Enable events from the "Event Subscriptions" page and add the following bot event subscriptions: `app_mention`,   `message.channels`, `message.groups`, `reaction_added`, `reaction_removed` and save changes
+- From the "OAuth & Permissions" page, after setting the following "scopes" or permissions, install Bashbot in your workspace (this will require administrator approval of your slack workspace) and note the "[Bot User OAuth Token](https://api.slack.com/authentication/token-types#bot)" to save in the .env file as `SLACK_BOT_TOKEN`
+  - `app_mentions:read`
+  - `channels:history`
+  - `chat:write`
+  - `groups:history`
+  - `reactions:read`
+  - `channels:read`
+  - `files:write`
+  - `groups:read`
+  - `incoming-webhook`
+  - `reactions:write`
+  - `users:read`
+
+Note: Prior to version 2, Bashbot required a "classic app" to be configured to get the correct type of token to connect to Slack. After logging into Slack via browser, visit [https://api.slack.com/apps?new_classic_app=1](https://api.slack.com/apps?new_classic_app=1) to set up a new "legacy bot user", "Bot User OAuth Access Token," add bashbot to your workspace, and invite to a channel. See the [Setup/Deployment Examples Repository](https://github.com/mathew-fleisch/bashbot-example) for more detailed information about how to deploy Bashbot in your infrastructure.
+
+### Quick Start: KinD cluster
+
+***KinD Prerequisites***
+
+- [docker](https://docs.docker.com/get-docker/)
+- [helm 3+](https://helm.sh/docs/intro/quickstart/)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/)
+- [KinD](https://kind.sigs.k8s.io/docs/user/quick-start/)
+
+To set up a local [KinD cluster](https://kind.sigs.k8s.io/docs/user/quick-start/) run the following commands:
 
 ```bash
-# Set `Bot User OAuth Access Token` as SLACK_BOT_TOKEN environment variable
-export SLACK_BOT_TOKEN=xoxb-xxxxxxxxx-xxxxxxx
-# Set `Bot App Access Token` as SLACK_APP_TOKEN environment variable
-export SLACK_APP_TOKEN=xapp-xxxxxxxxx-xxxxxxx
-
-# Get the sample config.json
-wget -O config.json https://raw.githubusercontent.com/mathew-fleisch/bashbot/main/sample-config.json
-
-# Pass environment variable and mount configuration json to run container
-docker run --rm \
-  --name bashbot \
-  -v ${PWD}/config.json:/bashbot/config.json \
-  -e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
-  -e SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN} \
-  -e SLACK_APP_TOKEN=${SLACK_APP_TOKEN} \
-  -e LOG_LEVEL="info" \
-  -e LOG_FORMAT="text" \
-  -it mathewfleisch/bashbot:latest
-```
-
----
-
-To set up a local [KinD cluster](https://kind.sigs.k8s.io/docs/user/quick-start/) run the following commands (prerequisites: [docker](https://docs.docker.com/get-docker/), [helm 3+](https://helm.sh/docs/intro/quickstart/), [kubectl](https://kubernetes.io/docs/tasks/tools/), [KinD](https://kind.sigs.k8s.io/docs/user/quick-start/) ):
-
-```bash
-# Copy .env/config.json/.tool-versions files to helm directory (set .env variable values)
+# Copy .env, config.json and .tool-versions sample files to helm directory and replace with custom values.
 cp sample-env-file helm/bashbot/.env
 cp sample-config.json helm/bashbot/config.json
 cp .tool-versions helm/bashbot/.tool-versions
@@ -109,6 +112,121 @@ kubectl --namespace bashbot get serviceaccounts
 kubectl --namespace bashbot get clusterrolebinding
 kubectl --namespace bashbot get secrets
 ```
+
+---
+
+### Quick Start: Docker
+
+```bash
+# Set `Bot User OAuth Access Token` as SLACK_BOT_TOKEN environment variable
+export SLACK_BOT_TOKEN=xoxb-xxxxxxxxx-xxxxxxx
+# Set `Bot App Access Token` as SLACK_APP_TOKEN environment variable
+export SLACK_APP_TOKEN=xapp-xxxxxxxxx-xxxxxxx
+
+# Get the sample config.json
+wget -O config.json https://raw.githubusercontent.com/mathew-fleisch/bashbot/main/sample-config.json
+
+# Pass environment variable and mount configuration json to run container
+docker run --rm \
+  --name bashbot \
+  -v ${PWD}/config.json:/bashbot/config.json \
+  -e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
+  -e SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN} \
+  -e SLACK_APP_TOKEN=${SLACK_APP_TOKEN} \
+  -e LOG_LEVEL="info" \
+  -e LOG_FORMAT="text" \
+  -it mathewfleisch/bashbot:latest
+```
+
+---
+
+### Quick Start: Go Binary
+
+```bash
+# Set a path to your local configuration file
+export BASH_CONFIG_FILEPATH=${PWD}/bashbot/config.json
+# Set `Bot User OAuth Access Token` as SLACK_BOT_TOKEN environment variable
+export SLACK_BOT_TOKEN=xoxb-xxxxxxxxx-xxxxxxx
+# Set `Bot App Access Token` as SLACK_APP_TOKEN environment variable
+export SLACK_APP_TOKEN=xapp-xxxxxxxxx-xxxxxxx
+
+# ----------- Install binary -------------- #
+
+# os: linux, darwin
+export os=$(uname | tr '[:upper:]' '[:lower:]')
+
+# arch: amd64, arm64
+export arch=amd64
+test "$(uname -m)" == "aarch64" && export arch=arm64
+
+# Latest bashbot version/tag
+export latest=$(curl -s https://api.github.com/repos/mathew-fleisch/bashbot/releases/latest | grep tag_name | cut -d '"' -f 4)
+
+# Remove any existing bashbot binaries
+rm -rf /usr/local/bin/bashbot || true
+
+# Get correct binary for host machine and place in user's path
+wget -qO /usr/local/bin/bashbot https://github.com/mathew-fleisch/bashbot/releases/download/${latest}/bashbot-${os}-${arch}
+
+# Make bashbot binary executable
+chmod +x /usr/local/bin/bashbot
+
+# To verify installation run version or help commands
+bashbot --version
+# bashbot-darwin-amd64    v1.6.15
+
+bashbot --help
+#  ____            _     ____        _   
+# |  _ \          | |   |  _ \      | |  
+# | |_) | __ _ ___| |__ | |_) | ___ | |_ 
+# |  _ < / _' / __| '_ \|  _ < / _ \| __|
+# | |_) | (_| \__ \ | | | |_) | (_) | |_ 
+# |____/ \__,_|___/_| |_|____/ \___/ \__|
+# Bashbot is a slack bot, written in golang, that can be configured
+# to run bash commands or scripts based on a configuration file.
+
+# Usage: ./bashbot [flags]
+
+#   -config-file string
+#         [REQUIRED] Filepath to config.json file (or environment variable BASHBOT_CONFIG_FILEPATH set)
+#   -help
+#         Help/usage information
+#   -install-vendor-dependencies
+#         Cycle through dependencies array in config file to install extra dependencies
+#   -log-format string
+#         Display logs as json or text (default "text")
+#   -log-level string
+#         Log elevel to display (info,debug,warn,error) (default "info")
+#   -send-message-channel string
+#         Send stand-alone slack message to this channel (requires -send-message-text)
+#   -send-message-ephemeral
+#         Send stand-alone ephemeral slack message to a specific user (requires -send-message-channel -send-message-text and -send-message-user)
+#   -send-message-text string
+#         Send stand-alone slack message (requires -send-message-channel)
+#   -send-message-user string
+#         Send stand-alone ephemeral slack message to this slack user (requires -send-message-channel -send-message-text and -send-message-ephemeral)
+#   -slack-token string
+#         [REQUIRED] Slack token used to authenticate with api (or environment variable SLACK_TOKEN set)
+#   -version
+#         Get current version
+
+
+# If the log-level doesn't exist, set it to 'info'
+LOG_LEVEL=${LOG_LEVEL:-info}
+# If the log-format doesn't exist, set it to 'text'
+LOG_FORMAT=${LOG_FORMAT:-text}
+
+# Run install-vendor-dependencies path
+bashbot --install-vendor-dependencies \
+  --log-level "$LOG_LEVEL" \
+  --log-format "$LOG_FORMAT"
+
+# Run Bashbot binary passing the config file and the Slack token
+bashbot \
+  --log-level "$LOG_LEVEL" \
+  --log-format "$LOG_FORMAT"
+```
+
 
 ---
 

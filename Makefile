@@ -73,7 +73,7 @@ kind-test-again: kind-test-upgrade
 
 .PHONY: kind-setup
 kind-setup: docker-build
-	kind create cluster
+	kind create cluster || true
 	kind load docker-image bashbot:local
 
 .PHONY: kind-test-install

@@ -7,7 +7,7 @@ on:
   pull_request:
     branches:
       - main
-      - v2
+      - v2 # TODO: REMOVE THIS BEFORE MERGING
 
 jobs:
   build:
