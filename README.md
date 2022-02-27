@@ -25,17 +25,22 @@ Bashbot uses the Slack API's "[Socket Mode](https://api.slack.com/apis/connectio
 - Click "Create New App" from the [Slack Apps](https://api.slack.com/apps) page and follow the "From Scratch" prompts to give your instance of bashbot a unique name and a workspace for it to be installed in
 - The "Basic Information" page gives controls to set a profile picture toward the bottom (make sure to save any changes)
 - Enable "Socket Mode" from the "Socket Mode" page and add the default scopes `conversations.read` and note the "[App-Level Token](https://api.slack.com/authentication/token-types#app)" that is generated to save in the .env file as `SLACK_APP_TOKEN`
-- Enable events from the "Event Subscriptions" page and add the following bot event subscriptions: `app_mention`,   `message.channels`, `message.groups`, `reaction_added`, `reaction_removed` and save changes
+- Enable events from the "Event Subscriptions" page and add the following bot event subscriptions and save changes
+  - `app_mention`
+  - `message.channels`
+  - `message.groups`
+  - `reaction_added`
+  - `reaction_removed`
 - From the "OAuth & Permissions" page, after setting the following "scopes" or permissions, install Bashbot in your workspace (this will require administrator approval of your slack workspace) and note the "[Bot User OAuth Token](https://api.slack.com/authentication/token-types#bot)" to save in the .env file as `SLACK_BOT_TOKEN`
   - `app_mentions:read`
   - `channels:history`
-  - `chat:write`
-  - `groups:history`
-  - `reactions:read`
   - `channels:read`
+  - `chat:write`
   - `files:write`
+  - `groups:history`
   - `groups:read`
   - `incoming-webhook`
+  - `reactions:read`
   - `reactions:write`
   - `users:read`
 
