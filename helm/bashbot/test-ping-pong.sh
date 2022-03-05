@@ -7,11 +7,11 @@ set -o nounset
 # set -x # debug
 
 cleanup() {
-  echo "Deployment test complete!"
+  echo "Ping/Pong test complete!"
 }
 
 trap cleanup EXIT
-
+TESTING_CHANNEL=${TESTING_CHANNEL:-C034FNXS3FA}
 main() {
   local ns=${1:-bashbot}
   local dn=${2:-bashbot}
@@ -30,23 +30,30 @@ main() {
     test $readyReplicas -eq $expectedReplicas \
       && test 1 -eq 1
     if [ $? -eq 0 ]; then
-      echo "Bashbot deployment confirmed!"
-      kubectl --namespace ${ns} get deployments
-      found_connected=0
+      # echo "Bashbot deployment confirmed!"
+      # kubectl --namespace ${ns} get deployments
+      found_pong=0
       for j in {30..1}; do
         bashbot_pod=$(kubectl -n bashbot get pods -o jsonpath='{.items[0].metadata.name}')
+        # Send `!bashbot ping` via bashbot binary within bashbot pod
+        kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
+          'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text "!bashbot ping"'
         last_log_line=$(kubectl -n bashbot logs --tail 1 $bashbot_pod)
         # Tail the last line of the bashbot pod's log looking
         # for the string 'Bashbot is now connected to slack'
-        if [[ $last_log_line =~ "Bashbot is now connected to slack" ]]; then
-          echo "Bashbot connected to slack successfully!"
-          found_connected=1
-          break
+        if [[ $last_log_line =~ "pong" ]]; then
+          echo "Bashbot ping/pong tests successful!"
+          found_pong=1
+
+          kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
+            'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text "Ping/pong test successful!"'
+          exit 0
         fi
-        echo "Bashbot not yet connected to slack. $j more attempts..."
+        echo "Bashbot pong test failed. $j more attempts..."
         sleep 3
       done
-      [ $found_connected -eq 1 ] && exit 0 || exit 1
+      # Don't require ping/pong tests to pass for the whole test to pass
+      [ $found_pong -eq 1 ] && exit 0 || exit 1
     fi
 
     # Since the deployment was not ready, try again $i more times

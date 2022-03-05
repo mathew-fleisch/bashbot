@@ -630,11 +630,6 @@ func handleEventsAPIEvent(event slackevents.EventsAPIEvent) error {
 }
 
 func handleMessage(event *slackevents.MessageEvent) {
-	// To Do: By bypassing this next check for a bot_message, we can test the bot's functionaltiy in a test slack channel
-	if event.SubType == "bot_message" {
-		return
-	}
-
 	for _, handler := range specials {
 		if handler(event) {
 			break
