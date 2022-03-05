@@ -75,4 +75,3 @@ namespace=${1:-bashbot}
 deploymentName=${2:-bashbot}
 
 main $namespace $deploymentName
-
