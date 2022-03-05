@@ -69,7 +69,7 @@ main() {
   exit 1
 }
 
-# Usage: ./test-deployment.sh [namespace] [deployment]
+# Usage: ./test-ping-pong.sh [namespace] [deployment]
 namespace=${1:-bashbot}
 deploymentName=${2:-bashbot}
 
