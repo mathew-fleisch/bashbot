@@ -38,6 +38,7 @@ main() {
         # Send `!bashbot ping` via bashbot binary within bashbot pod
         kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
           'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text "!bashbot ping"'
+        sleep 3
         last_log_line=$(kubectl -n bashbot logs --tail 1 $bashbot_pod)
         # Tail the last line of the bashbot pod's log looking
         # for the string 'Bashbot is now connected to slack'
