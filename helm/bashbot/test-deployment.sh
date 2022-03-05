@@ -11,6 +11,7 @@ cleanup() {
 }
 
 trap cleanup EXIT
+TESTING_CHANNEL=${TESTING_CHANNEL:-C034FNXS3FA}
 
 main() {
   local ns=${1:-bashbot}
@@ -40,6 +41,9 @@ main() {
         # for the string 'Bashbot is now connected to slack'
         if [[ $last_log_line =~ "Bashbot is now connected to slack" ]]; then
           echo "Bashbot connected to slack successfully!"
+
+          kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
+            'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text "Bashbot connected to slack! Running automated tests..."'
           found_connected=1
           break
         fi

@@ -49,7 +49,7 @@ main() {
             'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text "Ping/pong test successful!"'
           exit 0
         fi
-        echo "Bashbot pong test failed. $j more attempts..."
+        echo "Bashbot ping/pong test failed. $j more attempts..."
         sleep 3
       done
       # Don't require ping/pong tests to pass for the whole test to pass
