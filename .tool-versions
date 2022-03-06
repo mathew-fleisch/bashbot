@@ -1,6 +1,6 @@
-awscli 2.4.21
+awscli 2.4.23
 bat 0.20.0
-gcloud 374.0.0
+gcloud 375.0.0
 helm 3.8.0
 kubectl 1.23.4
 kubectx 0.9.4
