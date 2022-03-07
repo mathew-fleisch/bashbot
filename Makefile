@@ -8,6 +8,7 @@ LDFLAGS="-X main.Version=${VERSION}"
 GO_BUILD=go build -ldflags=$(LDFLAGS)
 BASHBOT_LOG_LEVEL?=info
 BASHBOT_LOG_TYPE?=text
+TESTING_CHANNEL?=C034FNXS3FA
 
 .PHONY: docker-build
 docker-build:
@@ -59,6 +60,7 @@ docker-run-upstream:
 		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
 		mathewfleisch/bashbot:$(LATEST_VERSION)
 
+# kind-test: kind-test-install
 .PHONY: kind-test
 kind-test: kind-setup kind-test-install
 	@echo "Waiting for bashbot to come up..."
@@ -66,6 +68,10 @@ kind-test: kind-setup kind-test-install
 	./helm/bashbot/test-deployment.sh
 	./examples/ping/test.sh
 	./examples/info/test.sh
+	./examples/kubernetes/test.sh
+	kubectl --namespace bashbot exec \
+		$(shell kubectl get pod --template '{{range .items}}{{.metadata.name}}{{end}}' --selector=app=bashbot) -- bash -c \
+		'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text ":tada: :tada: All Tests Complete!!! :tada: :tada:"'
 
 .PHONY: kind-test-again
 kind-test-again: kind-test-upgrade

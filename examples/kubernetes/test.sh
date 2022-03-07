@@ -7,7 +7,7 @@ set -o nounset
 # set -x # debug
 
 cleanup() {
-  echo "Ping/Pong test complete!"
+  echo "Kubernetes test complete!"
 }
 
 trap cleanup EXIT
@@ -32,29 +32,29 @@ main() {
     if [ $? -eq 0 ]; then
       # echo "Bashbot deployment confirmed!"
       # kubectl --namespace ${ns} get deployments
-      found_pong=0
+      found_pod=0
       for j in {5..1}; do
         bashbot_pod=$(kubectl -n bashbot get pods -o jsonpath='{.items[0].metadata.name}')
-        # Send `!bashbot ping` via bashbot binary within bashbot pod
+        # Send `!bashbot k-get-pods` via bashbot binary within bashbot pod
         kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-          'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text "!bashbot ping"'
+          'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text "!bashbot k-get-pods"'
         sleep 5
-        last_log_line=$(kubectl -n bashbot logs --tail 1 $bashbot_pod)
+        last_log_line=$(kubectl -n bashbot logs --tail 20 $bashbot_pod)
         # Tail the last line of the bashbot pod's log looking
-        # for the string 'Bashbot is now connected to slack'
-        if [[ $last_log_line =~ "pong" ]]; then
-          echo "Ping/pong test successful!"
-          found_pong=1
+        # for the bashbot pod name
+        if [[ $last_log_line =~ $bashbot_pod ]]; then
+          echo "kubectl commands successful!"
+          echo "pod found in logs: $bashbot_pod"
+          found_pod=1
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-            'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text ":large_green_circle: Ping/pong test successful!"'
+            'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text ":large_green_circle: Bashbot can run kubectl commands. pod found in logs: \`'$bashbot_pod'\`"'
           exit 0
         fi
-        echo "Bashbot ping/pong test failed. $j more attempts..."
+        echo "kubectl test failed. $j more attempts..."
         sleep 5
       done
-      # Don't require ping/pong tests to pass for the whole test to pass
-      [ $found_pong -eq 1 ] && exit 0 || exit 1
+      [ $found_pod -eq 1 ] && exit 0 || exit 1
     fi
 
     # Since the deployment was not ready, try again $i more times
@@ -67,8 +67,9 @@ main() {
   # Display some debug information and fail test
   kubectl --namespace ${ns} get deployments
   kubectl --namespace ${ns} get pods -o wide
+
   kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-    'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text ":red_circle: ping/pong test failed!"'
+    'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text ":red_circle: kubectl test failed!"'
   exit 1
 }
 

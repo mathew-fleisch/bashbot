@@ -7,7 +7,7 @@ set -o nounset
 # set -x # debug
 
 cleanup() {
-  echo "Ping/Pong test complete!"
+  echo "Date/time test complete!"
 }
 
 trap cleanup EXIT
@@ -35,7 +35,7 @@ main() {
       found_date=0
       for j in {5..1}; do
         bashbot_pod=$(kubectl -n bashbot get pods -o jsonpath='{.items[0].metadata.name}')
-        # Send `!bashbot ping` via bashbot binary within bashbot pod
+        # Send `!bashbot time date` via bashbot binary within bashbot pod
         kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
           'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text "!bashbot time date"'
         sleep 5
@@ -73,7 +73,7 @@ main() {
   exit 1
 }
 
-# Usage: ./test-ping-date.sh [namespace] [deployment]
+# Usage: ./test.sh [namespace] [deployment]
 namespace=${1:-bashbot}
 deploymentName=${2:-bashbot}
 
