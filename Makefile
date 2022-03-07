@@ -61,8 +61,8 @@ docker-run-upstream:
 		mathewfleisch/bashbot:$(LATEST_VERSION)
 
 .PHONY: kind-test
-# kind-test: kind-setup kind-test-install
-kind-test: kind-test-install
+kind-test: kind-setup kind-test-install
+# kind-test: kind-test-install
 	@echo "Waiting for bashbot to come up..."
 	sleep 1
 	./helm/bashbot/test-deployment.sh
