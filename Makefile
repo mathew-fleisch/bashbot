@@ -60,18 +60,18 @@ docker-run-upstream:
 		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
 		mathewfleisch/bashbot:$(LATEST_VERSION)
 
-# kind-test: kind-test-install
 .PHONY: kind-test
-kind-test: kind-setup kind-test-install
+# kind-test: kind-setup kind-test-install
+kind-test: kind-test-install
 	@echo "Waiting for bashbot to come up..."
 	sleep 1
 	./helm/bashbot/test-deployment.sh
 	./examples/ping/test.sh
 	./examples/info/test.sh
 	./examples/kubernetes/test.sh
-	$(eval PODNAME=$(shell sh -c "kubectl -n bashbot get pods | grep bashbot | awk '{print $$1}'"))
+	$(eval PODNAME=$(shell sh -c "kubectl -n bashbot get pods | grep bashbot | awk '{print $$1}'")) && \
 	kubectl --namespace bashbot exec $(PODNAME) -- bash -c \
-		'source .env && bashbot --send-message-channel $(TESTING_CHANNEL) --send-message-text ":tada: :tada: All Tests Complete!!! :tada: :tada:"'
+		'source .env && bashbot --send-message-channel $(TESTING_CHANNEL) --send-message-text ":tada: :tada: All Tests Complete!!! :tada: :tada:"' || true
 
 .PHONY: kind-test-again
 kind-test-again: kind-test-upgrade
