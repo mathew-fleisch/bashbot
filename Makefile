@@ -61,8 +61,8 @@ docker-run-upstream:
 		mathewfleisch/bashbot:$(LATEST_VERSION)
 
 .PHONY: kind-test
-# kind-test: kind-setup kind-test-install
-kind-test: kind-test-install
+kind-test: kind-setup kind-test-install
+# kind-test: kind-test-install
 	@echo "Waiting for bashbot to come up..."
 	sleep 1
 	./helm/bashbot/test-deployment.sh
@@ -105,13 +105,13 @@ kind-test-upgrade:
 # To override entrypoint, uncomment following two lines
 # --set 'image.command={/bin/bash}' \
 # --set 'image.args={-c,echo \"hello\" && sleep 3600}'
-	$(eval PODNAME=$(shell sh -c "kubectl -n bashbot get pods | grep bashbot | cut -d' ' -f1"))
+	$(eval export PODNAME=$(shell sh -c "kubectl -n bashbot get pods | grep bashbot | cut -d' ' -f1"))
 	kubectl -n bashbot delete pod $(PODNAME) \
 		--ignore-not-found=true
 
 .PHONY: kind-test-logs
 kind-test-logs:
-	$(eval PODNAME=$(shell sh -c "kubectl -n bashbot get pods | grep bashbot | cut -d' ' -f1"))
+	$(eval export PODNAME=$(shell sh -c "kubectl -n bashbot get pods | grep bashbot | cut -d' ' -f1"))
 	kubectl -n bashbot logs -f $(PODNAME) \
 		| sed -e 's/\\n/\n/g'
 
