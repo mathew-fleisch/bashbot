@@ -259,7 +259,7 @@
       "help": "!bashbot time",
       "trigger": "time",
       "location": "./",
-      "command": ["${command}"],
+      "command": ["echo \"Date/time: $(${command})\""],
       "parameters": [
         {
           "name": "command",

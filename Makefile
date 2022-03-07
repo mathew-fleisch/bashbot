@@ -64,7 +64,8 @@ kind-test: kind-setup kind-test-install
 	@echo "Waiting for bashbot to come up..."
 	sleep 1
 	./helm/bashbot/test-deployment.sh
-	./helm/bashbot/test-ping-pong.sh
+	./examples/ping/test.sh
+	./examples/info/test.sh
 
 .PHONY: kind-test-again
 kind-test-again: kind-test-upgrade

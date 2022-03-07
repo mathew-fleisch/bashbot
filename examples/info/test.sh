@@ -32,34 +32,34 @@ main() {
     if [ $? -eq 0 ]; then
       # echo "Bashbot deployment confirmed!"
       # kubectl --namespace ${ns} get deployments
-      found_pong=0
-      for j in {30..1}; do
+      found_date=0
+      for j in {5..1}; do
         bashbot_pod=$(kubectl -n bashbot get pods -o jsonpath='{.items[0].metadata.name}')
         # Send `!bashbot ping` via bashbot binary within bashbot pod
         kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-          'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text "!bashbot ping"'
-        sleep 3
+          'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text "!bashbot time date"'
+        sleep 5
         last_log_line=$(kubectl -n bashbot logs --tail 1 $bashbot_pod)
         # Tail the last line of the bashbot pod's log looking
         # for the string 'Bashbot is now connected to slack'
-        if [[ $last_log_line =~ "pong" ]]; then
-          echo "Bashbot ping/pong tests successful!"
-          found_pong=1
+        if [[ $last_log_line =~ "Date/time:" ]]; then
+          echo "date/time test successful!"
+          found_date=1
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-            'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text "Ping/pong test successful!"'
+            'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text ":large_green_circle: date/time test successful!"'
           exit 0
         fi
-        echo "Bashbot ping/pong test failed. $j more attempts..."
-        sleep 3
+        echo "Bashbot date/time test failed. $j more attempts..."
+        sleep 5
       done
-      # Don't require ping/pong tests to pass for the whole test to pass
-      [ $found_pong -eq 1 ] && exit 0 || exit 1
+      # Don't require date/time tests to pass for the whole test to pass
+      [ $found_date -eq 1 ] && exit 0 || exit 1
     fi
 
     # Since the deployment was not ready, try again $i more times
     echo "Deployment not found or not ready. $i more attempts..."
-    sleep 3
+    sleep 5
   done
 
   # The retry loop has exited without finding a stable deployment
@@ -67,10 +67,13 @@ main() {
   # Display some debug information and fail test
   kubectl --namespace ${ns} get deployments
   kubectl --namespace ${ns} get pods -o wide
+
+  kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
+    'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text ":red_circle: date/time test failed!"'
   exit 1
 }
 
-# Usage: ./test-ping-pong.sh [namespace] [deployment]
+# Usage: ./test-ping-date.sh [namespace] [deployment]
 namespace=${1:-bashbot}
 deploymentName=${2:-bashbot}
 
