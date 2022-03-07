@@ -70,7 +70,7 @@ kind-test: kind-setup kind-test-install
 	./examples/info/test.sh
 	./examples/kubernetes/test.sh
 	kubectl --namespace bashbot exec \
-		$(shell kubectl -n bashbot get pod --template '{{range .items}}{{.metadata.name}}{{end}}' --selector=app=bashbot) -- bash -c \
+		$(shell kubectl -n bashbot get po | grep bashbot | cut -d' ' -f1) -- bash -c \
 		'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text ":tada: :tada: All Tests Complete!!! :tada: :tada:"'
 
 .PHONY: kind-test-again
@@ -106,13 +106,13 @@ kind-test-upgrade:
 # --set 'image.command={/bin/bash}' \
 # --set 'image.args={-c,echo \"hello\" && sleep 3600}'
 	kubectl -n bashbot delete pod \
-		$(shell kubectl -n bashbot get pod --template '{{range .items}}{{.metadata.name}}{{end}}' --selector=app=bashbot) \
+		$(shell kubectl -n bashbot get po | grep bashbot | cut -d' ' -f1) \
 		--ignore-not-found=true
 
 .PHONY: kind-test-logs
 kind-test-logs:
 	kubectl -n bashbot logs -f \
-		$(shell kubectl -n bashbot get pod --template '{{range .items}}{{.metadata.name}}{{end}}' --selector=app=bashbot) \
+		$(shell kubectl -n bashbot get po | grep bashbot | cut -d' ' -f1) \
 		| sed -e 's/\\n/\n/g'
 
 .PHONY: kind-test-cleanup
