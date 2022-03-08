@@ -36,6 +36,7 @@ main() {
       bashbot_pod=$(kubectl -n bashbot get pods -o jsonpath='{.items[0].metadata.name}')
       kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
         'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text ":tada: :tada: All Tests Complete!!! :tada: :tada:"'
+      exit 0
     fi
 
     # Since the deployment was not ready, try again $i more times
@@ -51,7 +52,7 @@ main() {
   exit 1
 }
 
-# Usage: ./test-deployment.sh [namespace] [deployment]
+# Usage: ./test-complete.sh [namespace] [deployment]
 namespace=${1:-bashbot}
 deploymentName=${2:-bashbot}
 
