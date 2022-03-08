@@ -73,8 +73,8 @@ kind-test: kind-setup kind-test-install
 	kubectl -n bashbot get pods | grep bashbot 
 	kubectl -n bashbot get pods | grep bashbot | cut -d' ' -f1
 	$(eval PODNAME=$(shell sh -c "kubectl -n bashbot get pods | grep bashbot | cut -d' ' -f1"))
-	echo "PODNAME: $(shell kubectl -n bashbot get pods | grep bashbot | cut -d' ' -f1)"
-	kubectl --namespace bashbot exec $(shell kubectl -n bashbot get pods | grep bashbot | cut -d' ' -f1) -- bash -c \
+	echo "PODNAME: $(kubectl -n bashbot get pods | grep bashbot | cut -d' ' -f1)"
+	kubectl --namespace bashbot exec $(kubectl -n bashbot get pods | grep bashbot | cut -d' ' -f1) -- bash -c \
 		'source .env && bashbot --send-message-channel $(TESTING_CHANNEL) --send-message-text ":tada: :tada: All Tests Complete!!! :tada: :tada:"' || true
 
 .PHONY: kind-test-again
