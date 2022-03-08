@@ -69,10 +69,8 @@ kind-test: kind-setup kind-test-install
 	./examples/ping/test.sh
 	./examples/info/test.sh
 	./examples/kubernetes/test.sh
-# $(eval PODNAME := $(shell kubectl -n bashbot get pods | grep bashbot | cut -d' ' -f1))
-# echo "PODNAME: $(PODNAME)"
-	kubectl --namespace bashbot exec $(shell kubectl -n bashbot get pods -o jsonpath='{.items[0].metadata.name}') -- bash -c \
-		'source .env && bashbot --send-message-channel $(TESTING_CHANNEL) --send-message-text ":tada: :tada: All Tests Complete!!! :tada: :tada:"' || true
+	./helm/bashbot/test-complete.sh
+
 
 .PHONY: kind-test-again
 kind-test-again: kind-test-upgrade

@@ -33,7 +33,7 @@ main() {
       # echo "Bashbot deployment confirmed!"
       # kubectl --namespace ${ns} get deployments
       found_date=0
-      for j in {5..1}; do
+      for j in {3..1}; do
         bashbot_pod=$(kubectl -n bashbot get pods -o jsonpath='{.items[0].metadata.name}')
         # Send `!bashbot time date` via bashbot binary within bashbot pod
         kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
