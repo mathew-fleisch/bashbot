@@ -71,7 +71,6 @@ kind-test: kind-setup kind-test-install
 	./examples/kubernetes/test.sh
 	./helm/bashbot/test-complete.sh
 
-
 .PHONY: kind-test-again
 kind-test-again: kind-test-upgrade
 	@echo "Waiting for bashbot to come up..."
