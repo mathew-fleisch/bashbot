@@ -6,10 +6,6 @@
 name: PR CI
 on:
   pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
     branches:
       - main
       - v2 # TODO: REMOVE THIS BEFORE MERGING
