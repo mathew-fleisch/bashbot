@@ -211,10 +211,9 @@ test-lint-actions:
 	find .github/workflows -type f \( -iname \*.yaml -o -iname \*.yml \) \
 		| xargs -I {} action-validator --verbose {}
 
-# TODO: after cobra cli migration remove '|| true' to make this a blocking test
 .PHONY: test-lint
 test-lint:
-	golangci-lint --verbose run || true
+	golangci-lint --verbose run
 
 .PHONY: test-docker
 test-docker:
