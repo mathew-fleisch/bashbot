@@ -3,7 +3,7 @@
 # Description: This action will run go lint/unit tests as well as
 #              build a docker container and test it against a KinD cluster.
 #              See Makefile for more details.
-name: PR CI
+name: PR Tests
 on:
   pull_request:
     branches:
