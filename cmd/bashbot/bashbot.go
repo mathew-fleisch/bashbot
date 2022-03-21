@@ -799,8 +799,8 @@ func main() {
 		case socketmode.EventTypeHello:
 			// do nothing
 
-		default:
-			log.Debug("unhandled event: %#v", event)
+			// default:
+			// 	log.Debug("unhandled event: %v", event)
 		}
 	}
 }

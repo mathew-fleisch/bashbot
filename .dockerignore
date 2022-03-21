@@ -1,0 +1,11 @@
+#Ignoring git and cache folders
+.git
+.git*
+.cache
+
+#Ignore helm directory
+# helm/
+# helm/*
+
+# #Ignoring all the markdown and class files
+# *.md

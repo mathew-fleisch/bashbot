@@ -55,6 +55,17 @@ Note: Prior to version 2, Bashbot required a "classic app" to be configured to g
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - [KinD](https://kind.sigs.k8s.io/docs/user/quick-start/)
 
+Note: you can use the [asdf version manager](https://asdf-vm.com/) to install dependencies used in the makefile with the following .tool-versions
+
+```text
+action-validator 0.1.2
+dockle 0.4.3
+golangci-lint 1.44.2
+helm 3.8.1
+kind 0.12.0
+yq 4.22.1
+```
+
 To set up a local [KinD cluster](https://kind.sigs.k8s.io/docs/user/quick-start/) run the following commands:
 
 ```bash
@@ -62,7 +73,7 @@ To set up a local [KinD cluster](https://kind.sigs.k8s.io/docs/user/quick-start/
 cp sample-env-file helm/bashbot/.env
 cp sample-config.json helm/bashbot/config.json
 cp .tool-versions helm/bashbot/.tool-versions
-make kind-test
+make test-kind
 # docker build -t bashbot:local .
 # [+] Building 29.8s (17/17) FINISHED  
 # ...
