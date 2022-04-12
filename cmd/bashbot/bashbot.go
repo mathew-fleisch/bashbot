@@ -17,19 +17,16 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/slack-go/slack"
-	"github.com/slack-go/slack/slackevents"
-	"github.com/slack-go/slack/socketmode"
 )
 
-var specials []func(event *slackevents.MessageEvent) bool
+var specials []func(event *slack.MessageEvent) bool
 
 // Slacking off with global vars
 var Version = "development"
 var help bool
 var getVersion bool
 var configFile string
-var slackBotToken string
-var slackAppToken string
+var slackToken string
 var installVendorDependenciesFlag bool
 var sendMessageChannel string
 var sendMessageText string
@@ -38,12 +35,6 @@ var sendMessageUser string
 var logLevel string
 var logFormat string
 var api *slack.Client
-var channelsByName map[string]string
-var countkey string
-var emojiPattern *regexp.Regexp
-var slackUserPattern *regexp.Regexp
-var puncPattern *regexp.Regexp
-var c *regexp.Regexp
 var cmdPattern *regexp.Regexp
 
 type Admins struct {
@@ -245,7 +236,7 @@ func truncateString(str string, num int) string {
 }
 
 // Slack Command Processing
-func processCommand(event *slackevents.MessageEvent) bool {
+func processCommand(event *slack.MessageEvent) bool {
 	if !cmdPattern.MatchString(event.Text) {
 		return false
 	}
@@ -254,7 +245,7 @@ func processCommand(event *slackevents.MessageEvent) bool {
 	log.Debug(event)
 	log.Info("Channel: " + event.Channel)
 	log.Info("User: " + event.User)
-	log.Info("Timestamp: " + event.TimeStamp)
+	log.Info("Timestamp: " + event.Timestamp)
 
 	words := strings.Fields(event.Text)
 	var triggered string
@@ -264,10 +255,8 @@ func processCommand(event *slackevents.MessageEvent) bool {
 	for index, element := range words {
 		// This is ugly. condense these regexes.
 		element = regexp.MustCompile(`<http(.*)>`).ReplaceAllString(element, "http$1")
-		element = regexp.MustCompile(`“`).ReplaceAllString(element, "\"")
-		element = regexp.MustCompile(`”`).ReplaceAllString(element, "\"")
-		element = regexp.MustCompile(`‘`).ReplaceAllString(element, "'")
-		element = regexp.MustCompile(`’`).ReplaceAllString(element, "'")
+		element = regexp.MustCompile(`“|”`).ReplaceAllString(element, "\"")
+		element = regexp.MustCompile(`‘|’`).ReplaceAllString(element, "'")
 		log.Info(strconv.Itoa(index) + ": " + element)
 		if index > 1 {
 			cmd = append(cmd, element)
@@ -294,7 +283,7 @@ func processCommand(event *slackevents.MessageEvent) bool {
 	switch words[1] {
 	case triggered:
 		reportToChannel(event.Channel, "processing_command", "")
-		return processValidCommand(cmd, thisTool, event.Channel, event.User, event.TimeStamp)
+		return processValidCommand(cmd, thisTool, event.Channel, event.User, event.Timestamp)
 	case "exit":
 		if len(words) == 3 {
 			switch words[2] {
@@ -586,7 +575,7 @@ func chatOpsLog(channel string, user string, msg string) {
 	log.Info(ret)
 }
 
-func splitOut(output string, responseType string) string {
+func splitOut(output, responseType string) string {
 	var splitInterval int = 4000
 	switch responseType {
 	case "code":
@@ -601,8 +590,7 @@ func splitOut(output string, responseType string) string {
 
 		for i, char := range output {
 			if i >= (splitInterval*splitCount) && (char == splitChar) {
-				resultBuffer.WriteString(
-					strings.TrimLeft("```"+output[lastSplitPosition:i]+"``` \n", "\r\n"))
+				resultBuffer.WriteString(strings.TrimLeft("```"+output[lastSplitPosition:i]+"``` \n", "\r\n"))
 				lastSplitPosition = i + 1
 				splitCount++
 			}
@@ -614,22 +602,14 @@ func splitOut(output string, responseType string) string {
 	}
 }
 
-func handleEventsAPIEvent(event slackevents.EventsAPIEvent) error {
-	switch event.Type {
-	case slackevents.CallbackEvent:
-		innerEvent := event.InnerEvent
-
-		switch ev := innerEvent.Data.(type) {
-		case *slackevents.MessageEvent:
-			handleMessage(ev)
-		}
-	default:
-		return fmt.Errorf("unhandled event type: %s", event.Type)
+func handleMessage(event *slack.MessageEvent) {
+	// log.Debug("handleMessage()")
+	// log.Debug(event)
+	// To Do: By bypassing this next check for a bot_message, we can test the bot's functionaltiy in a test slack channel
+	if event.SubType == "bot_message" {
+		return
 	}
-	return nil
-}
 
-func handleMessage(event *slackevents.MessageEvent) {
 	for _, handler := range specials {
 		if handler(event) {
 			break
@@ -682,8 +662,7 @@ to run bash commands or scripts based on a configuration file.
 
 func main() {
 	flag.StringVar(&configFile, "config-file", "", "[REQUIRED] Filepath to config.json file (or environment variable BASHBOT_CONFIG_FILEPATH set)")
-	flag.StringVar(&slackBotToken, "slack-bot-token", "", "[REQUIRED] Slack bot token used to authenticate with api (or environment variable SLACK_BOT_TOKEN set)")
-	flag.StringVar(&slackAppToken, "slack-app-token", "", "[REQUIRED] Slack app token used to authenticate with slack app (or environment variable SLACK_APP_TOKEN set)")
+	flag.StringVar(&slackToken, "slack-token", "", "[REQUIRED] Slack token used to authenticate with api (or environment variable SLACK_TOKEN set)")
 	flag.BoolVar(&installVendorDependenciesFlag, "install-vendor-dependencies", false, "Cycle through dependencies array in config file to install extra dependencies")
 	flag.StringVar(&sendMessageChannel, "send-message-channel", "", "Send stand-alone slack message to this channel (requires -send-message-text)")
 	flag.StringVar(&sendMessageText, "send-message-text", "", "Send stand-alone slack message (requires -send-message-channel)")
@@ -714,31 +693,20 @@ func main() {
 		log.Error("Must define a config.json file")
 		os.Exit(1)
 	}
-	if slackBotToken == "" && os.Getenv("SLACK_BOT_TOKEN") != "" {
-		slackBotToken = os.Getenv("SLACK_BOT_TOKEN")
+	if slackToken == "" && os.Getenv("SLACK_TOKEN") != "" {
+		slackToken = os.Getenv("SLACK_TOKEN")
 	}
-	if slackBotToken == "" {
+	if slackToken == "" {
 		usage()
 		operatingSystem := runtime.GOOS
 		systemArchitecture := runtime.GOARCH
-		log.Error("Must define a slack bot token")
+		log.Error("Must define a slack token")
 		log.Error("After logging into slack, visit https://api.slack.com/apps?new_classic_app=1")
 		log.Error("to set up a new \"legacy bot user\" and \"Bot User OAuth Access Token\"")
-		log.Error("Export the slack bot token as the environment variable SLACK_BOT_TOKEN")
-		log.Error("export SLACK_BOT_TOKEN=xoxb-xxxxxxxxx-xxxxxxx")
-		log.Error("bashbot-" + operatingSystem + "-" + systemArchitecture + " -config-file ./config.json -slack-token $SLACK_BOT_TOKEN")
+		log.Error("Export the slack token as the environment variable SLACK_TOKEN")
+		log.Error("export SLACK_TOKEN=xoxb-xxxxxxxxx-xxxxxxx")
+		log.Error("bashbot-" + operatingSystem + "-" + systemArchitecture + " -config-file ./config.json -slack-token $SLACK_TOKEN")
 		log.Error("See Read-me file for more detailed instructions: http://github.com/mathew-fleisch/bashbot")
-		os.Exit(1)
-	}
-
-	if slackAppToken == "" && os.Getenv("SLACK_APP_TOKEN") != "" {
-		slackAppToken = os.Getenv("SLACK_APP_TOKEN")
-	}
-	if slackAppToken == "" {
-		usage()
-		log.Error("Must define a slack app token")
-		log.Error("Export the slack app token as the environment variable SLACK_APP_TOKEN")
-		log.Error("export SLACK_APP_TOKEN=xapp-xxxxxxxxx-xxxxxxx")
 		os.Exit(1)
 	}
 
@@ -751,7 +719,7 @@ func main() {
 	}
 
 	admin = getAdmin()
-	api = slack.New(slackBotToken, slack.OptionAppLevelToken(slackAppToken))
+	api = slack.New(slackToken)
 
 	// Send simple text message to slack
 	if sendMessageChannel != "" && sendMessageText != "" {
@@ -769,38 +737,38 @@ func main() {
 
 	// Regular expressions we'll use a whole lot.
 	// Should probably be in an intialization function to the side.
-	emojiPattern = regexp.MustCompile(`:[^\t\n\f\r ]+:`)
-	slackUserPattern = regexp.MustCompile(`<@[^\t\n\f\r ]+>`)
-	puncPattern = regexp.MustCompile(`[^a-zA-Z0-9]+`)
 	cmdPattern = regexp.MustCompile(matchTrigger)
 
 	// Our special handlers. If they handled a message, they return true.
-	specials = []func(event *slackevents.MessageEvent) bool{processCommand}
+	specials = []func(event *slack.MessageEvent) bool{processCommand}
 
-	client := socketmode.New(api)
-	go client.Run()
+	rtm := api.NewRTM()
+	go rtm.ManageConnection()
 
-	for event := range client.Events {
-		switch event.Type {
-		case socketmode.EventTypeEventsAPI:
-			data := event.Data.(slackevents.EventsAPIEvent)
-			client.Ack(*event.Request)
-			handleEventsAPIEvent(data)
-
-		case socketmode.EventTypeConnected:
+	for msg := range rtm.IncomingEvents {
+		switch ev := msg.Data.(type) {
+		case *slack.ConnectedEvent:
 			log.Info("Bashbot is now connected to slack. Primary trigger: `" + admin.Trigger + "`")
 
-		case socketmode.EventTypeConnectionError:
-			log.Error("Slack socket connection error")
+		case *slack.MessageEvent:
+			handleMessage(ev)
 
-		case socketmode.EventTypeErrorBadMessage:
-			log.Error("Bad message received")
+		case *slack.PresenceChangeEvent:
+			log.Info("Presence Change: " + ev.Presence)
 
-		case socketmode.EventTypeHello:
-			// do nothing
+		case *slack.RTMError:
+			log.Error("Slack API RTM Error: " + ev.Error())
 
-			// default:
-			// 	log.Debug("unhandled event: %v", event)
+		case *slack.InvalidAuthEvent:
+			log.Error("Invalid credentials (slack-token)")
+
+		case *slack.ConnectionErrorEvent:
+			log.Error("Can't connect to slack...")
+			log.Error(msg)
+
+		default:
+			// Ignore other events..
+			// log.Debug("Unhandled Event: " + msg.Type)
 		}
 	}
 }
