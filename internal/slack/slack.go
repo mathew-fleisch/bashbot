@@ -17,6 +17,8 @@ import (
 	"github.com/slack-go/slack/socketmode"
 )
 
+var Version = "development"
+
 // loadConfigFile is a helper function for loading bashbot json
 // configuration file into Config struct.
 func loadConfigFile(filePath string) (*Config, error) {
