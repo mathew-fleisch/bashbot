@@ -17,96 +17,6 @@ import (
 	"github.com/slack-go/slack/socketmode"
 )
 
-// Config holds all bashbot's configurations
-type Config struct {
-	Admins       []Admin      `json:"admins"`
-	Messages     []Message    `json:"messages"`
-	Tools        []Tool       `json:"tools"`
-	Dependencies []Dependency `json:"dependencies"`
-}
-
-type Admin struct {
-	Trigger          string   `json:"trigger"`
-	AppName          string   `json:"appName"`
-	UserIds          []string `json:"userIds"`
-	PrivateChannelId string   `json:"privateChannelId"`
-	LogChannelId     string   `json:"logChannelId"`
-}
-
-type Message struct {
-	Active bool   `json:"active"`
-	Name   string `json:"name"`
-	Text   string `json:"text"`
-}
-
-type Tool struct {
-	Name         string      `json:"name"`
-	Description  string      `json:"description"`
-	Help         string      `json:"help"`
-	Trigger      string      `json:"trigger"`
-	Location     string      `json:"location"`
-	Command      []string    `json:"command"`
-	Permissions  []string    `json:"permissions"`
-	Log          bool        `json:"log"`
-	Ephemeral    bool        `json:"ephemeral"`
-	Response     string      `json:"response"`
-	Parameters   []Parameter `json:"parameters"`
-	Envvars      []string    `json:"envvars"`
-	Dependencies []string    `json:"dependencies"`
-}
-
-type Parameter struct {
-	Name        string   `json:"name"`
-	Allowed     []string `json:"allowed"`
-	Description string   `json:"description,omitempty"`
-	Source      []string `json:"source,omitempty"`
-	Match       string   `json:"match,omitempty"`
-}
-
-type Dependency struct {
-	Name    string   `json:"name"`
-	Install []string `json:"install"`
-}
-
-type Channel struct {
-	Id                 string `json:"id"`
-	Created            int    `json:"created"`
-	IsOpen             bool   `json:"is_open"`
-	IsGroup            bool   `json:"is_group"`
-	IsShared           bool   `json:"is_shared"`
-	IsIm               bool   `json:"is_im"`
-	IsExtShared        bool   `json:"is_ext_shared"`
-	IsOrgShared        bool   `json:"is_org_shared"`
-	IsPendingExtShared bool   `json:"is_pending_ext_shared"`
-	IsPrivate          bool   `json:"is_private"`
-	IsMpim             bool   `json:"is_mpim"`
-	Unlinked           int    `json:"unlinked"`
-	NameNormalized     string `json:"name_normalized"`
-	NumMembers         int    `json:"num_members"`
-	Priority           int    `json:"priority"`
-	User               string `json:"user"`
-	Name               string `json:"name"`
-	Creator            string `json:"creator"`
-	IsArchived         bool   `json:"is_archived"`
-	Members            string `json:"members"`
-	Topic              Topic  `json:"topic"`
-	Purpose            Topic  `json:"purpose"`
-	IsChannel          bool   `json:"is_channel"`
-	IsGeneral          bool   `json:"is_general"`
-	IsMember           bool   `json:"is_member"`
-	Local              string `json:"locale"`
-}
-
-type Topic struct {
-	Value   string `json:"value"`
-	Creator string `json:"creator"`
-	LastSet int    `json:"last_set"`
-}
-
-var (
-	Version = "development"
-)
-
 // loadConfigFile is a helper function for loading bashbot json
 // configuration file into Config struct.
 func loadConfigFile(filePath string) (*Config, error) {
@@ -122,7 +32,24 @@ func loadConfigFile(filePath string) (*Config, error) {
 	return &config, nil
 }
 
-func RunSlackApp(cfg *Config, botToken, appToken, appTrigger string) {
+func RunSlackClient(configFile, botToken, appToken string) {
+	cfg, err := loadConfigFile(configFile)
+	if err != nil {
+		log.WithError(err).Fatal("config-file does not exist")
+		return
+	}
+	if botToken == "" {
+		botToken = os.Getenv("SLACK_TOKEN")
+	}
+	if appToken == "" {
+		appToken = os.Getenv("SLACK_APP_TOKEN")
+	}
+	if botToken == "" {
+		log.Fatal("Must define a slack bot token")
+	}
+	if appToken == "" {
+		log.Fatal("Must define a slack app token")
+	}
 	api := slack.New(botToken, slack.OptionAppLevelToken(appToken))
 	client := socketmode.New(api)
 	go client.Run()
@@ -133,7 +60,7 @@ func RunSlackApp(cfg *Config, botToken, appToken, appTrigger string) {
 			eventsAPIHandler(cfg, client, event)
 
 		case socketmode.EventTypeConnected:
-			log.Info("Bashbot is now connected to slack. Primary trigger: `" + appTrigger + "`")
+			log.Info("Bashbot is now connected to slack. Primary trigger: `" + cfg.Admins[0].Trigger + "`")
 
 		case socketmode.EventTypeConnectionError:
 			log.Error("Slack socket connection error")
@@ -166,13 +93,13 @@ func eventsAPIHandler(cfg *Config, client *socketmode.Client, socketEvent socket
 	return nil
 }
 
-// installVendorDependencies is a helper function for installing the
+// InstallVendorDependencies is a helper function for installing the
 // vendor dependencies required by the current bashbot instance.
 //
 // In the process of installing the dependencies, the dependency installer
 // executes the install command provided in the configuration file for each
 // dependency.
-func installVendorDependencies(cfg *Config) bool {
+func InstallVendorDependencies(cfg *Config) bool {
 	log.Debug("installing vendor dependencies")
 	for i := 0; i < len(cfg.Dependencies); i++ {
 		log.Info(cfg.Dependencies[i].Name)
@@ -243,10 +170,7 @@ func sendMessageToChannel(cfg *Config, client *socketmode.Client, channel, msg s
 		channel,
 		slack.MsgOptionText(strings.Replace(msg, "\\n", "\n", -1), false),
 		slack.MsgOptionUsername(cfg.Admins[0].AppName),
-		slack.MsgOptionPostMessageParameters(slack.PostMessageParameters{
-			UnfurlLinks: true,
-			UnfurlMedia: true,
-		}),
+		slack.MsgOptionPostMessageParameters(slack.PostMessageParameters{UnfurlLinks: true, UnfurlMedia: true}),
 	)
 	if err != nil {
 		log.Error(err)
@@ -257,14 +181,13 @@ func sendMessageToChannel(cfg *Config, client *socketmode.Client, channel, msg s
 
 // sendMessageToUser sends to message to a slack user in a slack channel.
 func sendMessageToUser(cfg *Config, client *socketmode.Client, channel, user, msg string) {
-	_, err := client.PostEphemeral(channel,
+	messageParams := slack.PostMessageParameters{UnfurlLinks: true, UnfurlMedia: true}
+	_, err := client.PostEphemeral(
+		channel,
 		user,
 		slack.MsgOptionText(strings.Replace(msg, "\\n", "\n", -1), false),
 		slack.MsgOptionUsername(cfg.Admins[0].AppName),
-		slack.MsgOptionPostMessageParameters(slack.PostMessageParameters{
-			UnfurlLinks: true,
-			UnfurlMedia: true,
-		}),
+		slack.MsgOptionPostMessageParameters(messageParams),
 	)
 	if err != nil {
 		log.Error(err)
@@ -284,36 +207,40 @@ func truncateString(str string, num int) string {
 	return res
 }
 
+// getChannelNamesByType retrieves names of the channels monitored by bashbot
+// by thier channel type.
+//
+// The available channel types are private_channel and public_channel.
+func getChannelNamesByType(client *socketmode.Client, channelsID []string, channelType string) ([]string, []slack.Channel) {
+	var names []string
+	channels, _, err := client.GetConversations(&slack.GetConversationsParameters{
+		Limit: 1000,
+		Types: []string{channelType},
+	})
+	if err != nil {
+		log.Error(err)
+		return nil, nil
+	}
+	for j := 0; j < len(channels); j++ {
+		for i := range channelsID {
+			if channelsID[i] == channels[j].ID {
+				names = append(names, channels[j].Name)
+			}
+		}
+	}
+	return names, channels
+}
+
 // getChannelNames retreives the names of the channels monitored by bashbot
 // using the channels id.
 func getChannelNames(client *socketmode.Client, channelsID []string) []string {
-	var names []string
-	// extracting the private channels monitored by bashbot.
-	channels, _, _ := client.GetConversations(&slack.GetConversationsParameters{
-		Limit: 1000,
-		Types: []string{"private_channel"},
-	})
-	log.Debugf("Number of private channels this bot is monitoring: %d", len(channels))
-	for j := 0; j < len(channels); j++ {
-		for i := range channelsID {
-			if channelsID[i] == channels[j].ID {
-				names = append(names, channels[j].Name)
-			}
-		}
-	}
-	// extracting the public channels monitored by bashbot.
-	channels, _, _ = client.GetConversations(&slack.GetConversationsParameters{
-		Limit: 1000,
-		Types: []string{"public_channel"},
-	})
-	log.Debugf("Number of public channels this bot is monitoring: %d", len(channels))
-	for j := 0; j < len(channels); j++ {
-		for i := range channelsID {
-			if channelsID[i] == channels[j].ID {
-				names = append(names, channels[j].Name)
-			}
-		}
-	}
+	privateChannelNames, privateChannels := getChannelNamesByType(client, channelsID, "private_channel")
+	log.Debugf("Number of private channels this bot is monitoring: %d", len(privateChannels))
+
+	publicChannelNames, publicChannels := getChannelNamesByType(client, channelsID, "public_channel")
+	log.Debugf("Number of public channels this bot is monitoring: %d", len(publicChannels))
+
+	names := append(privateChannelNames, publicChannelNames...)
 	if len(names) > 0 {
 		return names
 	}
@@ -326,15 +253,14 @@ func processCommand(cfg *Config, client *socketmode.Client, event *slackevents.M
 	if !cmdPattern.MatchString(event.Text) {
 		return false
 	}
-
-	log.Info("command detected: `" + event.Text + "`")
+	log.Infof("command detected: `%s`", event.Text)
 	log.Debug(event)
-	log.Info("Channel: " + event.Channel)
-	log.Info("User: " + event.User)
-	log.Info("Timestamp: " + event.TimeStamp)
+	log.Infof("Channel: %s", event.Channel)
+	log.Infof("User: %s", event.User)
+	log.Infof("Timestamp: %s", event.TimeStamp)
 
 	words := strings.Fields(event.Text)
-	cmd := []string{}
+	var cmd []string
 	for index, element := range words {
 		element = regexp.MustCompile(`<http(.*)>`).ReplaceAllString(element, "http$1")
 		element = regexp.MustCompile(`“|”`).ReplaceAllString(element, "\"")
@@ -345,13 +271,7 @@ func processCommand(cfg *Config, client *socketmode.Client, event *slackevents.M
 		}
 	}
 
-	tool := Tool{}
-	for i := range cfg.Tools {
-		if cfg.Tools[i].Trigger == words[1] {
-			tool = cfg.Tools[i]
-		}
-	}
-
+	tool := cfg.GetTool(words[1])
 	switch words[1] {
 	case tool.Trigger:
 		sendConfigMessageToChannel(cfg, client, event.Channel, "processing_command", "")
@@ -376,21 +296,44 @@ func processCommand(cfg *Config, client *socketmode.Client, event *slackevents.M
 	}
 }
 
-func processValidCommand(cfg *Config, client *socketmode.Client, cmds []string, tool Tool, channel, user, timestamp string) bool {
-	// checking if all required environment variables exist.
+// validateRequiredEnvVars is a helper function for checking if required environment variables
+// are available for bashbot.
+//
+// If any required environment variable is not set, it returns a missingenvvar error to the
+// slack bashbot client.
+func validateRequiredEnvVars(cfg *Config, client *socketmode.Client, channel string, tool Tool) error {
 	for _, envvar := range tool.Envvars {
 		if os.Getenv(envvar) == "" {
 			sendConfigMessageToChannel(cfg, client, channel, "missingenvvar", envvar)
-			return false
+			return fmt.Errorf("missing environment variable '%s'", envvar)
 		}
 	}
-	// checking if all required dependencies are installed on the
-	// machine / os.
+	return nil
+}
+
+// validateRequiredDependencies is a helper function for checking if required software dependencies
+// are available for bashbot.
+//
+// If any required software dependency is not installed on the host machine, it returns a
+// missingdependency error to the slack bashbot client.
+func validateRequiredDependencies(cfg *Config, client *socketmode.Client, channel string, tool Tool) error {
 	for _, dependency := range tool.Dependencies {
 		if _, err := exec.LookPath(dependency); err != nil {
 			sendConfigMessageToChannel(cfg, client, channel, "missingdependency", dependency)
-			return false
+			return fmt.Errorf("missing application/software dependency '%s'", dependency)
 		}
+	}
+	return nil
+}
+
+func processValidCommand(cfg *Config, client *socketmode.Client, cmds []string, tool Tool, channel, user, timestamp string) bool {
+	err := validateRequiredEnvVars(cfg, client, channel, tool)
+	if err != nil {
+		return false
+	}
+	err = validateRequiredDependencies(cfg, client, channel, tool)
+	if err != nil {
+		return false
 	}
 	// inject email if exists in command
 	thisUser, err := client.GetUserInfo(user)
@@ -476,14 +419,15 @@ func processValidCommand(cfg *Config, client *socketmode.Client, cmds []string, 
 				} else {
 					log.Debug("Parameter: " + cmds[j] + " does not match regex: " + tool.Parameters[j].Match)
 				}
-			} else {
-				for h := 0; h < len(tool.Parameters[j].Allowed); h++ {
-					log.Debug(" ====> Parameter[" + strconv.Itoa(j) + "].Allowed[" + strconv.Itoa(h) + "]: " + tool.Parameters[j].Allowed[h])
-					if tool.Parameters[j].Allowed[h] == cmds[j] {
-						validParams[j] = true
-					}
+				continue
+			}
+			for h := 0; h < len(tool.Parameters[j].Allowed); h++ {
+				log.Debug(" ====> Parameter[" + strconv.Itoa(j) + "].Allowed[" + strconv.Itoa(h) + "]: " + tool.Parameters[j].Allowed[h])
+				if tool.Parameters[j].Allowed[h] == cmds[j] {
+					validParams[j] = true
 				}
 			}
+
 		}
 	}
 
@@ -536,30 +480,14 @@ func logToChannel(cfg *Config, client *socketmode.Client, channelID, userID, msg
 	channel := getChannelNames(client, []string{channelID})
 	retacks := regexp.MustCompile("`")
 	msg = retacks.ReplaceAllLiteralString(msg, "")
-	output := fmt.Sprintf(
-		"%s[%s:%s]: %s",
-		cfg.Admins[0].AppName,
-		user.Profile.RealName,
-		channel[0],
-		truncateString(msg, 1000),
-	)
+	msg = truncateString(msg, 1000)
+	output := fmt.Sprintf("%s[%s:%s]: %s", cfg.Admins[0].AppName, user.Profile.RealName, channel[0], msg)
 	ret := splitOut(output, "code")
 	// Display message in chat-ops-log unless it came from admin channel
 	if channelID == cfg.Admins[0].PrivateChannelId {
 		return
 	}
-	channelID, _, err = client.PostMessage(cfg.Admins[0].LogChannelId,
-		slack.MsgOptionText(ret, false),
-		slack.MsgOptionUsername(cfg.Admins[0].AppName),
-		slack.MsgOptionPostMessageParameters(slack.PostMessageParameters{
-			UnfurlLinks: true,
-			UnfurlMedia: true,
-		}),
-	)
-	if err != nil {
-		log.Error(err)
-		return
-	}
+	sendMessageToChannel(cfg, client, cfg.Admins[0].LogChannelId, ret)
 	log.Debug("Channel ID: " + channelID)
 	log.Info(ret)
 }
@@ -586,4 +514,32 @@ func splitOut(output string, responseType string) string {
 	default:
 		return output
 	}
+}
+
+// ConfigureLogger configures the logger used by bashbot to set the log level
+// and also the log format.
+func ConfigureLogger(logLevel, logFormat string) {
+	log.SetOutput(os.Stdout)
+
+	switch logLevel {
+	case "info":
+		log.SetLevel(log.InfoLevel)
+	case "debug":
+		log.SetLevel(log.DebugLevel)
+	case "warn":
+		log.SetLevel(log.WarnLevel)
+	case "error":
+		log.SetLevel(log.ErrorLevel)
+	default:
+		log.SetLevel(log.InfoLevel)
+		log.Warn(fmt.Sprintf("Invalid log-level (setting to info level): %s", logLevel))
+	}
+
+	if logFormat == "json" {
+		log.SetFormatter(&log.JSONFormatter{})
+		return
+	}
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp: true,
+	})
 }
