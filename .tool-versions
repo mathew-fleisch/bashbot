@@ -1,12 +1,12 @@
-awscli 2.7.6
+awscli 2.7.7
 bat 0.21.0
-gcloud 388.0.0
+gcloud 389.0.0
 helm 3.9.0
 kubectl 1.24.1
 kubectx 0.9.4
 rclone 1.58.1
 shellcheck 0.8.0
-shfmt 3.5.0
+shfmt 3.5.1
 sops 3.7.3
 terraform 0.12.30
 terraform latest
