@@ -1,6 +1,6 @@
-awscli 2.7.9
+awscli 2.7.11
 bat 0.21.0
-gcloud 390.0.0
+gcloud 391.0.0
 helm 3.9.0
 kubectl 1.24.2
 kubectx 0.9.4
@@ -10,5 +10,5 @@ shfmt 3.5.1
 sops 3.7.3
 terraform 0.12.30
 terraform latest
-tflint 0.37.0
-yq 4.25.2
+tflint 0.38.1
+yq 4.25.3
