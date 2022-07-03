@@ -17,7 +17,40 @@ import (
 	"github.com/slack-go/slack/socketmode"
 )
 
+type Client struct {
+	slackClient  *slack.Client
+	socketClient *socketmode.Client
+	cfg          *Config
+}
+
 var Version = "development"
+
+// NewSlackClient creates a new slack client.
+func NewSlackClient(configFile, botToken, appToken string) *Client {
+	cfg, err := loadConfigFile(configFile)
+	if err != nil {
+		log.WithError(err).Fatal("config-file does not exist")
+	}
+	if botToken == "" {
+		botToken = os.Getenv("SLACK_TOKEN")
+	}
+	if appToken == "" {
+		appToken = os.Getenv("SLACK_APP_TOKEN")
+	}
+	if botToken == "" {
+		log.Fatal("Must define a slack bot token")
+	}
+	if appToken == "" {
+		log.Fatal("Must define a slack app token")
+	}
+	api := slack.New(botToken, slack.OptionAppLevelToken(appToken))
+	client := socketmode.New(api)
+	return &Client{
+		cfg:          cfg,
+		socketClient: client,
+		slackClient:  api,
+	}
+}
 
 // loadConfigFile is a helper function for loading bashbot json
 // configuration file into Config struct.
@@ -34,35 +67,17 @@ func loadConfigFile(filePath string) (*Config, error) {
 	return &config, nil
 }
 
-func RunSlackClient(configFile, botToken, appToken string) {
-	cfg, err := loadConfigFile(configFile)
-	if err != nil {
-		log.WithError(err).Fatal("config-file does not exist")
-		return
-	}
-	if botToken == "" {
-		botToken = os.Getenv("SLACK_TOKEN")
-	}
-	if appToken == "" {
-		appToken = os.Getenv("SLACK_APP_TOKEN")
-	}
-	if botToken == "" {
-		log.Fatal("Must define a slack bot token")
-	}
-	if appToken == "" {
-		log.Fatal("Must define a slack app token")
-	}
-	api := slack.New(botToken, slack.OptionAppLevelToken(appToken))
-	client := socketmode.New(api)
-	go client.Run()
+// Run runs the slack socketmode client on background.
+func (c *Client) Run() {
+	go c.socketClient.Run()
 
-	for event := range client.Events {
+	for event := range c.socketClient.Events {
 		switch event.Type {
 		case socketmode.EventTypeEventsAPI:
-			eventsAPIHandler(cfg, client, event)
+			c.eventsAPIHandler(event)
 
 		case socketmode.EventTypeConnected:
-			log.Info("Bashbot is now connected to slack. Primary trigger: `" + cfg.Admins[0].Trigger + "`")
+			log.Info("Bashbot is now connected to slack. Primary trigger: `" + c.cfg.Admins[0].Trigger + "`")
 
 		case socketmode.EventTypeConnectionError:
 			log.Error("Slack socket connection error")
@@ -75,9 +90,9 @@ func RunSlackClient(configFile, botToken, appToken string) {
 
 // eventsAPIHandler is a slack socket event handler for handling
 // events API event.
-func eventsAPIHandler(cfg *Config, client *socketmode.Client, socketEvent socketmode.Event) error {
+func (c *Client) eventsAPIHandler(socketEvent socketmode.Event) error {
 	event := socketEvent.Data.(slackevents.EventsAPIEvent)
-	client.Ack(*socketEvent.Request)
+	c.socketClient.Ack(*socketEvent.Request)
 	switch event.Type {
 	case slackevents.CallbackEvent:
 		innerEvent := event.InnerEvent
@@ -87,7 +102,7 @@ func eventsAPIHandler(cfg *Config, client *socketmode.Client, socketEvent socket
 			if event.SubType == "bot_message" {
 				break
 			}
-			processCommand(cfg, client, event)
+			c.processCommand(event)
 		}
 	default:
 		return fmt.Errorf("unhandled event type: %s", event.Type)
@@ -101,11 +116,11 @@ func eventsAPIHandler(cfg *Config, client *socketmode.Client, socketEvent socket
 // In the process of installing the dependencies, the dependency installer
 // executes the install command provided in the configuration file for each
 // dependency.
-func InstallVendorDependencies(cfg *Config) bool {
+func (c *Client) InstallVendorDependencies() bool {
 	log.Debug("installing vendor dependencies")
-	for i := 0; i < len(cfg.Dependencies); i++ {
-		log.Info(cfg.Dependencies[i].Name)
-		words := strings.Fields(strings.Join(cfg.Dependencies[i].Install, " "))
+	for i := 0; i < len(c.cfg.Dependencies); i++ {
+		log.Info(c.cfg.Dependencies[i].Name)
+		words := strings.Fields(strings.Join(c.cfg.Dependencies[i].Install, " "))
 		var tcmd []string
 		for index, element := range words {
 			log.Debugf("%d: %s", index, element)
@@ -113,7 +128,7 @@ func InstallVendorDependencies(cfg *Config) bool {
 		}
 		cmd := []string{"bash", "-c", "pushd vendor && " + strings.Join(tcmd, " ") + " && popd"}
 		log.Debug(strings.Join(cmd, " "))
-		log.Info(runShellCommands(cmd))
+		log.Info(c.runShellCommands(cmd))
 	}
 	return true
 }
@@ -126,7 +141,7 @@ func InstallVendorDependencies(cfg *Config) bool {
 //
 // The first value in the array should be the command name e.g bash, sh etc
 // while the other values will be treated as arguments.
-func runShellCommands(cmdArgs []string) string {
+func (c *Client) runShellCommands(cmdArgs []string) string {
 	cmdOut, err := exec.Command(cmdArgs[0], cmdArgs[1:]...).CombinedOutput()
 	if err != nil {
 		return "error running command."
@@ -145,34 +160,35 @@ func runShellCommands(cmdArgs []string) string {
 //
 // The passalong parameter is an optional parameter because not all messages needs additional
 // content(s) attached to the message sent.
-func sendConfigMessageToChannel(cfg *Config, client *socketmode.Client, channel, message, passalong string) {
+func (c *Client) sendConfigMessageToChannel(channel, message, passalong string) {
 	isActive := true
 	responseMessage := message
-	for i := 0; i < len(cfg.Messages); i++ {
-		if cfg.Messages[i].Name == message {
-			log.Debug(cfg.Messages[i].Name)
-			isActive = cfg.Messages[i].Active
-			responseMessage = cfg.Messages[i].Text
+	for i := 0; i < len(c.cfg.Messages); i++ {
+		if c.cfg.Messages[i].Name == message {
+			log.Debug(c.cfg.Messages[i].Name)
+			isActive = c.cfg.Messages[i].Active
+			responseMessage = c.cfg.Messages[i].Text
 			if passalong != "" {
-				responseMessage = fmt.Sprintf(cfg.Messages[i].Text, passalong)
+				responseMessage = fmt.Sprintf(c.cfg.Messages[i].Text, passalong)
 			}
 		}
 	}
 	if isActive {
-		sendMessageToChannel(cfg, client, channel, responseMessage)
+		c.SendMessageToChannel(channel, responseMessage)
 		return
 	}
 	log.Warn("Message suppressed by configuration")
 	log.Warn(responseMessage)
 }
 
-// sendMessageToChannel sends a message to the slack channel.
-func sendMessageToChannel(cfg *Config, client *socketmode.Client, channel, msg string) {
-	channelID, _, err := client.PostMessage(
+// SendMessageToChannel sends a message to a slack channel.
+func (c *Client) SendMessageToChannel(channel, msg string) {
+	messageParams := slack.PostMessageParameters{UnfurlLinks: true, UnfurlMedia: true}
+	channelID, _, err := c.slackClient.PostMessage(
 		channel,
 		slack.MsgOptionText(strings.Replace(msg, "\\n", "\n", -1), false),
-		slack.MsgOptionUsername(cfg.Admins[0].AppName),
-		slack.MsgOptionPostMessageParameters(slack.PostMessageParameters{UnfurlLinks: true, UnfurlMedia: true}),
+		slack.MsgOptionUsername(c.cfg.Admins[0].AppName),
+		slack.MsgOptionPostMessageParameters(messageParams),
 	)
 	if err != nil {
 		log.Error(err)
@@ -181,14 +197,14 @@ func sendMessageToChannel(cfg *Config, client *socketmode.Client, channel, msg s
 	log.Infof("Sent slack message[Channel:%s]: %s", channelID, msg)
 }
 
-// sendMessageToUser sends to message to a slack user in a slack channel.
-func sendMessageToUser(cfg *Config, client *socketmode.Client, channel, user, msg string) {
+// SendMessageToUser sends to message to a slack user in a slack channel.
+func (c *Client) SendMessageToUser(channel, user, msg string) {
 	messageParams := slack.PostMessageParameters{UnfurlLinks: true, UnfurlMedia: true}
-	_, err := client.PostEphemeral(
+	_, err := c.slackClient.PostEphemeral(
 		channel,
 		user,
 		slack.MsgOptionText(strings.Replace(msg, "\\n", "\n", -1), false),
-		slack.MsgOptionUsername(cfg.Admins[0].AppName),
+		slack.MsgOptionUsername(c.cfg.Admins[0].AppName),
 		slack.MsgOptionPostMessageParameters(messageParams),
 	)
 	if err != nil {
@@ -213,9 +229,9 @@ func truncateString(str string, num int) string {
 // by thier channel type.
 //
 // The available channel types are private_channel and public_channel.
-func getChannelNamesByType(client *socketmode.Client, channelsID []string, channelType string) ([]string, []slack.Channel) {
+func (c *Client) getChannelNamesByType(channelsID []string, channelType string) ([]string, []slack.Channel) {
 	var names []string
-	channels, _, err := client.GetConversations(&slack.GetConversationsParameters{
+	channels, _, err := c.socketClient.GetConversations(&slack.GetConversationsParameters{
 		Limit: 1000,
 		Types: []string{channelType},
 	})
@@ -235,11 +251,11 @@ func getChannelNamesByType(client *socketmode.Client, channelsID []string, chann
 
 // getChannelNames retreives the names of the channels monitored by bashbot
 // using the channels id.
-func getChannelNames(client *socketmode.Client, channelsID []string) []string {
-	privateChannelNames, privateChannels := getChannelNamesByType(client, channelsID, "private_channel")
+func (c *Client) getChannelNames(channelsID []string) []string {
+	privateChannelNames, privateChannels := c.getChannelNamesByType(channelsID, "private_channel")
 	log.Debugf("Number of private channels this bot is monitoring: %d", len(privateChannels))
 
-	publicChannelNames, publicChannels := getChannelNamesByType(client, channelsID, "public_channel")
+	publicChannelNames, publicChannels := c.getChannelNamesByType(channelsID, "public_channel")
 	log.Debugf("Number of public channels this bot is monitoring: %d", len(publicChannels))
 
 	names := append(privateChannelNames, publicChannelNames...)
@@ -249,8 +265,8 @@ func getChannelNames(client *socketmode.Client, channelsID []string) []string {
 	return []string{"all"}
 }
 
-func processCommand(cfg *Config, client *socketmode.Client, event *slackevents.MessageEvent) bool {
-	matchTrigger := fmt.Sprintf("(?i)^%s .", cfg.Admins[0].Trigger)
+func (c *Client) processCommand(event *slackevents.MessageEvent) bool {
+	matchTrigger := fmt.Sprintf("(?i)^%s .", c.cfg.Admins[0].Trigger)
 	cmdPattern := regexp.MustCompile(matchTrigger)
 	if !cmdPattern.MatchString(event.Text) {
 		return false
@@ -273,27 +289,27 @@ func processCommand(cfg *Config, client *socketmode.Client, event *slackevents.M
 		}
 	}
 
-	tool := cfg.GetTool(words[1])
+	tool := c.cfg.GetTool(words[1])
 	switch words[1] {
 	case tool.Trigger:
-		sendConfigMessageToChannel(cfg, client, event.Channel, "processing_command", "")
-		return processValidCommand(cfg, client, cmd, tool, event.Channel, event.User, event.TimeStamp)
+		c.sendConfigMessageToChannel(event.Channel, "processing_command", "")
+		return c.processValidCommand(cmd, tool, event.Channel, event.User, event.TimeStamp)
 	case "exit":
 		if len(words) == 3 {
 			switch words[2] {
 			case "0":
-				sendMessageToChannel(cfg, client, event.Channel, "exiting: success")
+				c.SendMessageToChannel(event.Channel, "exiting: success")
 				os.Exit(0)
 			default:
-				sendMessageToChannel(cfg, client, event.Channel, "exiting: failure")
+				c.SendMessageToChannel(event.Channel, "exiting: failure")
 				os.Exit(1)
 			}
 		}
-		sendMessageToChannel(cfg, client, event.Channel, "My battery is low and it's getting dark.")
+		c.SendMessageToChannel(event.Channel, "My battery is low and it's getting dark.")
 		os.Exit(0)
 		return false
 	default:
-		sendConfigMessageToChannel(cfg, client, event.Channel, "command_not_found", "")
+		c.sendConfigMessageToChannel(event.Channel, "command_not_found", "")
 		return false
 	}
 }
@@ -303,10 +319,10 @@ func processCommand(cfg *Config, client *socketmode.Client, event *slackevents.M
 //
 // If any required environment variable is not set, it returns a missingenvvar error to the
 // slack bashbot client.
-func validateRequiredEnvVars(cfg *Config, client *socketmode.Client, channel string, tool Tool) error {
+func (c *Client) validateRequiredEnvVars(channel string, tool Tool) error {
 	for _, envvar := range tool.Envvars {
 		if os.Getenv(envvar) == "" {
-			sendConfigMessageToChannel(cfg, client, channel, "missingenvvar", envvar)
+			c.sendConfigMessageToChannel(channel, "missingenvvar", envvar)
 			return fmt.Errorf("missing environment variable '%s'", envvar)
 		}
 	}
@@ -318,27 +334,27 @@ func validateRequiredEnvVars(cfg *Config, client *socketmode.Client, channel str
 //
 // If any required software dependency is not installed on the host machine, it returns a
 // missingdependency error to the slack bashbot client.
-func validateRequiredDependencies(cfg *Config, client *socketmode.Client, channel string, tool Tool) error {
+func (c *Client) validateRequiredDependencies(channel string, tool Tool) error {
 	for _, dependency := range tool.Dependencies {
 		if _, err := exec.LookPath(dependency); err != nil {
-			sendConfigMessageToChannel(cfg, client, channel, "missingdependency", dependency)
+			c.sendConfigMessageToChannel(channel, "missingdependency", dependency)
 			return fmt.Errorf("missing application/software dependency '%s'", dependency)
 		}
 	}
 	return nil
 }
 
-func processValidCommand(cfg *Config, client *socketmode.Client, cmds []string, tool Tool, channel, user, timestamp string) bool {
-	err := validateRequiredEnvVars(cfg, client, channel, tool)
+func (c *Client) processValidCommand(cmds []string, tool Tool, channel, user, timestamp string) bool {
+	err := c.validateRequiredEnvVars(channel, tool)
 	if err != nil {
 		return false
 	}
-	err = validateRequiredDependencies(cfg, client, channel, tool)
+	err = c.validateRequiredDependencies(channel, tool)
 	if err != nil {
 		return false
 	}
 	// inject email if exists in command
-	thisUser, err := client.GetUserInfo(user)
+	thisUser, err := c.slackClient.GetUserInfo(user)
 	if err != nil {
 		log.Info(fmt.Printf("%s\n", err))
 		return true
@@ -358,8 +374,8 @@ func processValidCommand(cfg *Config, client *socketmode.Client, cmds []string, 
 	validParams := make([]bool, len(tool.Parameters))
 	var tmpHelp string
 	authorized := false
-	var allowedChannels []string = getChannelNames(client, tool.Permissions)
-	if cfg.Admins[0].PrivateChannelId == channel {
+	var allowedChannels []string = c.getChannelNames(tool.Permissions)
+	if c.cfg.Admins[0].PrivateChannelId == channel {
 		authorized = true
 	} else {
 		for j := 0; j < len(tool.Permissions); j++ {
@@ -375,16 +391,16 @@ func processValidCommand(cfg *Config, client *socketmode.Client, cmds []string, 
 	if len(cmds) > 0 {
 		for j := 0; j < len(cmds); j++ {
 			if cmds[j] == "help" {
-				sendMessageToChannel(cfg, client, channel, cmdHelp)
+				c.SendMessageToChannel(channel, cmdHelp)
 				return true
 			}
 		}
 	}
 
 	if !authorized {
-		sendConfigMessageToChannel(cfg, client, channel, "unauthorized", strings.Join(allowedChannels, ", "))
-		sendMessageToChannel(cfg, client, channel, cmdHelp)
-		logToChannel(cfg, client, channel, user, tool.Trigger+" "+strings.Join(cmds, " "))
+		c.sendConfigMessageToChannel(channel, "unauthorized", strings.Join(allowedChannels, ", "))
+		c.SendMessageToChannel(channel, cmdHelp)
+		c.logToChannel(channel, user, tool.Trigger+" "+strings.Join(cmds, " "))
 		return true
 	}
 
@@ -396,14 +412,14 @@ func processValidCommand(cfg *Config, client *socketmode.Client, cmds []string, 
 			tmpHelp = fmt.Sprintf("%s\n%s: [%s%s]", tmpHelp, tool.Parameters[j].Name, strings.Join(tool.Parameters[j].Allowed, "|"), tool.Parameters[j].Description)
 			if len(derivedSource) > 0 {
 				log.Debug("Deriving allowed parameters: " + strings.Join(derivedSource, " "))
-				allowedOut := strings.Split(runShellCommands([]string{"bash", "-c", "cd " + tool.Location + " && " + strings.Join(derivedSource, " ")}), "\n")
+				allowedOut := strings.Split(c.runShellCommands([]string{"bash", "-c", "cd " + tool.Location + " && " + strings.Join(derivedSource, " ")}), "\n")
 				tool.Parameters[j].Allowed = append(tool.Parameters[j].Allowed, allowedOut...)
 			}
 		}
 	}
 
 	if tool.Log {
-		logToChannel(cfg, client, channel, user, tool.Trigger+" "+strings.Join(cmds, " "))
+		c.logToChannel(channel, user, tool.Trigger+" "+strings.Join(cmds, " "))
 	}
 
 	// Validate parameters against whitelist
@@ -436,7 +452,7 @@ func processValidCommand(cfg *Config, client *socketmode.Client, cmds []string, 
 	buildCmd := commandJoined
 	for x := 0; x < len(tool.Parameters); x++ {
 		if !validParams[x] {
-			sendConfigMessageToChannel(cfg, client, channel, "invalid_parameter", tool.Parameters[x].Name)
+			c.sendConfigMessageToChannel(channel, "invalid_parameter", tool.Parameters[x].Name)
 			return false
 		}
 		re := regexp.MustCompile(`\${` + tool.Parameters[x].Name + `}`)
@@ -452,7 +468,7 @@ func processValidCommand(cfg *Config, client *socketmode.Client, cmds []string, 
 		user,
 		thisUser.Name,
 		channel,
-		strings.Join(getChannelNames(client, []string{channel}), ""),
+		strings.Join(c.getChannelNames([]string{channel}), ""),
 	)
 	splitOn := regexp.MustCompile(`\s\&\&`)
 	displayCmd := splitOn.ReplaceAllString(buildCmd, " \\\n        &&")
@@ -460,36 +476,36 @@ func processValidCommand(cfg *Config, client *socketmode.Client, cmds []string, 
 	log.Info(displayCmd)
 
 	tmpCmd := []string{"bash", "-c", buildCmd}
-	ret := splitOut(runShellCommands(tmpCmd), tool.Response)
+	ret := splitOut(c.runShellCommands(tmpCmd), tool.Response)
 	if tool.Ephemeral {
-		sendConfigMessageToChannel(cfg, client, channel, "ephemeral", "")
-		sendMessageToUser(cfg, client, channel, user, ret)
+		c.sendConfigMessageToChannel(channel, "ephemeral", "")
+		c.SendMessageToUser(channel, user, ret)
 	} else {
-		sendMessageToChannel(cfg, client, channel, ret)
+		c.SendMessageToChannel(channel, ret)
 	}
 	if tool.Log {
-		logToChannel(cfg, client, channel, user, ret)
+		c.logToChannel(channel, user, ret)
 	}
 	return true
 }
 
-func logToChannel(cfg *Config, client *socketmode.Client, channelID, userID, msg string) {
-	user, err := client.GetUserInfo(userID)
+func (c *Client) logToChannel(channelID, userID, msg string) {
+	user, err := c.slackClient.GetUserInfo(userID)
 	if err != nil {
 		log.Errorf("can't get user: %w", err)
 		return
 	}
-	channel := getChannelNames(client, []string{channelID})
+	channel := c.getChannelNames([]string{channelID})
 	retacks := regexp.MustCompile("`")
 	msg = retacks.ReplaceAllLiteralString(msg, "")
 	msg = truncateString(msg, 1000)
-	output := fmt.Sprintf("%s[%s:%s]: %s", cfg.Admins[0].AppName, user.Profile.RealName, channel[0], msg)
+	output := fmt.Sprintf("%s[%s:%s]: %s", c.cfg.Admins[0].AppName, user.Profile.RealName, channel[0], msg)
 	ret := splitOut(output, "code")
 	// Display message in chat-ops-log unless it came from admin channel
-	if channelID == cfg.Admins[0].PrivateChannelId {
+	if channelID == c.cfg.Admins[0].PrivateChannelId {
 		return
 	}
-	sendMessageToChannel(cfg, client, cfg.Admins[0].LogChannelId, ret)
+	c.SendMessageToChannel(c.cfg.Admins[0].LogChannelId, ret)
 	log.Debug("Channel ID: " + channelID)
 	log.Info(ret)
 }

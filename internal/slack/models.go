@@ -78,7 +78,6 @@ type Topic struct {
 	LastSet int    `json:"last_set"`
 }
 
-// Config holds all bashbot's configurations
 type Config struct {
 	Admins       []Admin      `json:"admins"`
 	Messages     []Message    `json:"messages"`
