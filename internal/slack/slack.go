@@ -116,7 +116,7 @@ func (c *Client) eventsAPIHandler(socketEvent socketmode.Event) error {
 // In the process of installing the dependencies, the dependency installer
 // executes the install command provided in the configuration file for each
 // dependency.
-func (c *Client) InstallVendorDependencies() bool {
+func (c *Client) InstallVendorDependencies() {
 	log.Debug("installing vendor dependencies")
 	for i := 0; i < len(c.cfg.Dependencies); i++ {
 		log.Info(c.cfg.Dependencies[i].Name)
@@ -130,7 +130,6 @@ func (c *Client) InstallVendorDependencies() bool {
 		log.Debug(strings.Join(cmd, " "))
 		log.Info(c.runShellCommands(cmd))
 	}
-	return true
 }
 
 // runShellCommands is a helper function for executing shell commands on
