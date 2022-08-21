@@ -1,8 +1,8 @@
-awscli 2.7.22
+awscli 2.7.25
 bat 0.21.0
-gcloud 397.0.0
+gcloud 398.0.0
 helm 3.9.3
-kubectl 1.24.3
+kubectl 1.24.4
 kubectx 0.9.4
 rclone 1.59.1
 shellcheck 0.8.0
