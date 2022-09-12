@@ -44,7 +44,9 @@ jobs:
         name: Lint Container Using Dockle
         env:
           DOCKER_CONTENT_TRUST: 1
-        run: make docker-build && make test-docker
+        run: |
+          make docker-build
+          make test-docker
 
   integration_test:
     name: KinD Integration Tests
