@@ -67,6 +67,10 @@ jobs:
         run: |
           cp sample-config.json helm/bashbot/config.json
           cp .tool-versions helm/bashbot/.tool-versions
+          if [[ -z "$SLACK_BOT_TOKEN" ]] || [[ -z "$SLACK_APP_TOKEN" ]]; then
+            echo "Missing github secret(s): SLACK_BOT_TOKEN, SLACK_APP_TOKEN"
+            exit 1
+          fi
           cat sample-env-file | envsubst > helm/bashbot/.env \
             && make test-kind \
             && rm -rf helm/bashbot/.env \
