@@ -226,10 +226,12 @@ test-go:
 .PHONY: go-setup
 go-setup:
 	go mod tidy
-	go mod vendor
-	go install -v ./...
 	go get github.com/slack-go/slack@master
 	go get github.com/sirupsen/logrus
+	go get -u golang.org/x/sys
+	go mod vendor
+	go install -v ./...
+
 
 .PHONY: go-build-cross-compile
 go-build-cross-compile: go-clean

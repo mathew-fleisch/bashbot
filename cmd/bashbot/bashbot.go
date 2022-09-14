@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"os/exec"
 	"regexp"
@@ -38,12 +38,15 @@ var sendMessageUser string
 var logLevel string
 var logFormat string
 var api *slack.Client
-var channelsByName map[string]string
-var countkey string
-var emojiPattern *regexp.Regexp
-var slackUserPattern *regexp.Regexp
-var puncPattern *regexp.Regexp
-var c *regexp.Regexp
+
+// var channelsByName map[string]string
+
+// var countkey string
+// var emojiPattern *regexp.Regexp
+// var slackUserPattern *regexp.Regexp
+// var puncPattern *regexp.Regexp
+
+// var c *regexp.Regexp
 var cmdPattern *regexp.Regexp
 
 type Admins struct {
@@ -186,7 +189,7 @@ func getAdmin() Admin {
 		log.Error(err)
 	}
 	defer jsonFile.Close()
-	byteValue, _ := ioutil.ReadAll(jsonFile)
+	byteValue, _ := io.ReadAll(jsonFile)
 	var Admins Admins
 	err = json.Unmarshal(byteValue, &Admins)
 	if err != nil {
@@ -211,7 +214,7 @@ func installVendorDependencies() bool {
 	}
 	defer jsonFile.Close()
 
-	byteValue, _ := ioutil.ReadAll(jsonFile)
+	byteValue, _ := io.ReadAll(jsonFile)
 	var Dependencies Dependencies
 	json.Unmarshal(byteValue, &Dependencies)
 
@@ -280,7 +283,7 @@ func processCommand(event *slackevents.MessageEvent) bool {
 	}
 	defer jsonFile.Close()
 
-	byteValue, _ := ioutil.ReadAll(jsonFile)
+	byteValue, _ := io.ReadAll(jsonFile)
 	var Tools Tools
 	json.Unmarshal(byteValue, &Tools)
 
@@ -495,7 +498,7 @@ func reportToChannel(channel string, message string, passalong string) {
 	}
 	defer jsonFile.Close()
 
-	byteValue, _ := ioutil.ReadAll(jsonFile)
+	byteValue, _ := io.ReadAll(jsonFile)
 	var Messages Messages
 	json.Unmarshal(byteValue, &Messages)
 
@@ -769,9 +772,9 @@ func main() {
 
 	// Regular expressions we'll use a whole lot.
 	// Should probably be in an intialization function to the side.
-	emojiPattern = regexp.MustCompile(`:[^\t\n\f\r ]+:`)
-	slackUserPattern = regexp.MustCompile(`<@[^\t\n\f\r ]+>`)
-	puncPattern = regexp.MustCompile(`[^a-zA-Z0-9]+`)
+	// emojiPattern = regexp.MustCompile(`:[^\t\n\f\r ]+:`)
+	// slackUserPattern = regexp.MustCompile(`<@[^\t\n\f\r ]+>`)
+	// puncPattern = regexp.MustCompile(`[^a-zA-Z0-9]+`)
 	cmdPattern = regexp.MustCompile(matchTrigger)
 
 	// Our special handlers. If they handled a message, they return true.
@@ -796,11 +799,11 @@ func main() {
 		case socketmode.EventTypeErrorBadMessage:
 			log.Error("Bad message received")
 
-		case socketmode.EventTypeHello:
-			// do nothing
+		// case socketmode.EventTypeHello:
+		// do nothing
+		default:
+			log.Debug(fmt.Printf("unhandled event: %v", event))
 
-			// default:
-			// 	log.Debug("unhandled event: %v", event)
 		}
 	}
 }

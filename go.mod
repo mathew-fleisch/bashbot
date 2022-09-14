@@ -1,9 +1,13 @@
 module github.com/mathew-fleisch/bashbot
 
-go 1.15
+go 1.19
 
 require (
-	github.com/sirupsen/logrus v1.8.1
-	github.com/slack-go/slack v0.10.2
-	github.com/stretchr/testify v1.6.1 // indirect
+	github.com/sirupsen/logrus v1.9.0
+	github.com/slack-go/slack v0.11.4-0.20220911225724-78e593a0c416
+)
+
+require (
+	github.com/gorilla/websocket v1.4.2 // indirect
+	golang.org/x/sys v0.0.0-20220913175220-63ea55921009 // indirect
 )
