@@ -28,4 +28,5 @@ RUN chmod +x /usr/local/bin/bashbot \
     && chown -R ${NRUSER}:${NRUSER} /usr/asdf \
     && chown -R ${NRUSER}:${NRUSER} /bashbot
 USER ${NRUSER}
+
 CMD [ "/bashbot/entrypoint.sh" ]
