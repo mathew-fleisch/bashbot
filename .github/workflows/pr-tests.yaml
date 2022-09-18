@@ -34,12 +34,14 @@ jobs:
         name: Lint Actions
         run: make test-lint-actions
 
-      -
-        name: Lint Go
-        run: make test-lint
+      # -
+      #   name: Lint Go
+      #   run: make test-lint
+
       -
         name: Unit Tests
         run: make test-go
+
       -
         name: Lint Container Using Dockle
         env:
