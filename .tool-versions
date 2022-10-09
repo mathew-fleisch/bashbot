@@ -1,4 +1,4 @@
-awscli 2.8.0
+awscli 2.8.2
 bat 0.22.1
 gcloud 403.0.0
 helm 3.10.0
@@ -11,4 +11,4 @@ sops 3.7.3
 terraform 0.12.30
 terraform latest
 tflint 0.41.0
-yq 4.27.5
+yq 4.28.1
