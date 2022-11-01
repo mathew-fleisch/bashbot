@@ -1,8 +1,8 @@
-FROM golang:1.16 as builder
+FROM golang:1.19 as builder
 
 WORKDIR /bashbot
 COPY . .
-RUN make go-setup && make go-build
+RUN make
 
 FROM alpine:latest
 LABEL maintainer="Mathew Fleisch <mathew.fleisch@gmail.com>"

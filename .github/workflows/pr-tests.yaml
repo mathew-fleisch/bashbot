@@ -34,17 +34,21 @@ jobs:
         name: Lint Actions
         run: make test-lint-actions
 
-      -
-        name: Lint Go
-        run: make test-lint
+      # -
+      #   name: Lint Go
+      #   run: make test-lint
+
       -
         name: Unit Tests
         run: make test-go
-      -
-        name: Lint Container Using Dockle
-        env:
-          DOCKER_CONTENT_TRUST: 1
-        run: make docker-build && make test-docker
+
+      # -
+      #   name: Lint Container Using Dockle
+      #   env:
+      #     DOCKER_CONTENT_TRUST: 1
+      #   run: |
+      #     make docker-build
+      #     make test-docker
 
   integration_test:
     name: KinD Integration Tests
@@ -65,6 +69,10 @@ jobs:
         run: |
           cp sample-config.json helm/bashbot/config.json
           cp .tool-versions helm/bashbot/.tool-versions
+          if [[ -z "$SLACK_BOT_TOKEN" ]] || [[ -z "$SLACK_APP_TOKEN" ]]; then
+            echo "Missing github secret(s): SLACK_BOT_TOKEN, SLACK_APP_TOKEN"
+            exit 1
+          fi
           cat sample-env-file | envsubst > helm/bashbot/.env \
             && make test-kind \
             && rm -rf helm/bashbot/.env \
