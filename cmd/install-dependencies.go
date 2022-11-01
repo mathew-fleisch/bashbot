@@ -16,18 +16,15 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/mathew-fleisch/bashbot/internal/slack"
 	"github.com/spf13/cobra"
 )
 
 // installDependenciesCmd represents the installDependencies command
 var installDependenciesCmd = &cobra.Command{
-	Use:   "installDependencies",
+	Use:   "install-dependencies",
 	Short: "Cycle through dependencies array in config file to install extra dependencies",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("installDependencies called")
+	Run: func(cmd *cobra.Command, _ []string) {
 		configFile, _ := cmd.Flags().GetString("config-file")
 		slackToken, _ := cmd.Flags().GetString("slack-token")
 		slackAppToken, _ := cmd.Flags().GetString("slack-app-token")

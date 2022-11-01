@@ -24,7 +24,7 @@ import (
 var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run bashbot",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		configFile, _ := cmd.Flags().GetString("config-file")
 		slackToken, _ := cmd.Flags().GetString("slack-token")
 		slackAppToken, _ := cmd.Flags().GetString("slack-app-token")

@@ -27,7 +27,7 @@ import (
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Get current version",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		operatingSystem := runtime.GOOS
 		systemArchitecture := runtime.GOARCH
 		fmt.Printf("bashbot-%s-%s\t %s\n", operatingSystem, systemArchitecture, slack.Version)

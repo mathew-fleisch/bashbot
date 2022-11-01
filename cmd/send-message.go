@@ -23,9 +23,9 @@ import (
 
 // sendMessageCmd represents the sendMessage command
 var sendMessageCmd = &cobra.Command{
-	Use:   "sendMessage",
+	Use:   "send-message",
 	Short: "Send stand-alone slack message",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		channel, _ := cmd.Flags().GetString("channel")
 		if channel == "" {
 			log.Fatal("--channel flag is required")

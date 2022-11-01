@@ -32,7 +32,7 @@ func NewSlackClient(configFile, botToken, appToken string) *Client {
 		log.WithError(err).Fatal("config-file does not exist")
 	}
 	if botToken == "" {
-		botToken = os.Getenv("SLACK_TOKEN")
+		botToken = os.Getenv("SLACK_BOT_TOKEN")
 	}
 	if appToken == "" {
 		appToken = os.Getenv("SLACK_APP_TOKEN")
@@ -143,7 +143,7 @@ func (c *Client) InstallVendorDependencies() {
 func (c *Client) runShellCommands(cmdArgs []string) string {
 	cmdOut, err := exec.Command(cmdArgs[0], cmdArgs[1:]...).CombinedOutput()
 	if err != nil {
-		return "error running command."
+		return fmt.Sprintf("error running command:\n '%s',\n error: '%s'.", strings.Join(cmdArgs, " "), err.Error())
 	}
 	out := string(cmdOut)
 	displayOut := regexp.MustCompile(`\s*\n`).ReplaceAllString(out, "\\n")
@@ -190,7 +190,7 @@ func (c *Client) SendMessageToChannel(channel, msg string) {
 		slack.MsgOptionPostMessageParameters(messageParams),
 	)
 	if err != nil {
-		log.Error(err)
+		log.Errorf("failed to send message to slack channel: %s", err.Error())
 		return
 	}
 	log.Infof("Sent slack message[Channel:%s]: %s", channelID, msg)
