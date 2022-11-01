@@ -361,15 +361,15 @@ func (c *Client) processValidCommand(cmds []string, tool Tool, channel, user, ti
 	reEmail := regexp.MustCompile(`\${email}`)
 	commandJoined := reEmail.ReplaceAllLiteralString(strings.Join(tool.Command, " "), thisUser.Profile.Email)
 
-	log.Debugf(" ----> Param Name:        %s", tool.Name)
-	log.Debugf(" ----> Param Description: %s", tool.Description)
-	log.Debugf(" ----> Param Log:         %s", strconv.FormatBool(tool.Log))
-	log.Debugf(" ----> Param Help:        %s", tool.Help)
-	log.Debugf(" ----> Param Trigger:     %s", tool.Trigger)
-	log.Debugf(" ----> Param Location:    %s", tool.Location)
-	log.Debugf(" ----> Param Command:     %s", commandJoined)
-	log.Debugf(" ----> Param Ephemeral:   %s", strconv.FormatBool(tool.Ephemeral))
-	log.Debugf(" ----> Param Response:    %s", tool.Response)
+	log.Infof(" ----> Param Name:        %s", tool.Name)
+	log.Infof(" ----> Param Description: %s", tool.Description)
+	log.Infof(" ----> Param Log:         %s", strconv.FormatBool(tool.Log))
+	log.Infof(" ----> Param Help:        %s", tool.Help)
+	log.Infof(" ----> Param Trigger:     %s", tool.Trigger)
+	log.Infof(" ----> Param Location:    %s", tool.Location)
+	log.Infof(" ----> Param Command:     %s", commandJoined)
+	log.Infof(" ----> Param Ephemeral:   %s", strconv.FormatBool(tool.Ephemeral))
+	log.Infof(" ----> Param Response:    %s", tool.Response)
 	validParams := make([]bool, len(tool.Parameters))
 	var tmpHelp string
 	authorized := false
@@ -462,12 +462,13 @@ func (c *Client) processValidCommand(cmds []string, tool Tool, channel, user, ti
 		}
 	}
 	buildCmd = fmt.Sprintf(
-		"export TRIGGERED_AT=%s && export TRIGGERED_USER_ID=%s && export TRIGGERED_USER_NAME=%s && export TRIGGERED_CHANNEL_ID=%s && export TRIGGERED_CHANNEL_NAME=%s",
+		"export TRIGGERED_AT=%s && export TRIGGERED_USER_ID=%s && export TRIGGERED_USER_NAME=%s && export TRIGGERED_CHANNEL_ID=%s && export TRIGGERED_CHANNEL_NAME=%s && %s",
 		timestamp,
 		user,
 		thisUser.Name,
 		channel,
 		strings.Join(c.getChannelNames([]string{channel}), ""),
+		buildCmd,
 	)
 	splitOn := regexp.MustCompile(`\s\&\&`)
 	displayCmd := splitOn.ReplaceAllString(buildCmd, " \\\n        &&")
