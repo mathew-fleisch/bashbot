@@ -1,18 +1,3 @@
-/*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
@@ -53,7 +38,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().String("config-file", "", "[REQUIRED] Filepath to config.json file (or environment variable BASHBOT_CONFIG_FILEPATH set)")
-	rootCmd.PersistentFlags().String("slack-token", "", "[REQUIRED] Slack bot token used to authenticate with api (or environment variable SLACK_TOKEN set)")
+	rootCmd.PersistentFlags().String("slack-bot-token", "", "[REQUIRED] Slack bot token used to authenticate with api (or environment variable SLACK_TOKEN set)")
 	rootCmd.PersistentFlags().String("slack-app-token", "", "[REQUIRED] Slack app token used to authenticate with api (or environment variable SLACK_APP_TOKEN set)")
 	rootCmd.PersistentFlags().String("log-level", "info", "Log elevel to display (info,debug,warn,error)")
 	rootCmd.PersistentFlags().String("log-format", "text", "Display logs as json or text")
