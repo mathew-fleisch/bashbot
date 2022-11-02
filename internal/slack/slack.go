@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"regexp"
@@ -27,6 +26,9 @@ var Version = "development"
 
 // NewSlackClient creates a new slack client.
 func NewSlackClient(configFile, botToken, appToken string) *Client {
+	if configFile == "" {
+		configFile = os.Getenv("BASHBOT_CONFIG_FILEPATH")
+	}
 	cfg, err := loadConfigFile(configFile)
 	if err != nil {
 		log.WithError(err).Fatal("config-file does not exist")
@@ -55,7 +57,7 @@ func NewSlackClient(configFile, botToken, appToken string) *Client {
 // loadConfigFile is a helper function for loading bashbot json
 // configuration file into Config struct.
 func loadConfigFile(filePath string) (*Config, error) {
-	fileContents, err := ioutil.ReadFile(filePath)
+	fileContents, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, err
 	}

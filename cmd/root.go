@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/mathew-fleisch/bashbot/internal/slack"
 	"github.com/spf13/cobra"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -67,4 +68,16 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func initSlackClient(cmd *cobra.Command) *slack.Client {
+	configFile, _ := cmd.Flags().GetString("config-file")
+	slackBotToken, _ := cmd.Flags().GetString("slack-bot-token")
+	slackAppToken, _ := cmd.Flags().GetString("slack-app-token")
+	logLevel, _ := cmd.Flags().GetString("log-level")
+	logFormat, _ := cmd.Flags().GetString("log-format")
+	if logLevel != "" && logFormat != "" {
+		slack.ConfigureLogger(logLevel, logFormat)
+	}
+	return slack.NewSlackClient(configFile, slackBotToken, slackAppToken)
 }
