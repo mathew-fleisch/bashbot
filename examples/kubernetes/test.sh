@@ -37,7 +37,7 @@ main() {
         bashbot_pod=$(kubectl -n bashbot get pods -o jsonpath='{.items[0].metadata.name}')
         # Send `!bashbot k-get-pods` via bashbot binary within bashbot pod
         kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-          'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text "!bashbot k-get-pods"'
+          'source .env && bashbot send-message --channel '${TESTING_CHANNEL}' --msg "!bashbot k-get-pods"'
         sleep 5
         last_log_line=$(kubectl -n bashbot logs --tail 20 $bashbot_pod)
         # Tail the last line of the bashbot pod's log looking
@@ -48,7 +48,7 @@ main() {
           found_pod=1
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-            'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text ":large_green_circle: Bashbot can run kubectl commands. pod found in logs: \`'$bashbot_pod'\`"'
+            'source .env && bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: Bashbot can run kubectl commands. pod found in logs: \`'$bashbot_pod'\`"'
           exit 0
         fi
         echo "kubectl test failed. $j more attempts..."
@@ -69,7 +69,7 @@ main() {
   kubectl --namespace ${ns} get pods -o wide
 
   kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-    'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text ":red_circle: kubectl test failed!"'
+    'source .env && bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":red_circle: kubectl test failed!"'
   exit 1
 }
 

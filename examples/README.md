@@ -288,9 +288,9 @@ jobs:
           SLACK_TOKEN: ${{ secrets.RELEASE_SLACK_TOKEN }}
         run: |
           echo '{"admins":[{"trigger":"bashbotexample","appName":"Bashbot Example","userIds":[""],"privateChannelId":"","logChannelId":""}],"messages":[],"tools":[],"dependencies":[]}' > $BASHBOT_CONFIG_FILEPATH
-          bashbot \
-            --send-message-channel ${{ github.event.client_payload.channel }} \
-            --send-message-text "${{ github.event.client_payload.text }}"
+          bashbot send-message \
+            --channel ${{ github.event.client_payload.channel }} \
+            --msg "${{ github.event.client_payload.text }}"
 ```
 
 Executing this action has logs/output that looks similar to this

@@ -16,6 +16,6 @@ arch=amd64
 os=$(uname | tr '[:upper:]' '[:lower:]')
 wget -q https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/download/${LATEST_VERSION}/bashbot-${os}-${arch} -O bashbot
 chmod +x bashbot
-./bashbot \
-    --send-message-channel ${SLACK_CHANNEL} \
-    --send-message-text "<@${SLACK_USERID}> Bashbot triggered this job"
+./bashbot send-message \
+    --channel ${SLACK_CHANNEL} \
+    --msg "<@${SLACK_USERID}> Bashbot triggered this job"

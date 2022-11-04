@@ -43,7 +43,7 @@ main() {
           echo "Bashbot connected to slack successfully!"
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-            'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text "Bashbot connected to slack! Running automated tests..."'
+            'source .env && bashbot send-message --channel '${TESTING_CHANNEL}' --msg "Bashbot connected to slack! Running automated tests..."'
           found_connected=1
           break
         fi

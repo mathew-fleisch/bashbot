@@ -37,7 +37,7 @@ main() {
         bashbot_pod=$(kubectl -n bashbot get pods -o jsonpath='{.items[0].metadata.name}')
         # Send `!bashbot ping` via bashbot binary within bashbot pod
         kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-          'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text "!bashbot ping"'
+          'source .env && bashbot send-message --channel '${TESTING_CHANNEL}' --msg "!bashbot ping"'
         sleep 5
         last_log_line=$(kubectl -n bashbot logs --tail 1 $bashbot_pod)
         # Tail the last line of the bashbot pod's log looking
@@ -47,7 +47,7 @@ main() {
           found_pong=1
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-            'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text ":large_green_circle: Ping/pong test successful!"'
+            'source .env && bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: Ping/pong test successful!"'
           exit 0
         fi
         echo "Bashbot ping/pong test failed. $j more attempts..."
@@ -68,7 +68,7 @@ main() {
   kubectl --namespace ${ns} get deployments
   kubectl --namespace ${ns} get pods -o wide
   kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-    'source .env && bashbot --send-message-channel '${TESTING_CHANNEL}' --send-message-text ":red_circle: ping/pong test failed!"'
+    'source .env && bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":red_circle: ping/pong test failed!"'
   exit 1
 }
 
