@@ -309,4 +309,3 @@ git push origin v1.8.0
 ```
 
 There are also automated anchore container scans and codeql static analysis done on every push to the main branch.
-
