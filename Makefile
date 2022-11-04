@@ -3,7 +3,7 @@ GOARCH?=$(shell go env GOARCH)
 VERSION?=$(shell git describe --abbrev=0 --tags)
 LATEST_VERSION?=$(shell curl -s https://api.github.com/repos/mathew-fleisch/bashbot/releases/latest | grep tag_name | cut -d '"' -f 4)
 BINARY?=bin/bashbot
-SRC_LOCATION?=cmd/bashbot/bashbot.go
+SRC_LOCATION?=main.go
 LDFLAGS="-X main.Version=${VERSION}"
 GO_BUILD=go build -ldflags=$(LDFLAGS)
 BASHBOT_LOG_LEVEL?=info
@@ -73,6 +73,7 @@ docker-run-local-bash: ## run an exsting build of bashbot:local but override the
 	@docker run -it --rm --entrypoint bash \
 		-v $(PWD)/config.json:/bashbot/config.json \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
+		-e BASHBOT_ENV_VARS_FILEPATH="/bashbot/.env" \
 		-v $(PWD)/.tool-versions:/bashbot/.tool-versions \
 		-e SLACK_BOT_TOKEN=$(SLACK_BOT_TOKEN) \
 		-e SLACK_APP_TOKEN=$(SLACK_APP_TOKEN) \

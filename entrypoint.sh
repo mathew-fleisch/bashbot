@@ -40,12 +40,12 @@ LOG_LEVEL=${LOG_LEVEL:-info}
 # If the log-format doesn't exist, set it to 'text'
 LOG_FORMAT=${LOG_FORMAT:-text}
 
-# Run install-vendor-dependencies path
-bashbot --install-vendor-dependencies \
+# Run install-dependencies path
+bashbot install-dependencies \
   --log-level "$LOG_LEVEL" \
   --log-format "$LOG_FORMAT"
 
 # Run Bashbot binary passing the config file and the Slack token
-bashbot \
+bashbot run \
   --log-level "$LOG_LEVEL" \
   --log-format "$LOG_FORMAT"
