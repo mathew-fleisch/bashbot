@@ -79,7 +79,6 @@ jobs:
             && make test-kind \
             && rm -rf helm/bashbot/.env \
             && rm -rf .env \
-            && make test-kind-cleanup \
             && echo "Deployment assets and KinD cluster removed"
       -
         name: Debug 
@@ -88,7 +87,6 @@ jobs:
         run: |
           make help
           ls -alF
-          kubectl cluster-info
           kubectl version
           helm version
           helm list -n bashbot
@@ -108,4 +106,5 @@ jobs:
           kubectl --namespace bashbot describe pod $(kubectl --namespace bashbot get pods | grep bashbot | awk '{print $1}') || true
           echo "Logs:"
           kubectl --namespace bashbot logs $(kubectl --namespace bashbot get pods | grep bashbot | awk '{print $1}') || true
+          make test-kind-cleanup || true
 
