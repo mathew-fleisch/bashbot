@@ -65,6 +65,8 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_APP_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
+          BASHBOT_CONFIG_FILEPATH: /bashbot/config.json
+          BASHBOT_ENV_VARS_FILEPATH: /bashbot/.env
           GIT_TOKEN: not-used
         run: |
           cp sample-config.json helm/bashbot/config.json
