@@ -68,6 +68,7 @@ jobs:
           GIT_TOKEN: not-used
         run: |
           cp sample-config.json helm/bashbot/config.json
+          cp sample-config.json config.json
           cp .tool-versions helm/bashbot/.tool-versions
           if [[ -z "$SLACK_BOT_TOKEN" ]] || [[ -z "$SLACK_APP_TOKEN" ]]; then
             echo "Missing github secret(s): SLACK_BOT_TOKEN, SLACK_APP_TOKEN"
