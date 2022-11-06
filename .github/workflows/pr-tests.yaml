@@ -74,8 +74,10 @@ jobs:
             exit 1
           fi
           cat sample-env-file | envsubst > helm/bashbot/.env \
+            && cp helm/bashbot/.env .env \
             && make test-kind \
             && rm -rf helm/bashbot/.env \
+            && rm -rf .env \
             && make test-kind-cleanup \
             && echo "Deployment assets and KinD cluster removed"
       -
