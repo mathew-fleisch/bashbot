@@ -85,6 +85,10 @@ jobs:
         run: |
           make help
           ls -alF
+          kubectl cluster-info
+          kubectl version
+          helm version
+          helm list -n bashbot
           echo "Deployments:"
           kubectl --namespace bashbot get deployments -o wide
           echo "Pods:"
@@ -95,8 +99,8 @@ jobs:
           kubectl --namespace bashbot get secrets
           echo "Configmaps:"
           kubectl --namespace bashbot get configmaps
-          echo "bashbot Config:"
-          kubectl --namespace bashbot get configmaps bashbot-configmap -o jsonpath='{.data.config\.json}' | jq '.' || true
+          # echo "bashbot Config:"
+          # kubectl --namespace bashbot get configmaps bashbot-configmap -o jsonpath='{.data.config\.json}' | jq '.' || true
           echo "Describe bashbot pod:"
           kubectl --namespace bashbot describe pod $(kubectl --namespace bashbot get pods | grep bashbot | awk '{print $1}') || true
           echo "Logs:"
