@@ -78,3 +78,25 @@ jobs:
             && rm -rf helm/bashbot/.env \
             && make test-kind-cleanup \
             && echo "Deployment assets and KinD cluster removed"
+      -
+        name: Debug 
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          make help
+          ls -alF
+          echo "Deployments:"
+          kubectl --namespace bashbot get deployments -o wide
+          echo "Pods:"
+          kubectl --namespace bashbot get pods -o wide
+          echo "Secrets:"
+          kubectl --namespace bashbot get secrets
+          echo "Configmaps:"
+          kubectl --namespace bashbot get configmaps
+          echo "bashbot Config:"
+          kubectl --namespace bashbot get configmaps bashbot-configmap -o jsonpath='{.data.config\.json}' | jq '.' || true
+          echo "Describe bashbot pod:"
+          kubectl --namespace bashbot describe pod $(kubectl --namespace bashbot get pods | grep bashbot | awk '{print $1}') || true
+          echo "Logs:"
+          kubectl --namespace bashbot logs $(kubectl --namespace bashbot get pods | grep bashbot | awk '{print $1}') || true
+
