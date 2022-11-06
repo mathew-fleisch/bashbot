@@ -89,6 +89,8 @@ jobs:
           kubectl --namespace bashbot get deployments -o wide
           echo "Pods:"
           kubectl --namespace bashbot get pods -o wide
+          echo "Service Accounts:"
+          kubectl --namespace bashbot get serviceaccounts
           echo "Secrets:"
           kubectl --namespace bashbot get secrets
           echo "Configmaps:"
