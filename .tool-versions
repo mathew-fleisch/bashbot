@@ -1,8 +1,4 @@
-bat 0.22.1
-helm 3.10.1
-kubectl 1.25.3
+helm 3.10.3
+kubectl 1.26.0
 kubectx 0.9.4
-shellcheck 0.8.0
-shfmt 3.5.1
-tflint 0.42.2
-yq 4.29.2
+yq 4.30.6
