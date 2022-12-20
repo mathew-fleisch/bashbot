@@ -1,0 +1,20 @@
+{
+  "name": "Curl Example",
+  "description": "Pass a valid url to curl",
+  "help": "bashbot curl [url]",
+  "trigger": "curl",
+  "location": "./",
+  "command": ["curl -s ${url}"],
+  "parameters": [
+    {
+      "name": "url",
+      "allowed": [],
+      "description": "A valid url",
+      "match": "(http|ftp|https)://([\\w_-]+(?:(?:\\.[\\w_-]+)+))([\\w.,@?^=%&:/~+#-]*[\\w@?^=%&/~+#-])?"
+    }
+  ],
+  "log": false,
+  "ephemeral": false,
+  "response": "code",
+  "permissions": ["all"]
+}
