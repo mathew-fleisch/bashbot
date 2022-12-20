@@ -352,7 +352,7 @@
       "location": "./",
       "command": [
         ". /usr/asdf/asdf.sh",
-        " && kubectl get pods --all-namespaces"
+        " && kubectl get pods --all-namespaces || true"
       ],
       "parameters": [],
       "log": false,
