@@ -42,10 +42,14 @@ LOG_FORMAT=${LOG_FORMAT:-text}
 
 # Run install-dependencies path
 bashbot install-dependencies \
+  --slack-bot-token "$SLACK_BOT_TOKEN" \
+  --slack-app-token "$SLACK_APP_TOKEN" \
   --log-level "$LOG_LEVEL" \
   --log-format "$LOG_FORMAT"
 
 # Run Bashbot binary passing the config file and the Slack token
 bashbot run \
+  --slack-bot-token "$SLACK_BOT_TOKEN" \
+  --slack-app-token "$SLACK_APP_TOKEN" \
   --log-level "$LOG_LEVEL" \
   --log-format "$LOG_FORMAT"

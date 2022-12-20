@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/sirupsen/logrus v1.9.0
-	github.com/slack-go/slack v0.11.4-0.20220911225724-78e593a0c416
+	github.com/slack-go/slack v0.12.0
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.12.0
 )
@@ -24,7 +24,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.3.0 // indirect
-	golang.org/x/sys v0.0.0-20220913175220-63ea55921009 // indirect
+	golang.org/x/sys v0.3.0 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
