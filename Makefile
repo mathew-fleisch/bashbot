@@ -112,7 +112,7 @@ test-kind: test-kind-setup test-kind-helm-install ## run KinD tests
 	./helm/bashbot/test-deployment.sh
 	./examples/ping/test.sh
 	./examples/info/test.sh
-	./examples/kubernetes/test.sh || true
+	./examples/kubernetes/test.sh
 	./helm/bashbot/test-complete.sh
 
 .PHONY: test-kind-setup
