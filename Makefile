@@ -211,4 +211,3 @@ update-asdf-dependencies: ## trigger github action to update asdf dependencies l
 	    --data '{"event_type": "trigger-asdf-update"}' \
 	    https://api.github.com/repos/mathew-fleisch/bashbot/dispatches
 	@echo "Updating asdf dependencies via github-action: https://github.com/mathew-fleisch/bashbot/actions/workflows/update-asdf-versions.yaml"
-
