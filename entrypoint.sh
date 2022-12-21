@@ -34,7 +34,7 @@ if [ -z "$SLACK_APP_TOKEN" ]; then
   exit 1
 fi
 mkdir -p vendor
-
+sleep 4
 # If the log-level doesn't exist, set it to 'info'
 LOG_LEVEL=${LOG_LEVEL:-info}
 # If the log-format doesn't exist, set it to 'text'
