@@ -517,18 +517,18 @@
     {
       "name": "Install Dependencies with asdf",
       "install": [
-        "mkdir -p /usr/asdf; ",
-        "git clone --depth 1 https://github.com/asdf-vm/asdf.git /usr/asdf --branch v0.8.1; ",
-        ". /usr/asdf/asdf.sh; ",
+        "mkdir -p /usr/asdf || true; ",
+        "git clone --depth 1 https://github.com/asdf-vm/asdf.git /usr/asdf --branch v0.8.1 || true; ",
+        ". /usr/asdf/asdf.sh || true; ",
         "cat /bashbot/.tool-versions ",
           "| grep -vE '^#' ",
           "| awk '{print $1}' ",
-          "| xargs -I {} asdf plugin add {}; ",
-        "asdf install; ",
-        "echo 'asdf installed and configured!'; ",
-        "echo 'Source asdf before command to use installed dependencies:'; ",
-        "echo '. /usr/asdf/asdf.sh'; ",
-        "asdf list"
+          "| xargs -I {} asdf plugin add {} || true; ",
+        "asdf install || true; ",
+        "echo 'asdf installed and configured!' || true; ",
+        "echo 'Source asdf before command to use installed dependencies:' || true; ",
+        "echo '. /usr/asdf/asdf.sh' || true; ",
+        "asdf list || true"
       ]
     },
     {
