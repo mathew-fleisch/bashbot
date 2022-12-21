@@ -517,6 +517,8 @@
     {
       "name": "Install Dependencies with asdf",
       "install": [
+        "git config --global --unset http.proxy || true; ", 
+        "git config --global --unset https.proxy || true; ",
         "mkdir -p /usr/asdf || true; ",
         "git clone --depth 1 https://github.com/asdf-vm/asdf.git /usr/asdf --branch v0.8.1 || true; ",
         ". /usr/asdf/asdf.sh || true; ",
