@@ -188,8 +188,8 @@ wget -qO /usr/local/bin/bashbot https://github.com/mathew-fleisch/bashbot/releas
 chmod +x /usr/local/bin/bashbot
 
 # To verify installation run version or help commands
-bashbot --version
-# bashbot-darwin-amd64    v1.6.15
+bashbot version
+# bashbot-darwin-amd64    v2.0.0
 
 bashbot --help
 #  ____            _     ____        _   

@@ -36,7 +36,7 @@ The [get-version.sh](get-version.sh) first checks to see if Bashbot is already a
 # First check if bashbot is installed and pull that version
 if command -v bashbot > /dev/null; then 
     command -v bashbot
-    bashbot --version
+    bashbot version
     exit 0
 fi
 
@@ -45,8 +45,8 @@ arch=amd64
 [ "$(uname -m)" == "aarch64" ] && arch=arm64
 os=$(uname | tr '[:upper:]' '[:lower:]')
 if [ -f "./bin/bashbot-${os}-${arch}" ]; then
-    echo "./bin/bashbot-${os}-${arch} --version"
-    ./bin/bashbot-${os}-${arch} --version
+    echo "./bin/bashbot-${os}-${arch} version"
+    ./bin/bashbot-${os}-${arch} version
     exit 0
 fi
 

@@ -92,7 +92,7 @@ arch=amd64
 os=$(uname | tr '[:upper:]' '[:lower:]')
 wget -q https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/download/${LATEST_VERSION}/bashbot-${os}-${arch} -O bashbot
 chmod +x bashbot
-downloaded_version=$(./bashbot --version | awk '{print $2}')
+downloaded_version=$(./bashbot version | awk '{print $2}')
 ./bashbot send-message \
     --channel ${SLACK_CHANNEL} \
     --msg "<@${SLACK_USERID}> Bashbot triggered this <https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/.github/workflows/example-bashbot-github-action.yaml|example github action> and used the bashbot binary (<https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/tag/${downloaded_version}|${downloaded_version}>) within the github action, to <https://github.com/${REPO_OWNER}/${REPO_NAME}/runs/${JOB_ID}?check_suite_focus=true|simulate a long running job> in order to send success/failure back to slack."

@@ -137,8 +137,8 @@ func (c *Client) InstallVendorDependencies() {
 // runShellCommands is a helper function for executing shell commands on
 // the bashbot host machine.
 //
-//  usage:
-// 		runShellCommands([]string{"bash", "-c", "apt-get install git && echo hello"})
+//	 usage:
+//			runShellCommands([]string{"bash", "-c", "apt-get install git && echo hello"})
 //
 // The first value in the array should be the command name e.g bash, sh etc
 // while the other values will be treated as arguments.
@@ -157,7 +157,8 @@ func (c *Client) runShellCommands(cmdArgs []string) string {
 // messages configured in the bashbot config file.
 //
 // usage:
-// 		sendConfigMessageToChannel(cfg, client, "channelID", "processing_command", "try another command")
+//
+//	sendConfigMessageToChannel(cfg, client, "channelID", "processing_command", "try another command")
 //
 // The passalong parameter is an optional parameter because not all messages needs additional
 // content(s) attached to the message sent.
@@ -464,12 +465,13 @@ func (c *Client) processValidCommand(cmds []string, tool Tool, channel, user, ti
 		}
 	}
 	buildCmd = fmt.Sprintf(
-		"export TRIGGERED_AT=%s && export TRIGGERED_USER_ID=%s && export TRIGGERED_USER_NAME=%s && export TRIGGERED_CHANNEL_ID=%s && export TRIGGERED_CHANNEL_NAME=%s && %s",
+		"export TRIGGERED_AT=%s && export TRIGGERED_USER_ID=%s && export TRIGGERED_USER_NAME=%s && export TRIGGERED_CHANNEL_ID=%s && export TRIGGERED_CHANNEL_NAME=%s && cd %s && %s",
 		timestamp,
 		user,
 		thisUser.Name,
 		channel,
 		strings.Join(c.getChannelNames([]string{channel}), ""),
+		tool.Location,
 		buildCmd,
 	)
 	splitOn := regexp.MustCompile(`\s\&\&`)

@@ -45,8 +45,8 @@ go-run: ## run the bashbot source code with go
 	@go run $(SRC_LOCATION)
 
 .PHONY: go-version
-go-version: ## run the bashbot source code with the --version flag
-	@go run $(SRC_LOCATION) --version
+go-version: ## run the bashbot source code with the version argument
+	@go run $(SRC_LOCATION) version
 
 
 ##@ Docker stuff
@@ -200,7 +200,7 @@ help: ## this
 install-latest: ## install the latest version of the bashbot binary to /usr/local/bin/bashbot with wget
 	wget -q -O /usr/local/bin/bashbot https://github.com/mathew-fleisch/bashbot/releases/download/$(LATEST_VERSION)/bashbot-$(GOOS)-$(GOARCH)
 	chmod +x /usr/local/bin/bashbot
-	bashbot --version
+	bashbot version
 	@echo "Run 'bashbot --help' for more information"
 
 .PHONY: update-asdf-dependencies
