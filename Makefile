@@ -111,6 +111,7 @@ docker-run-upstream: ## run the latest upstream build of bashbot
 test-kind: test-kind-setup test-kind-helm-install ## run KinD tests
 	./helm/bashbot/test-deployment.sh
 	./examples/ping/test.sh
+	./examples/asdf/test.sh
 	./examples/info/test.sh
 	./examples/kubernetes/test.sh
 	./helm/bashbot/test-complete.sh
