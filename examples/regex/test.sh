@@ -48,7 +48,7 @@ main() {
           found_regex=1
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-            'source .env && bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: regex test successful!"'
+            'source .env && bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: regex test successful! Curl of jsonplaceholder.typicode.com api returned expected json object with .id=1, parsed by jq"'
           exit 0
         fi
         echo "Bashbot regex test failed. $j more attempts..."
