@@ -108,7 +108,7 @@
       "help": "!bashbot dump",
       "trigger": "dump",
       "location": "./",
-      "command": ["jq -r '.' ${BASHBOT_CONFIG_FILEPATH}"],
+      "command": ["jq -cr '.' ${BASHBOT_CONFIG_FILEPATH}"],
       "parameters": [],
       "log": false,
       "ephemeral": false,
@@ -163,10 +163,10 @@
       "description": "Testing that regex",
       "envvars": [],
       "dependencies": [],
-      "help": "!bashbot regex hopefully a bunch of free form text",
+      "help": "!bashbot regex With great power, comes great responsibility",
       "trigger": "regex",
       "location": "./",
-      "command": [". /usr/asdf/asdf.sh && echo \"${command}\" || true"],
+      "command": [". /usr/asdf/asdf.sh && ${command} || true"],
       "parameters": [
         {
           "name": "command",
@@ -229,21 +229,18 @@
       ]
     },
     {
-      "name": "TEST Command",
-      "description": "Show the json object for a specific command",
+      "name": "Environment variable test",
+      "description": "Show an example of how to only run a command if specific env vars are defined.",
       "envvars": ["TRIGGERED_USER_NAME", "TRIGGERED_USER_ID", "TRIGGERED_CHANNEL_NAME", "TRIGGERED_CHANNEL_ID"],
       "dependencies": [],
-      "help": "!bashbot test",
-      "trigger": "test",
+      "help": "!bashbot env-var-test",
+      "trigger": "env-var-test",
       "location": "./",
       "command": [
         "echo \"Username[id]: ${TRIGGERED_USER_NAME}[${TRIGGERED_USER_ID}]\"",
         "&& echo \" Channel[id]: ${TRIGGERED_CHANNEL_NAME}[${TRIGGERED_CHANNEL_ID}] <@${TRIGGERED_USER_ID}>\""
       ],
-      "parameters": [{
-        "name": "blah",
-        "allowed": ["yup", "nope"]
-      }],
+      "parameters": [],
       "log": false,
       "ephemeral": false,
       "response": "code",

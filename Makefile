@@ -113,6 +113,7 @@ test-kind: test-kind-setup test-kind-helm-install ## run KinD tests
 	./examples/ping/test.sh
 	./examples/asdf/test.sh
 	./examples/info/test.sh
+	./examples/regex/test.sh
 	./examples/kubernetes/test.sh
 	./helm/bashbot/test-complete.sh
 
