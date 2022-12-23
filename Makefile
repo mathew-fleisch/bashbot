@@ -131,7 +131,7 @@ test-kind-helm-install: ## install bashbot via helm into an existing KinD cluste
 		--set image.tag=local \
 		--debug \
 		--wait
-	sleep 30
+	timeout 30s make pod-logs || true
 
 .PHONY: test-kind-cleanup
 test-kind-cleanup: ## delete any KinD cluster set up for bashbot

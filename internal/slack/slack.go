@@ -323,7 +323,8 @@ func (c *Client) processCommand(event *slackevents.MessageEvent) bool {
 // slack bashbot client.
 func (c *Client) validateRequiredEnvVars(channel string, tool Tool) error {
 	for _, envvar := range tool.Envvars {
-		if os.Getenv(envvar) == "" {
+		// Ignore runtime environment variables
+		if os.Getenv(envvar) == "" && envvar != "TRIGGERED_AT" && envvar != "TRIGGERED_USER_ID" && envvar != "TRIGGERED_USER_NAME" && envvar != "TRIGGERED_CHANNEL_ID" && envvar != "TRIGGERED_CHANNEL_NAME" {
 			c.sendConfigMessageToChannel(channel, "missingenvvar", envvar)
 			return fmt.Errorf("missing environment variable '%s'", envvar)
 		}
@@ -443,8 +444,10 @@ func (c *Client) processValidCommand(cmds []string, tool Tool, channel, user, ti
 			}
 			for h := 0; h < len(tool.Parameters[j].Allowed); h++ {
 				log.Debug(" ====> Parameter[" + strconv.Itoa(j) + "].Allowed[" + strconv.Itoa(h) + "]: " + tool.Parameters[j].Allowed[h])
-				if tool.Parameters[j].Allowed[h] == cmds[j] {
-					validParams[j] = true
+				if j < len(cmds) {
+					if tool.Parameters[j].Allowed[h] == cmds[j] {
+						validParams[j] = true
+					}
 				}
 			}
 
