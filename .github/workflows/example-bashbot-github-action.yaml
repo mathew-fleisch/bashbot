@@ -15,22 +15,6 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v3
-        with:
-          ref: v2
-      - 
-        name: Install Golang via asdf
-        uses: asdf-vm/actions/install@v1
-        with:
-          tool_versions: golang 1.16.6
-      -
-        name: Build go-binaries
-        run: |
-          asdf global golang 1.16.6
-          make setup
-          make build
-          echo "Go-Binaries created: $(ls bin -alF)"
-          mv bin/bashbot* /usr/local/bin/bashbot
-          chmod +x /usr/local/bin/bashbot
       -
         name: Send Slack Message With Bashbot Binary
         env:
@@ -38,9 +22,8 @@ jobs:
           SLACK_TOKEN: ${{ secrets.RELEASE_SLACK_TOKEN }}
           SLACK_CHANNEL: ${{ github.event.client_payload.channel }}
           SLACK_USERID: ${{ github.event.client_payload.user_id }}
-          GIT_TOKEN: ${{ github.token }}
-        run: |
-          bashbot send-message \
-            --channel ${SLACK_CHANNEL} \
-            --msg "<@${SLACK_USERID}> Bashbot triggered this job: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          REPO_OWNER: mathew-fleisch
+          REPO_NAME: bashbot
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./examples/trigger-github-action/github-action.sh
           
