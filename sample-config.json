@@ -532,7 +532,7 @@
       "name": "Bashbot Inception: download bashbot source code into vendor directory",
       "install": [
         "rm -rf bashbot || true",
-        "&& git clone https://github.com/mathew-fleisch/bashbot.git"
+        "&& git clone https://github.com/mathew-fleisch/bashbot.git --branch v2"
       ]
     }
   ]
