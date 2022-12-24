@@ -18,4 +18,4 @@ wget -q https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/download/${LATEST
 chmod +x bashbot
 ./bashbot \
     --send-message-channel ${SLACK_CHANNEL} \
-    --send-message-text "<@${SLACK_USERID}> Bashbot triggered this job: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+    --send-message-text "<@${SLACK_USERID}> Bashbot triggered this job"
