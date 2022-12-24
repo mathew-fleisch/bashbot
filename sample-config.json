@@ -499,6 +499,7 @@
         "&& export REPO_NAME=bashbot",
         "&& export SLACK_CHANNEL=${TRIGGERED_CHANNEL_ID}",
         "&& export SLACK_USERID=${TRIGGERED_USER_ID}",
+        "&& echo \"Running this example github action: https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/.github/workflows/example-bashbot-github-action.yaml\"",
         "&& ./trigger.sh"
       ],
       "parameters": [],

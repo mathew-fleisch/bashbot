@@ -53,7 +53,7 @@ jobs:
           SLACK_CHANNEL: C02A1SH4GLT
         run: |
           make install-latest
-          bashbot --version
+          bashbot version
           bashbot send-message \
             --slack-token ${{ secrets.RELEASE_SLACK_TOKEN }} \
             --config-file .github/workflows/release-config.json \
