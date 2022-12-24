@@ -10,6 +10,7 @@ for expect in $expected_variables; do
     exit 0
   fi
 done
+
 curl -s \
   -X POST \
   -H "Accept: application/vnd.github.everest-preview+json" \
