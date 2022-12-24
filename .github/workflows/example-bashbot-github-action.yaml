@@ -15,13 +15,22 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v3
-      
+        with:
+          ref: v2
       - 
-        name: Install stuff with asdf
+        name: Install Golang via asdf
         uses: asdf-vm/actions/install@v1
         with:
-          tool_versions: |
-            bashbot 1.8.45
+          tool_versions: golang 1.16.6
+      -
+        name: Build go-binaries
+        run: |
+          asdf global golang 1.16.6
+          make setup
+          make build
+          echo "Go-Binaries created: $(ls bin -alF)"
+          mv bin/bashbot* /usr/local/bin/bashbot
+          chmod +x /usr/local/bin/bashbot
       -
         name: Send Slack Message With Bashbot Binary
         env:
