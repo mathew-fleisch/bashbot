@@ -489,7 +489,7 @@
     {
       "name": "Trigger a Github Action",
       "description": "Triggers an example Github Action job by repository dispatch",
-      "envvars": [],
+      "envvars": ["GIT_TOKEN"],
       "dependencies": [],
       "help": "!bashbot trigger-github-action",
       "trigger": "trigger-github-action",

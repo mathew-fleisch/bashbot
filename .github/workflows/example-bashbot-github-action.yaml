@@ -15,6 +15,13 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v3
+      
+      - 
+        name: Install stuff with asdf
+        uses: asdf-vm/actions/install@v1
+        with:
+          tool_versions: |
+            bashbot latest
       -
         name: Send Slack Message With Bashbot Binary
         env:
@@ -22,8 +29,9 @@ jobs:
           SLACK_TOKEN: ${{ secrets.RELEASE_SLACK_TOKEN }}
           SLACK_CHANNEL: ${{ github.event.client_payload.channel }}
           SLACK_USERID: ${{ github.event.client_payload.user_id }}
-          REPO_OWNER: mathew-fleisch
-          REPO_NAME: bashbot
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./examples/trigger-github-action/github-action.sh
+        run: |
+          bashbot send-message \
+            --channel ${SLACK_CHANNEL} \
+            --msg "<@${SLACK_USERID}> Bashbot triggered this job: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           
