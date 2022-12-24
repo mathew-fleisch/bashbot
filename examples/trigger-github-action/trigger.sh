@@ -2,7 +2,7 @@
 # shellcheck disable=SC2086
 
 github_base="${github_base:-api.github.com}"
-expected_variables="BASHBOT_CONFIG_FILEPATH SLACK_TOKEN SLACK_CHANNEL SLACK_USERID REPO_OWNER REPO_NAME GITHUB_TOKEN"
+expected_variables="BASHBOT_CONFIG_FILEPATH SLACK_CHANNEL SLACK_USERID REPO_OWNER REPO_NAME GITHUB_TOKEN"
 for expect in $expected_variables; do
   if [[ -z "${!expect}" ]]; then
     echo "Missing environment variable $expect"
