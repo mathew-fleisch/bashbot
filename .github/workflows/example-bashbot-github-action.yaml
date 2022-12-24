@@ -31,6 +31,7 @@ jobs:
           SLACK_USERID: ${{ github.event.client_payload.user_id }}
           GIT_TOKEN: ${{ github.token }}
         run: |
+          asdf install bashbot latest
           bashbot send-message \
             --channel ${SLACK_CHANNEL} \
             --msg "<@${SLACK_USERID}> Bashbot triggered this job: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
