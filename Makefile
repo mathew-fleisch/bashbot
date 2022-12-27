@@ -10,6 +10,7 @@ BASHBOT_LOG_LEVEL?=info
 BASHBOT_LOG_TYPE?=text
 TESTING_CHANNEL?=C034FNXS3FA
 NAMESPACE?=bashbot
+BOTNAME?=bashbot
 
 
 ##@ Go stuff
@@ -108,48 +109,58 @@ docker-run-upstream: ## run the latest upstream build of bashbot
 
 
 .PHONY: test-kind
-test-kind: test-kind-setup test-kind-helm-install ## run KinD tests
-	./helm/bashbot/test-deployment.sh
-	./examples/ping/test.sh
-	./examples/asdf/test.sh
-	./examples/info/test.sh
-	./examples/regex/test.sh
-	./examples/kubernetes/test.sh
-	./helm/bashbot/test-complete.sh
+test-kind: test-kind-setup helm-install test-run ## run KinD tests
+
+test-run: ## run tests designed for bashbot running in kubernetes
+	@echo "Testing: $(NAMESPACE) $(BOTNAME)"
+	./helm/bashbot/test-deployment.sh $(NAMESPACE) $(BOTNAME)
+	./examples/ping/test.sh $(NAMESPACE) $(BOTNAME)
+	./examples/asdf/test.sh $(NAMESPACE) $(BOTNAME)
+	./examples/info/test.sh $(NAMESPACE) $(BOTNAME)
+	./examples/regex/test.sh $(NAMESPACE) $(BOTNAME)
+	./examples/kubernetes/test.sh $(NAMESPACE) $(BOTNAME)
+	./helm/bashbot/test-complete.sh $(NAMESPACE) $(BOTNAME)
+
 
 .PHONY: test-kind-setup
 test-kind-setup: docker-build ## setup a KinD cluster to test bashbot's helm chart
 	kind create cluster || true
 	kind load docker-image bashbot:local
 
-.PHONY: test-kind-helm-install
-test-kind-helm-install: ## install bashbot via helm into an existing KinD cluster to /usr/local/bin/bashbot
-	helm upgrade bashbot helm/bashbot \
+.PHONY: helm-install
+helm-install: ## install bashbot via helm into an existing KinD cluster to /usr/local/bin/bashbot
+	kubectl create namespace $(NAMESPACE) || true
+	@echo "Creating kubernetes secrets from helm/bashbot/.env"
+	@kubectl --namespace $(NAMESPACE) delete secret $(BOTNAME)-env --ignore-not-found=true
+	@echo "kubectl --namespace $(NAMESPACE) get secret $(BOTNAME)-env"
+	@kubectl --namespace $(NAMESPACE) create secret generic $(BOTNAME)-env \
+		$(shell cat helm/bashbot/.env | sed -e 's/export\ /--from-literal=/g' | tr '\n' ' ');
+	helm upgrade $(BOTNAME) helm/bashbot \
 		--install \
 		--namespace $(NAMESPACE) \
-		--create-namespace \
 		--set image.repository=bashbot \
 		--set image.tag=local \
+		--set namespace=$(NAMESPACE) \
+		--set botname=$(BOTNAME) \
 		--debug \
 		--wait
-	kubectl -n $(NAMESPACE) get pods \
-		| grep bashbot \
-		| cut -d' ' -f1 \
-		| xargs -I {} bash -c 'timeout 30s kubectl -n $(NAMESPACE) logs -f {} | sed -e 's/\\n/\n/g' || true'
+	kubectl -n $(NAMESPACE) get pods --template '{{range .items}}{{.metadata.name}}{{end}}' --selector=app=$(BOTNAME) \
+		| xargs -I {} bash -c 'timeout 30s kubectl -n $(NAMESPACE) logs -f {} | sed -e "s/\\*\\n/\n/g" || true'
 
 .PHONY: test-kind-cleanup
 test-kind-cleanup: ## delete any KinD cluster set up for bashbot
-	helm --namespace $(NAMESPACE) delete bashbot || true
+	helm --namespace $(NAMESPACE) delete $(BOTNAME) || true
+	kubectl delete clusterrolebinding $(BOTNAME) || true
 	kind delete cluster
 
 .PHONY: pod-get
 pod-get: ## with an existing pod bashbot pod running, use kubectl to get the pod name
-	@kubectl -n $(NAMESPACE) get pods | grep bashbot | cut -d' ' -f1
+	@kubectl --namespace $(NAMESPACE) get pods --template '{{range .items}}{{.metadata.name}}{{end}}' --selector=app=$(BOTNAME)
 
 .PHONY: pod-logs
 pod-logs: ## with an existing pod bashbot pod running, use kubectl to display the logs of the pod
 	kubectl -n $(NAMESPACE) logs -f $(shell make pod-get) \
-		| sed -e 's/\\n/\n/g'
+		| sed -e 's/\\*\\n/\n/g' \
 
 .PHONY: pod-delete
 pod-delete: ## with an existing pod bashbot pod running, use kubectl to delete it
@@ -158,6 +169,11 @@ pod-delete: ## with an existing pod bashbot pod running, use kubectl to delete i
 .PHONY: pod-exec
 pod-exec: ## with an existing pod bashbot pod running, use kubectl to exec into it 
 	kubectl -n $(NAMESPACE) exec -it $(shell make pod-get) -- bash
+
+.PHONY: pod-exec-test
+pod-exec-test: ## with an existing pod bashbot pod running, use kubectl to exec into it and run the test-suite
+	kubectl -n $(NAMESPACE) exec  $(shell make pod-get) -- \
+		bash -c '. /usr/asdf/asdf.sh && make test-run'
 
 
 ##@ Linters and Tests

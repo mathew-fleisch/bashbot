@@ -34,7 +34,7 @@ main() {
       # kubectl --namespace ${ns} get deployments
       found_asdf=0
       for j in {3..1}; do
-        bashbot_pod=$(kubectl -n bashbot get pods -o jsonpath='{.items[0].metadata.name}')
+        bashbot_pod=$(kubectl -n ${ns} get pods -o jsonpath='{.items[0].metadata.name}')
         asdf_found=$(kubectl --namespace ${ns} exec $bashbot_pod -- bash -c '. /usr/asdf/asdf.sh && command -v asdf')
         # Tail the last line of the bashbot pod's log looking
         # for the string 'Bashbot is now connected to slack'
@@ -43,7 +43,7 @@ main() {
           found_asdf=1
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-            'source .env && bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: asdf installed successfully!"'
+            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: asdf installed successfully!"'
           exit 0
         fi
         echo "Bashbot dependency test failed (asdf). $j more attempts..."
@@ -63,7 +63,7 @@ main() {
   kubectl --namespace ${ns} get deployments
   kubectl --namespace ${ns} get pods -o wide
   kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-    'source .env && bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":red_circle: dependency test (asdf) failed!"'
+    'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":red_circle: dependency test (asdf) failed!"'
   exit 1
 }
 

@@ -35,15 +35,15 @@ main() {
       kubectl --namespace ${ns} get deployments
       found_connected=0
       for j in {30..1}; do
-        bashbot_pod=$(kubectl -n bashbot get pods -o jsonpath='{.items[0].metadata.name}')
-        last_log_line=$(kubectl -n bashbot logs --tail 1 $bashbot_pod)
+        bashbot_pod=$(kubectl -n ${ns} get pods --template '{{range .items}}{{.metadata.name}}{{end}}' --selector=app=${dn})
+        last_log_line=$(kubectl -n ${ns} logs $bashbot_pod | sed -e 's/\\*\\n/\n/g')
         # Tail the last line of the bashbot pod's log looking
         # for the string 'Bashbot is now connected to slack'
         if [[ $last_log_line =~ "Bashbot is now connected to slack" ]]; then
           echo "Bashbot connected to slack successfully!"
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-            'source .env && bashbot send-message --channel '${TESTING_CHANNEL}' --msg "Bashbot connected to slack! Running automated tests..."'
+            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg "Bashbot connected to slack! Running automated tests..."'
           found_connected=1
           break
         fi

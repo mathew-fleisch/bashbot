@@ -33,9 +33,9 @@ main() {
     if [ $? -eq 0 ]; then
       echo "Bashbot deployment confirmed!"
       kubectl --namespace ${ns} get deployments
-      bashbot_pod=$(kubectl -n bashbot get pods -o jsonpath='{.items[0].metadata.name}')
+      bashbot_pod=$(kubectl -n ${ns} get pods -o jsonpath='{.items[0].metadata.name}')
       kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-        'source .env && bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":tada: :tada: All Tests Complete!!! :tada: :tada:"'
+        'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":tada: :tada: All Tests Complete!!! :tada: :tada:"'
       exit 0
     fi
 

@@ -34,13 +34,13 @@ main() {
       # kubectl --namespace ${ns} get deployments
       found_regex=0
       for j in {3..1}; do
-        bashbot_pod=$(kubectl -n bashbot get pods -o jsonpath='{.items[0].metadata.name}')
+        bashbot_pod=$(kubectl -n ${ns} get pods -o jsonpath='{.items[0].metadata.name}')
         # Send `!bashbot curl https://jsonplaceholder.typicode.com/posts/1 | jq -r \‘.id\’`\
         # via bashbot binary within bashbot pod and expect an id of value 1 in the response
         kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-          'source .env && bashbot send-message --channel '${TESTING_CHANNEL}' --msg "!bashbot curl https://jsonplaceholder.typicode.com/posts/1 | jq -r ‘.id’"'
+          'bashbot send-message --channel '${TESTING_CHANNEL}' --msg "!bashbot curl https://jsonplaceholder.typicode.com/posts/1 | jq -r ‘.id’"'
         sleep 5
-        last_log_line=$(kubectl -n bashbot logs --tail 1 $bashbot_pod)
+        last_log_line=$(kubectl -n ${ns} logs --tail 1 $bashbot_pod)
         # Tail the last line of the bashbot pod's log looking
         # for the string 'Bashbot is now connected to slack'
         if [[ $last_log_line =~ "1" ]]; then
@@ -48,7 +48,7 @@ main() {
           found_regex=1
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-            'source .env && bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: regex test successful! Curl of jsonplaceholder.typicode.com api returned expected json object with .id=1, parsed by jq"'
+            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: regex test successful! Curl of jsonplaceholder.typicode.com api returned expected json object with .id=1, parsed by jq"'
           exit 0
         fi
         echo "Bashbot regex test failed. $j more attempts..."
@@ -70,7 +70,7 @@ main() {
   kubectl --namespace ${ns} get pods -o wide
 
   kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-    'source .env && bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":red_circle: regex test failed!"'
+    'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":red_circle: regex test failed!"'
   exit 1
 }
 

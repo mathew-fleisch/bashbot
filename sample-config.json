@@ -342,14 +342,14 @@
     {
       "name": "kubectl get pods --all-namespaces",
       "description": "Get all pods in all namespaces",
-      "envvars": [],
+      "envvars": ["BOTNAME", "NAMESPACE"],
       "dependencies": [],
       "help": "!bashbot k-get-pods",
       "trigger": "k-get-pods",
       "location": "./",
       "command": [
         ". /usr/asdf/asdf.sh",
-        " && kubectl get pods --all-namespaces"
+        " && kubectl --namespace ${NAMESPACE} get pods | grep -E \"NAME|${BOTNAME}\""
       ],
       "parameters": [],
       "log": false,
