@@ -1,4 +1,5 @@
 helm 3.10.3
 kubectl 1.26.0
 kubectx 0.9.4
+kustomize 4.5.7
 yq 4.30.6
