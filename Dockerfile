@@ -28,4 +28,5 @@ RUN chmod +x /usr/local/bin/bashbot \
     && chown -R ${NRUSER}:${NRUSER} /usr/asdf \
     && chown -R ${NRUSER}:${NRUSER} /bashbot
 USER ${NRUSER}
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "which", "bashbot" ]
 CMD [ "/bashbot/entrypoint.sh" ]

@@ -22,11 +22,11 @@ jobs:
         name: Install Golang via asdf
         uses: asdf-vm/actions/install@v1
         with:
-          tool_versions: golang 1.19.1
+          tool_versions: golang 1.19.4
       -
         name: Build go-binaries
         run: |
-          asdf global golang 1.19.1
+          asdf global golang 1.19.4
           make go-setup
           make go-build-cross-compile
           echo "Go-Binaries created: $(ls bin -alF)"

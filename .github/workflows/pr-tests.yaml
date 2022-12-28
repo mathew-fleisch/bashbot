@@ -42,13 +42,11 @@ jobs:
         name: Unit Tests
         run: make test-go
 
-      # -
-      #   name: Lint Container Using Dockle
-      #   env:
-      #     DOCKER_CONTENT_TRUST: 1
-      #   run: |
-      #     make docker-build
-      #     make test-docker
+      -
+        name: Lint Container Using Dockle
+        env:
+          DOCKER_CONTENT_TRUST: 1
+        run: make test-docker
 
   integration_test:
     name: KinD Integration Tests

@@ -194,11 +194,13 @@ test-lint-actions: ## lint github actions with action-validator
 
 .PHONY: test-lint
 test-lint: ## lint go source with golangci-lint
-	golangci-lint --verbose run
+	golangci-lint --skip-dirs-use-default --verbose run
 
 .PHONY: test-docker
 test-docker: ## use dockle to test the dockerfile for best practices
-	dockle bashbot:local
+	export DOCKER_CONTENT_TRUST=1 \
+		&& make docker-build \
+		&& dockle bashbot:local
 
 # go test -cover -v ./...
 .PHONY: test-go

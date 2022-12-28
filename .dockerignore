@@ -4,7 +4,8 @@
 .cache
 **.env*
 .DS_Store
-
+Dockerfile
+vendor/*
 #Ignore helm directory
 # helm/
 # helm/*
