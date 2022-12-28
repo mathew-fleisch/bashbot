@@ -11,28 +11,28 @@ on:
       - v2 # TODO: REMOVE THIS BEFORE MERGING
 
 jobs:
-  unit_test:
-    name: Lint and Unit Tests
-    runs-on: ubuntu-latest
-    steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - 
-        name: Install stuff with asdf
-        uses: asdf-vm/actions/install@v1
-        with:
-          tool_versions: |
-            action-validator 0.1.2
-            dockle 0.4.5
-            helm 3.8.1
-            golangci-lint 1.44.2
-            yq 4.22.1
-      -
-        name: Lint Actions
-        run: make test-lint-actions
+  # unit_test:
+  #   name: Lint and Unit Tests
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     -
+  #       name: Checkout
+  #       uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
+  #     - 
+  #       name: Install stuff with asdf
+  #       uses: asdf-vm/actions/install@v1
+  #       with:
+  #         tool_versions: |
+  #           action-validator 0.1.2
+  #           dockle 0.4.5
+  #           helm 3.8.1
+  #           golangci-lint 1.44.2
+  #           yq 4.22.1
+  #     -
+  #       name: Lint Actions
+  #       run: make test-lint-actions
 
       # -
       #   name: Lint Go
