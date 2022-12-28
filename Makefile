@@ -138,14 +138,15 @@ helm-install: ## install bashbot via helm into an existing KinD cluster to /usr/
 	helm upgrade $(BOTNAME) helm/bashbot \
 		--install \
 		--namespace $(NAMESPACE) \
-		--set image.repository=bashbot \
-		--set image.tag=local \
 		--set namespace=$(NAMESPACE) \
 		--set botname=$(BOTNAME) \
+		--set image.repository=bashbot \
+		--set image.tag=local \
+		--set log_level=$(BASHBOT_LOG_LEVEL) \
+		--set log_format=$(BASHBOT_LOG_TYPE) \
 		--debug \
 		--wait
-	kubectl -n $(NAMESPACE) get pods --template '{{range .items}}{{.metadata.name}}{{end}}' --selector=app=$(BOTNAME) \
-		| xargs -I {} bash -c 'timeout 30s kubectl -n $(NAMESPACE) logs -f {} | sed -e "s/\\*\\n/\n/g" || true'
+	make pod-logs
 
 .PHONY: test-kind-cleanup
 test-kind-cleanup: ## delete any KinD cluster set up for bashbot
@@ -155,12 +156,19 @@ test-kind-cleanup: ## delete any KinD cluster set up for bashbot
 
 .PHONY: pod-get
 pod-get: ## with an existing pod bashbot pod running, use kubectl to get the pod name
-	@kubectl --namespace $(NAMESPACE) get pods --template '{{range .items}}{{.metadata.name}}{{end}}' --selector=app=$(BOTNAME)
+	@kubectl --namespace $(NAMESPACE) get pods \
+		--template '{{range .items}}{{.metadata.name}}{{end}}' \
+		--selector=app=$(BOTNAME)
 
 .PHONY: pod-logs
 pod-logs: ## with an existing pod bashbot pod running, use kubectl to display the logs of the pod
 	kubectl -n $(NAMESPACE) logs -f $(shell make pod-get) \
-		| sed -e 's/\\*\\n/\n/g' \
+		| sed -e 's/\\*\\n/\n/g'
+	
+.PHONY: pod-logs-json
+pod-logs-json: ## with an existing pod bashbot pod running, use kubectl to display the json logs of the pod and pipe to jq
+	kubectl -n $(NAMESPACE) logs -f $(shell make pod-get) \
+		| jq -Rr '. as $$line | try (fromjson | .) catch $$line'
 
 .PHONY: pod-delete
 pod-delete: ## with an existing pod bashbot pod running, use kubectl to delete it
