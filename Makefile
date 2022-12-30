@@ -137,6 +137,7 @@ helm-install: ## install bashbot via helm into an existing KinD cluster to /usr/
 		$(shell cat helm/bashbot/.env | sed -e 's/export\ /--from-literal=/g' | tr '\n' ' ');
 	helm upgrade $(BOTNAME) helm/bashbot \
 		--install \
+		--timeout 2m0s \
 		--namespace $(NAMESPACE) \
 		--set namespace=$(NAMESPACE) \
 		--set botname=$(BOTNAME) \
