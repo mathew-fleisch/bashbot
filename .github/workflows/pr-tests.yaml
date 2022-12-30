@@ -79,7 +79,12 @@ jobs:
             echo "Missing github secret(s): SLACK_BOT_TOKEN, SLACK_APP_TOKEN"
             exit 1
           fi
-          make test-kind
+          cat sample-env-file | envsubst > helm/bashbot/.env \
+            && cp helm/bashbot/.env .env \
+            && make test-kind \
+            && rm -rf helm/bashbot/.env \
+            && rm -rf .env \
+            && echo "Deployment assets and KinD cluster removed"
       -
         name: Debug 
         if: ${{ always() }}
