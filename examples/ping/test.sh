@@ -39,7 +39,7 @@ main() {
         kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
           'bashbot send-message --channel '${TESTING_CHANNEL}' --msg "!bashbot ping"'
         sleep 5
-        last_log_line=$(kubectl -n ${ns} logs --tail 1 $bashbot_pod)
+        last_log_line=$(kubectl -n ${ns} logs --tail 10 $bashbot_pod)
         # Tail the last line of the bashbot pod's log looking
         # for the string 'Bashbot is now connected to slack'
         if [[ $last_log_line =~ "pong" ]]; then

@@ -12,6 +12,8 @@ cleanup() {
 
 trap cleanup EXIT
 TESTING_CHANNEL=${TESTING_CHANNEL:-C034FNXS3FA}
+ADMIN_CHANNEL=${ADMIN_CHANNEL:-GPFMM5MD2}
+
 main() {
   local ns=${1:-bashbot}
   local dn=${2:-bashbot}
@@ -35,27 +37,59 @@ main() {
       found_regex=0
       for j in {3..1}; do
         bashbot_pod=$(kubectl -n ${ns} get pods -o jsonpath='{.items[0].metadata.name}')
-        # Send `!bashbot curl https://jsonplaceholder.typicode.com/posts/1 | jq -r \‘.id\’`\
-        # via bashbot binary within bashbot pod and expect an id of value 1 in the response
+        # Send `!bashbot curl https://jsonplaceholder.typicode.com/posts/1 | jq -r ‘.body’`\
+        # via bashbot binary within bashbot pod and expect a body value that contains 'consequuntur' in the response
         kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-          'bashbot send-message --channel '${TESTING_CHANNEL}' --msg "!bashbot curl https://jsonplaceholder.typicode.com/posts/1 | jq -r ‘.id’"'
+          'bashbot send-message --channel '${TESTING_CHANNEL}' --msg "!bashbot curl https://jsonplaceholder.typicode.com/posts/1"'
         sleep 5
-        last_log_line=$(kubectl -n ${ns} logs --tail 1 $bashbot_pod)
+        last_log_line=$(kubectl -n ${ns} logs --tail 10 $bashbot_pod | grep -v "bashbot-log")
         # Tail the last line of the bashbot pod's log looking
         # for the string 'Bashbot is now connected to slack'
-        if [[ $last_log_line =~ "1" ]]; then
-          echo "regex test successful! Curl of jsonplaceholder.typicode.com api returned expected json object with .id=1, parsed by jq"
+        if [[ $last_log_line =~ "consequuntur" ]]; then
+          echo "regex test successful! Curl of jsonplaceholder.typicode.com api returned expected json object with .body with contents 'consequuntur', parsed by jq"
           found_regex=1
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: regex test successful! Curl of jsonplaceholder.typicode.com api returned expected json object with .id=1, parsed by jq"'
-          exit 0
+            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: regex test successful! Curl of jsonplaceholder.typicode.com api returned expected json object with .body containing string (consequuntur), parsed by jq"'
+          break
         fi
         echo "Bashbot regex test failed. $j more attempts..."
         sleep 5
       done
+
+
+      found_admin=0
+      for j in {3..1}; do
+        bashbot_pod=$(kubectl -n ${ns} get pods -o jsonpath='{.items[0].metadata.name}')
+        # Expect first call to fail in wrong channel
+        kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
+          'bashbot send-message --channel '${TESTING_CHANNEL}' --msg "!bashbot regex env | grep BASHBOT_CONFIG_FILEPATH | cut -d= -f2"'
+        # One cannot interpolate existing environment variables, but instead grep them from the env command
+        kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
+          'bashbot send-message --channel '${ADMIN_CHANNEL}' --msg "!bashbot regex env | grep BASHBOT_CONFIG_FILEPATH | cut -d= -f2"'
+        sleep 5
+        last_log_line=$(kubectl -n ${ns} logs --tail 10 $bashbot_pod | grep -v "bashbot-log")
+        # Tail the last line of the bashbot pod's log looking
+        # for the string 'Bashbot is now connected to slack'
+        if [[ $last_log_line =~ config\.yaml ]]; then
+          echo "Private regex test successful! The environment variables include a config.yaml value for BASHBOT_CONFIG_FILEPATH"
+          found_admin=1
+
+          kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
+            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: Private regex test successful! The environment variables include a config.yaml value for BASHBOT_CONFIG_FILEPATH"'
+          break
+        fi
+        echo "Bashbot private regex test failed. $j more attempts..."
+        sleep 5
+      done
+
+
       # Don't require regex tests to pass for the whole test to pass
-      [ $found_regex -eq 1 ] && exit 0 || exit 1
+      if [ $found_regex -eq 1 ] && [ $found_admin -eq 1 ]; then 
+        exit 0
+      else
+        exit 1
+      fi
     fi
 
     # Since the deployment was not ready, try again $i more times

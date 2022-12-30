@@ -1,9 +1,8 @@
 package slack
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
+	"gopkg.in/yaml.v2"
 	"os"
 	"os/exec"
 	"regexp"
@@ -31,7 +30,7 @@ func NewSlackClient(configFile, botToken, appToken string) *Client {
 	}
 	cfg, err := loadConfigFile(configFile)
 	if err != nil {
-		log.WithError(err).Fatal("config-file does not exist")
+		log.WithError(err).Fatal("Problem loading config-file")
 	}
 	if botToken == "" {
 		botToken = os.Getenv("SLACK_BOT_TOKEN")
@@ -54,7 +53,7 @@ func NewSlackClient(configFile, botToken, appToken string) *Client {
 	}
 }
 
-// loadConfigFile is a helper function for loading bashbot json
+// loadConfigFile is a helper function for loading bashbot yaml
 // configuration file into Config struct.
 func loadConfigFile(filePath string) (*Config, error) {
 	fileContents, err := os.ReadFile(filePath)
@@ -62,7 +61,7 @@ func loadConfigFile(filePath string) (*Config, error) {
 		return nil, err
 	}
 	var config Config
-	err = json.Unmarshal(fileContents, &config)
+	err = yaml.Unmarshal(fileContents, &config)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +144,7 @@ func (c *Client) InstallVendorDependencies() {
 func (c *Client) runShellCommands(cmdArgs []string) string {
 	cmdOut, err := exec.Command(cmdArgs[0], cmdArgs[1:]...).CombinedOutput()
 	if err != nil {
-		return fmt.Sprintf("error running command:\n '%s',\n error: '%s'.", strings.Join(cmdArgs, " "), err.Error())
+		return fmt.Sprintf("error running command:\n%s\nerror: %s", strings.Join(cmdArgs, " "), err.Error())
 	}
 	out := string(cmdOut)
 	displayOut := regexp.MustCompile(`\s*\n`).ReplaceAllString(out, "\\n")
@@ -483,15 +482,80 @@ func (c *Client) processValidCommand(cmds []string, tool Tool, channel, user, ti
 	log.Info(displayCmd)
 
 	tmpCmd := []string{"bash", "-c", buildCmd}
-	ret := splitOut(c.runShellCommands(tmpCmd), tool.Response)
-	if tool.Ephemeral {
-		c.sendConfigMessageToChannel(channel, "ephemeral", "")
-		c.SendMessageToUser(channel, user, ret)
+	var rawOutput = c.runShellCommands(tmpCmd)
+	// If the return string is more than 3500 characters, send it as a file
+	var fileThreshold = 3500
+	log.Info("Return length:")
+	log.Info(len(rawOutput))
+	var sendFile = false
+	if len(rawOutput) > fileThreshold {
+		sendFile = true
+	}
+	var retFile = fmt.Sprintf(" ----> Param Name:        %s\n", tool.Name)
+	retFile += fmt.Sprintf(" ----> Param Description: %s\n", tool.Description)
+	retFile += fmt.Sprintf(" ----> Param Log:         %s\n", strconv.FormatBool(tool.Log))
+	retFile += fmt.Sprintf(" ----> Param Help:        %s\n", tool.Help)
+	retFile += fmt.Sprintf(" ----> Param Trigger:     %s\n", tool.Trigger)
+	retFile += fmt.Sprintf(" ----> Param Location:    %s\n", tool.Location)
+	retFile += fmt.Sprintf(" ----> Param Command:     %s\n", commandJoined)
+	retFile += fmt.Sprintf(" ----> Param Ephemeral:   %s\n", strconv.FormatBool(tool.Ephemeral))
+	retFile += fmt.Sprintf(" ----> Param Response:    %s\n", tool.Response)
+	retFile += fmt.Sprintf(" ----> Command:\n%s\n", displayCmd)
+	retFile += rawOutput
+	var ret = ""
+	switch tool.Response {
+	case "file":
+		sendFile = true
+		ret = retFile
+	case "code":
+		ret = fmt.Sprintf("```%s```", rawOutput)
+	default:
+		ret = rawOutput
+	}
+	if sendFile {
+		var tFile = fmt.Sprintf("%s.txt", timestamp)
+		log.Info(tFile)
+		f, err := os.Create(tFile)
+		if err != nil {
+			log.Error(err)
+		}
+		defer f.Close()
+		_, err2 := f.WriteString(ret)
+		if err2 != nil {
+			log.Error(err2)
+		}
+		uploadParams := slack.FileUploadParameters{
+			Channels: []string{channel},
+			File:     tFile,
+		}
+		c.slackClient.UploadFile(uploadParams)
 	} else {
-		c.SendMessageToChannel(channel, ret)
+		if tool.Ephemeral {
+			c.sendConfigMessageToChannel(channel, "ephemeral", "")
+			c.SendMessageToUser(channel, user, ret)
+		} else {
+			c.SendMessageToChannel(channel, ret)
+		}
 	}
 	if tool.Log {
-		c.logToChannel(channel, user, ret)
+		// c.logToChannel(channel, user, ret)
+
+		var tFile = fmt.Sprintf("bashbot-log-%s.txt", timestamp)
+		log.Info(tFile)
+		f, err := os.Create(tFile)
+		if err != nil {
+			log.Error(err)
+		}
+		defer f.Close()
+		_, err2 := f.WriteString(retFile)
+		if err2 != nil {
+			log.Error(err2)
+		}
+		uploadParams := slack.FileUploadParameters{
+			Channels: []string{c.cfg.Admins[0].LogChannelId},
+			File:     tFile,
+		}
+		c.slackClient.UploadFile(uploadParams)
 	}
 	return true
 }
@@ -502,43 +566,18 @@ func (c *Client) logToChannel(channelID, userID, msg string) {
 		log.Errorf("can't get user: %w", err)
 		return
 	}
-	channel := c.getChannelNames([]string{channelID})
-	retacks := regexp.MustCompile("`")
-	msg = retacks.ReplaceAllLiteralString(msg, "")
-	msg = truncateString(msg, 1000)
-	output := fmt.Sprintf("%s[%s:%s]: %s", c.cfg.Admins[0].AppName, user.Profile.RealName, channel[0], msg)
-	ret := splitOut(output, "code")
 	// Display message in chat-ops-log unless it came from admin channel
 	if channelID == c.cfg.Admins[0].PrivateChannelId {
 		return
 	}
-	c.SendMessageToChannel(c.cfg.Admins[0].LogChannelId, ret)
-	log.Debug("Channel ID: " + channelID)
-	log.Info(ret)
-}
-
-func splitOut(output string, responseType string) string {
-	splitInterval := 4000
-	switch responseType {
-	case "code":
-		if len(output) < splitInterval {
-			return fmt.Sprintf("```%s```", output)
-		}
-		splitCount := 1
-		lastSplitPosition := 0
-		resultBuffer := bytes.Buffer{}
-		for i, char := range output {
-			if i >= (splitInterval*splitCount) && (char == '\n') {
-				resultBuffer.WriteString(strings.TrimLeft("```"+output[lastSplitPosition:i]+"``` \n", "\r\n"))
-				lastSplitPosition = i + 1
-				splitCount++
-			}
-		}
-		log.Debug(resultBuffer.String())
-		return resultBuffer.String()
-	default:
-		return output
-	}
+	channel := c.getChannelNames([]string{channelID})
+	retacks := regexp.MustCompile("`")
+	msg = retacks.ReplaceAllLiteralString(msg, "")
+	msg = truncateString(msg, 1000)
+	output := fmt.Sprintf("%s <@%s> <#%s> - %s", c.cfg.Admins[0].AppName, user.ID, channelID, msg)
+	c.SendMessageToChannel(c.cfg.Admins[0].LogChannelId, output)
+	log.Debugf("Bashbot command triggered channel: %s", channel)
+	log.Info(output)
 }
 
 // ConfigureLogger configures the logger used by bashbot to set the log level

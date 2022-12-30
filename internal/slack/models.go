@@ -1,88 +1,88 @@
 package slack
 
 type Admin struct {
-	Trigger          string   `json:"trigger"`
-	AppName          string   `json:"appName"`
-	UserIds          []string `json:"userIds"`
-	PrivateChannelId string   `json:"privateChannelId"`
-	LogChannelId     string   `json:"logChannelId"`
+	Trigger          string   `yaml:"trigger"`
+	AppName          string   `yaml:"appName"`
+	UserIds          []string `yaml:"userIds"`
+	PrivateChannelId string   `yaml:"privateChannelId"`
+	LogChannelId     string   `yaml:"logChannelId"`
 }
 
 type Message struct {
-	Active bool   `json:"active"`
-	Name   string `json:"name"`
-	Text   string `json:"text"`
+	Active bool   `yaml:"active"`
+	Name   string `yaml:"name"`
+	Text   string `yaml:"text"`
 }
 
 type Tool struct {
-	Name         string      `json:"name"`
-	Description  string      `json:"description"`
-	Help         string      `json:"help"`
-	Trigger      string      `json:"trigger"`
-	Location     string      `json:"location"`
-	Command      []string    `json:"command"`
-	Permissions  []string    `json:"permissions"`
-	Log          bool        `json:"log"`
-	Ephemeral    bool        `json:"ephemeral"`
-	Response     string      `json:"response"`
-	Parameters   []Parameter `json:"parameters"`
-	Envvars      []string    `json:"envvars"`
-	Dependencies []string    `json:"dependencies"`
+	Name         string      `yaml:"name"`
+	Description  string      `yaml:"description"`
+	Help         string      `yaml:"help"`
+	Trigger      string      `yaml:"trigger"`
+	Location     string      `yaml:"location"`
+	Command      []string    `yaml:"command"`
+	Permissions  []string    `yaml:"permissions"`
+	Log          bool        `yaml:"log"`
+	Ephemeral    bool        `yaml:"ephemeral"`
+	Response     string      `yaml:"response"`
+	Parameters   []Parameter `yaml:"parameters"`
+	Envvars      []string    `yaml:"envvars"`
+	Dependencies []string    `yaml:"dependencies"`
 }
 
 type Parameter struct {
-	Name        string   `json:"name"`
-	Allowed     []string `json:"allowed"`
-	Description string   `json:"description,omitempty"`
-	Source      []string `json:"source,omitempty"`
-	Match       string   `json:"match,omitempty"`
+	Name        string   `yaml:"name"`
+	Allowed     []string `yaml:"allowed"`
+	Description string   `yaml:"description,omitempty"`
+	Source      []string `yaml:"source,omitempty"`
+	Match       string   `yaml:"match,omitempty"`
 }
 
 type Dependency struct {
-	Name    string   `json:"name"`
-	Install []string `json:"install"`
+	Name    string   `yaml:"name"`
+	Install []string `yaml:"install"`
 }
 
 type Channel struct {
-	Id                 string `json:"id"`
-	Created            int    `json:"created"`
-	IsOpen             bool   `json:"is_open"`
-	IsGroup            bool   `json:"is_group"`
-	IsShared           bool   `json:"is_shared"`
-	IsIm               bool   `json:"is_im"`
-	IsExtShared        bool   `json:"is_ext_shared"`
-	IsOrgShared        bool   `json:"is_org_shared"`
-	IsPendingExtShared bool   `json:"is_pending_ext_shared"`
-	IsPrivate          bool   `json:"is_private"`
-	IsMpim             bool   `json:"is_mpim"`
-	Unlinked           int    `json:"unlinked"`
-	NameNormalized     string `json:"name_normalized"`
-	NumMembers         int    `json:"num_members"`
-	Priority           int    `json:"priority"`
-	User               string `json:"user"`
-	Name               string `json:"name"`
-	Creator            string `json:"creator"`
-	IsArchived         bool   `json:"is_archived"`
-	Members            string `json:"members"`
-	Topic              Topic  `json:"topic"`
-	Purpose            Topic  `json:"purpose"`
-	IsChannel          bool   `json:"is_channel"`
-	IsGeneral          bool   `json:"is_general"`
-	IsMember           bool   `json:"is_member"`
-	Local              string `json:"locale"`
+	Id                 string `yaml:"id"`
+	Created            int    `yaml:"created"`
+	IsOpen             bool   `yaml:"is_open"`
+	IsGroup            bool   `yaml:"is_group"`
+	IsShared           bool   `yaml:"is_shared"`
+	IsIm               bool   `yaml:"is_im"`
+	IsExtShared        bool   `yaml:"is_ext_shared"`
+	IsOrgShared        bool   `yaml:"is_org_shared"`
+	IsPendingExtShared bool   `yaml:"is_pending_ext_shared"`
+	IsPrivate          bool   `yaml:"is_private"`
+	IsMpim             bool   `yaml:"is_mpim"`
+	Unlinked           int    `yaml:"unlinked"`
+	NameNormalized     string `yaml:"name_normalized"`
+	NumMembers         int    `yaml:"num_members"`
+	Priority           int    `yaml:"priority"`
+	User               string `yaml:"user"`
+	Name               string `yaml:"name"`
+	Creator            string `yaml:"creator"`
+	IsArchived         bool   `yaml:"is_archived"`
+	Members            string `yaml:"members"`
+	Topic              Topic  `yaml:"topic"`
+	Purpose            Topic  `yaml:"purpose"`
+	IsChannel          bool   `yaml:"is_channel"`
+	IsGeneral          bool   `yaml:"is_general"`
+	IsMember           bool   `yaml:"is_member"`
+	Local              string `yaml:"locale"`
 }
 
 type Topic struct {
-	Value   string `json:"value"`
-	Creator string `json:"creator"`
-	LastSet int    `json:"last_set"`
+	Value   string `yaml:"value"`
+	Creator string `yaml:"creator"`
+	LastSet int    `yaml:"last_set"`
 }
 
 type Config struct {
-	Admins       []Admin      `json:"admins"`
-	Messages     []Message    `json:"messages"`
-	Tools        []Tool       `json:"tools"`
-	Dependencies []Dependency `json:"dependencies"`
+	Admins       []Admin      `yaml:"admins"`
+	Messages     []Message    `yaml:"messages"`
+	Tools        []Tool       `yaml:"tools"`
+	Dependencies []Dependency `yaml:"dependencies"`
 }
 
 func (c *Config) GetTool(trigger string) Tool {

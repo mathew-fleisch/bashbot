@@ -44,6 +44,9 @@ main() {
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
             'bashbot send-message --channel '${TESTING_CHANNEL}' --msg "Bashbot connected to slack! Running automated tests..."'
+          kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
+            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg "!bashbot help"'
+          sleep 3
           found_connected=1
           break
         fi

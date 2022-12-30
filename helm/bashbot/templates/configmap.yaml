@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Values.namespace }}
 data:
   {{- $files := .Files }}
-  {{- range tuple "config.json" ".tool-versions" }}
+  {{- range tuple "config.yaml" ".tool-versions" }}
   {{ . }}: |-
 {{ $files.Get . | indent 3 }}
   {{- end }}

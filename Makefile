@@ -60,8 +60,8 @@ docker-build: ## build and tag bashbot:local
 .PHONY: docker-run-local
 docker-run-local: ## run an existing build of bashbot:local
 	@docker run -it --rm \
-		-v $(PWD)/config.json:/bashbot/config.json \
-		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
+		-v $(PWD)/config.yaml:/bashbot/config.yaml \
+		-e 	="/bashbot/config.yaml" \
 		-v $(PWD)/.tool-versions:/bashbot/.tool-versions \
 		-e SLACK_BOT_TOKEN=$(SLACK_BOT_TOKEN) \
 		-e SLACK_APP_TOKEN=$(SLACK_APP_TOKEN) \
@@ -72,8 +72,8 @@ docker-run-local: ## run an existing build of bashbot:local
 .PHONY: docker-run-local-bash
 docker-run-local-bash: ## run an exsting build of bashbot:local but override the entrypoint with /bin/bash
 	@docker run -it --rm --entrypoint bash \
-		-v $(PWD)/config.json:/bashbot/config.json \
-		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
+		-v $(PWD)/config.yaml:/bashbot/config.yaml \
+		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
 		-e BASHBOT_ENV_VARS_FILEPATH="/bashbot/.env" \
 		-v $(PWD)/.tool-versions:/bashbot/.tool-versions \
 		-e SLACK_BOT_TOKEN=$(SLACK_BOT_TOKEN) \
@@ -85,8 +85,8 @@ docker-run-local-bash: ## run an exsting build of bashbot:local but override the
 .PHONY: docker-run-upstream-bash
 docker-run-upstream-bash: ## run the latest upstream build of bashbot but override the entrypoint with /bin/bash
 	@docker run -it --rm --entrypoint bash \
-		-v $(PWD)/config.json:/bashbot/config.json \
-		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
+		-v $(PWD)/config.yaml:/bashbot/config.yaml \
+		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
 		-e SLACK_BOT_TOKEN=$(SLACK_BOT_TOKEN) \
 		-e SLACK_APP_TOKEN=$(SLACK_APP_TOKEN) \
 		-e LOG_LEVEL="$(BASHBOT_LOG_LEVEL)" \
@@ -96,8 +96,8 @@ docker-run-upstream-bash: ## run the latest upstream build of bashbot but overri
 .PHONY: docker-run-upstream
 docker-run-upstream: ## run the latest upstream build of bashbot
 	@docker run -it --rm \
-		-v $(PWD)/config.json:/bashbot/config.json \
-		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.json" \
+		-v $(PWD)/config.yaml:/bashbot/config.yaml \
+		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
 		-e SLACK_BOT_TOKEN=$(SLACK_BOT_TOKEN) \
 		-e SLACK_APP_TOKEN=$(SLACK_APP_TOKEN) \
 		-e LOG_LEVEL="$(BASHBOT_LOG_LEVEL)" \
@@ -146,7 +146,8 @@ helm-install: ## install bashbot via helm into an existing KinD cluster to /usr/
 		--set log_format=$(BASHBOT_LOG_TYPE) \
 		--debug \
 		--wait
-	make pod-logs
+	sleep 3
+	timeout 30s make pod-logs 2>/dev/null || true
 
 .PHONY: test-kind-cleanup
 test-kind-cleanup: ## delete any KinD cluster set up for bashbot

@@ -6,7 +6,7 @@ RUN make
 
 FROM alpine:latest
 LABEL maintainer="Mathew Fleisch <mathew.fleisch@gmail.com>"
-ENV BASHBOT_CONFIG_FILEPATH=/bashbot/config.json
+ENV BASHBOT_CONFIG_FILEPATH=/bashbot/config.yaml
 ENV BASHBOT_ENV_VARS_FILEPATH ""
 ENV SLACK_BOT_TOKEN ""
 ENV SLACK_APP_TOKEN ""
@@ -14,7 +14,7 @@ ENV LOG_LEVEL "info"
 ENV LOG_FORMAT "text"
 ARG NRUSER=bb
 
-RUN apk add --update --no-cache bash curl git make jq \
+RUN apk add --update --no-cache bash curl git make jq yq \
     && rm -rf /var/cache/apk/* \
     && addgroup -S ${NRUSER} \
     && adduser -D -S ${NRUSER} -G ${NRUSER} \

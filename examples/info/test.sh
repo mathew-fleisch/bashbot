@@ -7,7 +7,7 @@ set -o nounset
 # set -x # debug
 
 cleanup() {
-  echo "Date/time test complete!"
+  echo "container/user info test complete!"
 }
 
 trap cleanup EXIT
@@ -32,29 +32,30 @@ main() {
     if [ $? -eq 0 ]; then
       # echo "Bashbot deployment confirmed!"
       # kubectl --namespace ${ns} get deployments
-      found_date=0
+      found_user=0
       for j in {3..1}; do
         bashbot_pod=$(kubectl -n ${ns} get pods -o jsonpath='{.items[0].metadata.name}')
-        # Send `!bashbot time date` via bashbot binary within bashbot pod
+        # Send `!bashbot info` via bashbot binary within bashbot pod
         kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-          'bashbot send-message --channel '${TESTING_CHANNEL}' --msg "!bashbot time date"'
+          'bashbot send-message --channel '${TESTING_CHANNEL}' --msg "!bashbot info"'
         sleep 5
-        last_log_line=$(kubectl -n ${ns} logs --tail 1 $bashbot_pod)
+        last_log_line=$(kubectl -n ${ns} logs --tail 10 $bashbot_pod)
         # Tail the last line of the bashbot pod's log looking
-        # for the string 'Bashbot is now connected to slack'
-        if [[ $last_log_line =~ "Date/time:" ]]; then
-          echo "date/time test successful!"
-          found_date=1
+        # for the string 'whoami: bb' to prove the info script
+        # is showing the correct value for whoami
+        if [[ $last_log_line =~ "whoami: bb" ]]; then
+          echo "container/user info test successful!"
+          found_user=1
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: date/time test successful!"'
+            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: container/user info test successful!\nSaw \"whoami: bb\" in bashbot logs"'
           exit 0
         fi
-        echo "Bashbot date/time test failed. $j more attempts..."
+        echo "Bashbot container/user info test failed. $j more attempts..."
         sleep 5
       done
-      # Don't require date/time tests to pass for the whole test to pass
-      [ $found_date -eq 1 ] && exit 0 || exit 1
+      # Don't require container/user info tests to pass for the whole test to pass
+      [ $found_user -eq 1 ] && exit 0 || exit 1
     fi
 
     # Since the deployment was not ready, try again $i more times
@@ -69,7 +70,7 @@ main() {
   kubectl --namespace ${ns} get pods -o wide
 
   kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-    'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":red_circle: date/time test failed!"'
+    'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":red_circle: container/user info test failed!"'
   exit 1
 }
 

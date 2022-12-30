@@ -12,10 +12,6 @@ jobs:
     name: Example Bashbot Triggered GitHub Action
     runs-on: ubuntu-latest
     steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v3
-      
       - 
         name: Install stuff with asdf
         uses: asdf-vm/actions/install@v1
@@ -25,12 +21,25 @@ jobs:
       -
         name: Send Slack Message With Bashbot Binary
         env:
-          BASHBOT_CONFIG_FILEPATH: .github/workflows/example-config.json
-          SLACK_TOKEN: ${{ secrets.RELEASE_SLACK_TOKEN }}
+          BASHBOT_CONFIG_FILEPATH: ./config.yaml
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_APP_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
           SLACK_CHANNEL: ${{ github.event.client_payload.channel }}
           SLACK_USERID: ${{ github.event.client_payload.user_id }}
           GIT_TOKEN: ${{ github.token }}
         run: |
+          cat <<EOF > $BASHBOT_CONFIG_FILEPATH
+          admins:
+            - trigger: bashbotexample
+              appName: Bashbot Example
+              userIds:
+                - "UP3BBQX34"
+              privateChannelId: "GPFMM5MD2"
+              logChannelId: "CPJ1NFPL7"
+          messages: []
+          tools: []
+          dependencies: []
+          EOF
           bashbot send-message \
             --channel ${SLACK_CHANNEL} \
             --msg "<@${SLACK_USERID}> Bashbot triggered this job: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

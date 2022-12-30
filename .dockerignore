@@ -6,6 +6,8 @@
 .DS_Store
 Dockerfile
 vendor/*
+config.json
+config.yaml
 #Ignore helm directory
 # helm/
 # helm/*
