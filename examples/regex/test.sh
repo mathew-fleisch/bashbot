@@ -46,11 +46,11 @@ main() {
         # Tail the last line of the bashbot pod's log looking
         # for the string 'Bashbot is now connected to slack'
         if [[ $last_log_line =~ "consequuntur" ]]; then
-          echo "regex test successful! Curl of jsonplaceholder.typicode.com api returned expected json object with .body with contents 'consequuntur', parsed by jq"
+          echo "regex test successful! JQ parsed curl of https://jsonplaceholder.typicode.com/posts/1 api, returned expected json object containing string (consequuntur)"
           found_regex=1
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: regex test successful! Curl of jsonplaceholder.typicode.com api returned expected json object with .body containing string (consequuntur), parsed by jq"'
+            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: regex test successful!\nJQ parsed curl of https://jsonplaceholder.typicode.com/posts/1 api, returned expected json object containing string (consequuntur)"'
           break
         fi
         echo "Bashbot regex test failed. $j more attempts..."
@@ -78,7 +78,7 @@ main() {
           found_admin=1
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: Private regex test successful! The environment variables include a config.yaml value for BASHBOT_CONFIG_FILEPATH"'
+            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: Private regex test successful!\nThe environment variables include a config.yaml value for BASHBOT_CONFIG_FILEPATH"'
           break
         fi
         echo "Bashbot private regex test failed. $j more attempts..."
