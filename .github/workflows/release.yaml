@@ -1,6 +1,8 @@
-# Name:        build-container.yaml
+# Name:        release.yaml
 # Author:      Mathew Fleisch <mathew.fleisch@gmail.com>
-# Description: This action will build and push a docker container, when triggered by
+# Description: This action will build and push a multi-arch docker container,
+#              cross compile go-binaries and save as release artifacts,
+#              and package a helm chart as gh-pages env, when triggered by
 #              pushing a new git tag (that starts with the letter 'v').
 name: Build Bashbot Containers
 on:
@@ -9,6 +11,35 @@ on:
       - 'v*'
 
 jobs:
+  release:
+    name: Release Bashbot Binaries
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout Bashbot source
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - 
+        name: Install Golang via asdf
+        uses: asdf-vm/actions/install@v1
+        with:
+          tool_versions: golang 1.19.4
+      -
+        name: Build go-binaries
+        run: |
+          asdf global golang 1.19.4
+          make go-setup
+          make go-build-cross-compile
+          echo "Go-Binaries created: $(ls bin -alF)"
+
+      -
+        name: Cut Github Release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GIT_TOKEN }}
+          allowUpdates: true
+          artifacts: "bin/*"
   build:
     name: Build and Push Bashbot Container
     runs-on: ubuntu-latest
@@ -58,6 +89,16 @@ jobs:
             mathewfleisch/bashbot:${{ env.RELEASE_VERSION }}
           cache-from: type=registry,ref=mathewfleisch/bashbot:latest
           cache-to: type=inline
+      - 
+        name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+      - 
+        name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.1.0
+        env:
+          CR_TOKEN: "${{ secrets.GIT_TOKEN }}"
       - 
         name: Install Bashbot via asdf
         uses: asdf-vm/actions/install@v1
