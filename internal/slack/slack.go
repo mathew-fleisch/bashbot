@@ -502,16 +502,15 @@ func (c *Client) processValidCommand(cmds []string, tool Tool, channel, user, ti
 	retFile += fmt.Sprintf(" ----> Param Response:    %s\n", tool.Response)
 	retFile += fmt.Sprintf(" ----> Command:\n%s\n", displayCmd)
 	retFile += rawOutput
-	var ret = ""
+	var ret = rawOutput
 	switch tool.Response {
 	case "file":
 		sendFile = true
 		ret = retFile
 	case "code":
 		ret = fmt.Sprintf("```%s```", rawOutput)
-	default:
-		ret = rawOutput
 	}
+	log.Debug(ret)
 	if sendFile {
 		var tFile = fmt.Sprintf("%s.txt", timestamp)
 		log.Info(tFile)
@@ -528,7 +527,10 @@ func (c *Client) processValidCommand(cmds []string, tool Tool, channel, user, ti
 			Channels: []string{channel},
 			File:     tFile,
 		}
-		c.slackClient.UploadFile(uploadParams)
+
+		if _, err := c.slackClient.UploadFile(uploadParams); err != nil {
+			log.Errorf("Unexpected error uploading file: %s", err)
+		}
 	} else {
 		if tool.Ephemeral {
 			c.sendConfigMessageToChannel(channel, "ephemeral", "")
@@ -555,7 +557,10 @@ func (c *Client) processValidCommand(cmds []string, tool Tool, channel, user, ti
 			Channels: []string{c.cfg.Admins[0].LogChannelId},
 			File:     tFile,
 		}
-		c.slackClient.UploadFile(uploadParams)
+
+		if _, err := c.slackClient.UploadFile(uploadParams); err != nil {
+			log.Errorf("Unexpected error uploading file: %s", err)
+		}
 	}
 	return true
 }
@@ -563,7 +568,7 @@ func (c *Client) processValidCommand(cmds []string, tool Tool, channel, user, ti
 func (c *Client) logToChannel(channelID, userID, msg string) {
 	user, err := c.slackClient.GetUserInfo(userID)
 	if err != nil {
-		log.Errorf("can't get user: %w", err)
+		log.Errorf("can't get user: %v", err)
 		return
 	}
 	// Display message in chat-ops-log unless it came from admin channel
