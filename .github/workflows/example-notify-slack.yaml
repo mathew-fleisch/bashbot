@@ -16,12 +16,13 @@ jobs:
         name: Install Bashbot via asdf
         uses: asdf-vm/actions/install@v1
         with:
-          tool_versions: bashbot 1.8.0
+          tool_versions: bashbot latest
       -
         name: Send Slack Message With Bashbot Binary
         env:
           BASHBOT_CONFIG_FILEPATH: ./config.yaml
-          SLACK_TOKEN: ${{ secrets.RELEASE_SLACK_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_APP_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
         run: |
           cat <<EOF > $BASHBOT_CONFIG_FILEPATH
           admins:

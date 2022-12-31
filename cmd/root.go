@@ -39,7 +39,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().String("config-file", "", "[REQUIRED] Filepath to config.yaml file (or environment variable BASHBOT_CONFIG_FILEPATH set)")
-	rootCmd.PersistentFlags().String("slack-bot-token", "", "[REQUIRED] Slack bot token used to authenticate with api (or environment variable SLACK_TOKEN set)")
+	rootCmd.PersistentFlags().String("slack-bot-token", "", "[REQUIRED] Slack bot token used to authenticate with api (or environment variable SLACK_BOT_TOKEN set)")
 	rootCmd.PersistentFlags().String("slack-app-token", "", "[REQUIRED] Slack app token used to authenticate with api (or environment variable SLACK_APP_TOKEN set)")
 	rootCmd.PersistentFlags().String("log-level", "info", "Log elevel to display (info,debug,warn,error)")
 	rootCmd.PersistentFlags().String("log-format", "text", "Display logs as json or text")
