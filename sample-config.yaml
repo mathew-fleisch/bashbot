@@ -68,7 +68,7 @@ tools:
     dependencies:
       - curl
       - jq
-    help: bashbot aqi [zip-code]
+    help: "!bashbot aqi [zip-code]"
     trigger: aqi
     location: /bashbot/vendor/bashbot/examples/aqi
     command:
@@ -151,11 +151,11 @@ tools:
     response: code
     permissions:
       - all
-  - name: Testing the regex
-    description: Testing that regex
+  - name: Regular expression example
+    description: With great power, comes great responsibility
     envvars: []
     dependencies: []
-    help: "!bashbot regex With great power, comes great responsibility"
+    help: "!bashbot regex $([command])"
     trigger: regex
     location: /bashbot/
     command:
@@ -163,7 +163,7 @@ tools:
     parameters:
       - name: command
         allowed: []
-        description: This should just allow any text to be used as input
+        description: This should allow any text to be used as input
         match: .*
     log: false
     ephemeral: false
