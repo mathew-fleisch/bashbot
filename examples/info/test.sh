@@ -48,7 +48,7 @@ main() {
           found_user=1
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: container/user info test successful!\nSaw \"whoami: bb\" in bashbot logs"'
+            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: container/user info test successful!\n> Saw \"whoami: bb\" in bashbot logs"'
           exit 0
         fi
         echo "Bashbot container/user info test failed. $j more attempts..."

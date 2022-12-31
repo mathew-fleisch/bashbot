@@ -48,7 +48,7 @@ main() {
           found_res=1
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: aqi test successful!\nSaw \"Air Quality Index\" in bashbot logs"'
+            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: aqi test successful!\n> Saw \"Air Quality Index\" in bashbot logs"'
           exit 0
         fi
         echo "Bashbot aqi test failed. $j more attempts..."

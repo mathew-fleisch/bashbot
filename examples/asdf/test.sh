@@ -66,7 +66,7 @@ main() {
           found_res=1
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: asdf test successful!\nSaw \"kubectl\" installed via asdf in bashbot logs"'
+            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: asdf test successful!\n> Saw \"kubectl\" installed via asdf in bashbot logs"'
           break
         fi
         echo "Bashbot aqi test failed. $j more attempts..."

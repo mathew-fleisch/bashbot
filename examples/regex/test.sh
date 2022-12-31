@@ -50,7 +50,7 @@ main() {
           found_regex=1
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: regex test successful!\nJQ parsed curl of https://jsonplaceholder.typicode.com/posts/1 api, returned expected json object containing string (consequuntur)"'
+            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: regex test successful!\n> JQ parsed curl of https://jsonplaceholder.typicode.com/posts/1 api, returned expected json object containing string (consequuntur)"'
           break
         fi
         echo "Bashbot regex test failed. $j more attempts..."
@@ -63,7 +63,7 @@ main() {
         bashbot_pod=$(kubectl -n ${ns} get pods -o jsonpath='{.items[0].metadata.name}')
         # Expect first call to fail in wrong channel
         kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-          'bashbot send-message --channel '${TESTING_CHANNEL}' --msg "Expect protected test fails, and retry in private channel..."'
+          'bashbot send-message --channel '${TESTING_CHANNEL}' --msg "> Expect protected test fails, and retry in private channel..."'
         kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
           'bashbot send-message --channel '${TESTING_CHANNEL}' --msg "!bashbot regex env | grep BASHBOT_CONFIG_FILEPATH | cut -d= -f2"'
         # One cannot interpolate existing environment variables, but instead grep them from the env command
@@ -78,7 +78,7 @@ main() {
           found_admin=1
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: Private regex test successful!\nThe environment variables include a config.yaml value for BASHBOT_CONFIG_FILEPATH"'
+            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: Private regex test successful!\n> The environment variables include a config.yaml value for BASHBOT_CONFIG_FILEPATH"'
           break
         fi
         echo "Bashbot private regex test failed. $j more attempts..."
