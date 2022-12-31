@@ -69,6 +69,7 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_APP_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
+          AIRQUALITY_API_KEY: ${{ secrets.AIRQUALITY_API_KEY }}
           BASHBOT_CONFIG_FILEPATH: /bashbot/config.yaml
           GIT_TOKEN: not-used
         run: |
