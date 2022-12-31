@@ -45,6 +45,13 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.botname }}-env
                   key: GIT_TOKEN
+                  optional: true
+            - name: AIRQUALITY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.botname }}-env
+                  key: AIRQUALITY_API_KEY
+                  optional: true
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.pullPolicy }}
           name: {{ .Values.botname }}

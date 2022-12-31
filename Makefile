@@ -115,6 +115,7 @@ test-run: ## run tests designed for bashbot running in kubernetes
 	@echo "Testing: $(NAMESPACE) $(BOTNAME)"
 	./helm/bashbot/test-deployment.sh $(NAMESPACE) $(BOTNAME)
 	./examples/ping/test.sh $(NAMESPACE) $(BOTNAME)
+	./examples/aqi/test.sh $(NAMESPACE) $(BOTNAME)
 	./examples/asdf/test.sh $(NAMESPACE) $(BOTNAME)
 	./examples/info/test.sh $(NAMESPACE) $(BOTNAME)
 	./examples/regex/test.sh $(NAMESPACE) $(BOTNAME)
