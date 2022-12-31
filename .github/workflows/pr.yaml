@@ -95,17 +95,17 @@ jobs:
         name: Unit Tests
         run: make test-go
 
-      -
-        name: Docker Login
-        uses: docker/login-action@v2
-        with:
-          registry: docker.io
-          username: ${{ secrets.REGISTRY_USERNAME }}
-          password: ${{ secrets.REGISTRY_PASSWORD }}
+      # -
+      #   name: Docker Login
+      #   uses: docker/login-action@v2
+      #   with:
+      #     registry: docker.io
+      #     username: ${{ secrets.REGISTRY_USERNAME }}
+      #     password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      -
-        name: Lint Container Using Dockle
-        run: make test-docker
+      # -
+      #   name: Lint Container Using Dockle
+      #   run: make test-docker
 
   integration_test:
     name: KinD Integration Tests
