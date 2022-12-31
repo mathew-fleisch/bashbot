@@ -6,40 +6,30 @@ In this example, a curl is executed via bash script and triggers a github action
 
 ## Bashbot configuration
 
-This command is triggered by sending `bashbot trigger-github-action` in a slack channel where Bashbot is also a member. The script is expected to exist before execution at the relative path `./examples/trigger-github-action/trigger-github-action` and requires the following environment variables to be set: `BASHBOT_CONFIG_FILEPATH SLACK_TOKEN SLACK_CHANNEL SLACK_USERID REPO_OWNER REPO_NAME GITHUB_TOKEN GITHUB_RUN_ID`.
+This command is triggered by sending `!bashbot trigger-github-action` in a slack channel where Bashbot is also a member. The script is expected to exist before execution at the relative path `./examples/trigger-github-action/trigger-github-action` and requires the following environment variables to be set: `BASHBOT_CONFIG_FILEPATH SLACK_TOKEN SLACK_CHANNEL SLACK_USERID REPO_OWNER REPO_NAME GITHUB_TOKEN GITHUB_RUN_ID`.
 
-```json
-{
-  "name": "Trigger a Github Action",
-  "description": "Triggers an example Github Action job by repository dispatch",
-  "envvars": [
-    "BASHBOT_CONFIG_FILEPATH", 
-    "SLACK_TOKEN", 
-    "SLACK_CHANNEL", 
-    "SLACK_USERID", 
-    "REPO_OWNER",
-    "REPO_NAME",
-    "GITHUB_TOKEN",
-    "GITHUB_RUN_ID"
-  ],
-  "dependencies": ["curl", "wget"],
-  "help": "bashbot trigger-github-action",
-  "trigger": "trigger-github-action",
-  "location": "./examples/github-action",
-  "command": [
-    "export REPO_OWNER=mathew-fleisch",
-    "&& export REPO_NAME=bashbot",
-    "&& export SLACK_CHANNEL=${TRIGGERED_CHANNEL_ID}",
-    "&& export SLACK_USERID=${TRIGGERED_USER_ID}",
-    "&& ./trigger.sh",
-    "&& echo \"Running this <https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/.github/workflows/example-bashbot-github-action.yaml|example github action>\""
-  ],
-  "parameters": [],
-  "log": false,
-  "ephemeral": false,
-  "response": "text",
-  "permissions": ["all"]
-}
+```yaml
+name: Trigger a Github Action
+description: Triggers an example Github Action job by repository dispatch
+envvars:
+  - GIT_TOKEN
+dependencies: []
+help: "!bashbot trigger-github-action"
+trigger: trigger-github-action
+location: /bashbot/vendor/bashbot/examples/trigger-github-action
+command:
+  - "export REPO_OWNER=mathew-fleisch"
+  - "&& export REPO_NAME=bashbot"
+  - "&& export SLACK_CHANNEL=${TRIGGERED_CHANNEL_ID}"
+  - "&& export SLACK_USERID=${TRIGGERED_USER_ID}"
+  - "&& echo \"Running this example github action: https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/.github/workflows/example-bashbot-github-action.yaml\""
+  - "&& ./trigger.sh"
+parameters: []
+log: true
+ephemeral: false
+response: text
+permissions:
+  - GPFMM5MD2
 ```
 
 ## Bashbot scripts

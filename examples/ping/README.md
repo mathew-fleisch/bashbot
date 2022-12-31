@@ -8,20 +8,18 @@ In this example, a 'pong' response is returned to the user. This command is usef
 
 This command is triggered by sending `bashbot ping` in a slack channel where Bashbot is also a member. This command requires no external script and simply returns a message 'pong' back to the user.
 
-```json
-{
-  "name": "Ping/Pong",
-  "description": "Return pong on pings",
-  "envvars": [],
-  "dependencies": [],
-  "help": "ping",
-  "trigger": "ping",
-  "location": "./",
-  "command": ["echo \"pong\""],
-  "parameters": [],
-  "log": false,
-  "ephemeral": false,
-  "response": "text",
-  "permissions": ["all"]
-}
+```yaml
+name: Ping/Pong
+description: Return pong on pings
+help: "!bashbot ping"
+trigger: ping
+location: /bashbot/
+command:
+  - echo "pong"
+parameters: []
+log: true
+ephemeral: false
+response: text
+permissions:
+  - all
 ```

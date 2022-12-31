@@ -309,14 +309,14 @@ tools:
     response: code
     permissions:
       - all
-  - name: kubectl get pods --all-namespaces
-    description: Get all pods in all namespaces
+  - name: kubectl get bashbot pod
+    description: Get the bashbot pod using kubectl
     envvars:
       - BOTNAME
       - NAMESPACE
     dependencies: []
-    help: "!bashbot k-get-pods"
-    trigger: k-get-pods
+    help: "!bashbot k-get-pod"
+    trigger: k-get-pod
     location: /bashbot/
     command:
       - ". /usr/asdf/asdf.sh"
