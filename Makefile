@@ -113,14 +113,14 @@ test-kind: test-kind-setup helm-install test-run ## run KinD tests
 
 test-run: ## run tests designed for bashbot running in kubernetes
 	@echo "Testing: $(NAMESPACE) $(BOTNAME)"
-	./helm/bashbot/test-deployment.sh $(NAMESPACE) $(BOTNAME)
+	./charts/bashbot/test-deployment.sh $(NAMESPACE) $(BOTNAME)
 	./examples/ping/test.sh $(NAMESPACE) $(BOTNAME)
 	./examples/aqi/test.sh $(NAMESPACE) $(BOTNAME)
 	./examples/asdf/test.sh $(NAMESPACE) $(BOTNAME)
 	./examples/info/test.sh $(NAMESPACE) $(BOTNAME)
 	./examples/regex/test.sh $(NAMESPACE) $(BOTNAME)
 	./examples/kubernetes/test.sh $(NAMESPACE) $(BOTNAME)
-	./helm/bashbot/test-complete.sh $(NAMESPACE) $(BOTNAME)
+	./charts/bashbot/test-complete.sh $(NAMESPACE) $(BOTNAME)
 
 
 .PHONY: test-kind-setup
@@ -131,12 +131,12 @@ test-kind-setup: docker-build ## setup a KinD cluster to test bashbot's helm cha
 .PHONY: helm-install
 helm-install: ## install bashbot via helm into an existing KinD cluster to /usr/local/bin/bashbot
 	kubectl create namespace $(NAMESPACE) || true
-	@echo "Creating kubernetes secrets from helm/bashbot/.env"
+	@echo "Creating kubernetes secrets from charts/bashbot/.env"
 	@kubectl --namespace $(NAMESPACE) delete secret $(BOTNAME)-env --ignore-not-found=true
 	@echo "kubectl --namespace $(NAMESPACE) get secret $(BOTNAME)-env"
 	@kubectl --namespace $(NAMESPACE) create secret generic $(BOTNAME)-env \
-		$(shell cat helm/bashbot/.env | sed -e 's/export\ /--from-literal=/g' | tr '\n' ' ');
-	helm upgrade $(BOTNAME) helm/bashbot \
+		$(shell cat charts/bashbot/.env | sed -e 's/export\ /--from-literal=/g' | tr '\n' ' ');
+	helm upgrade $(BOTNAME) charts/bashbot \
 		--install \
 		--timeout 2m0s \
 		--namespace $(NAMESPACE) \

@@ -70,9 +70,9 @@ To set up a local [KinD cluster](https://kind.sigs.k8s.io/docs/user/quick-start/
 
 ```bash
 # Copy .env, config.yaml and .tool-versions sample files to helm directory and replace with custom values.
-cp sample-env-file helm/bashbot/.env
-cp sample-config.yaml helm/bashbot/config.yaml
-cp .tool-versions helm/bashbot/.tool-versions
+cp sample-env-file charts/bashbot/.env
+cp sample-config.yaml charts/bashbot/config.yaml
+cp .tool-versions charts/bashbot/.tool-versions
 make test-kind
 # docker build -t bashbot:local .
 # [+] Building 29.8s (17/17) FINISHED  
@@ -93,7 +93,7 @@ make test-kind
 # Have a question, bug, or feature request? Let us know! https://kind.sigs.k8s.io/#community 🙂
 # kind load docker-image bashbot:local
 # Image: "bashbot:local" with ID "sha256:9d5d360ad6de055ae2f5f9ef859c86b10b8c3613ce078d354f255e3efa8ec000" not yet present on node "kind-control-plane", loading...
-# helm install bashbot helm/bashbot \
+# helm install bashbot charts/bashbot \
 #  --namespace bashbot \
 #  --create-namespace \
 #  --set image.repository=bashbot \
@@ -106,7 +106,7 @@ make test-kind
 # TEST SUITE: None
 # Waiting for bashbot to come up...
 # sleep 1
-# ./helm/bashbot/test-deployment.sh
+# ./charts/bashbot/test-deployment.sh
 # Deployment not found or not ready. 20 more attempts...
 # Deployment not found or not ready. 19 more attempts...
 # Deployment not found or not ready. 18 more attempts...
