@@ -63,6 +63,8 @@ main() {
         bashbot_pod=$(kubectl -n ${ns} get pods -o jsonpath='{.items[0].metadata.name}')
         # Expect first call to fail in wrong channel
         kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
+          'bashbot send-message --channel '${TESTING_CHANNEL}' --msg "Expect protected test fails, and retry in private channel..."'
+        kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
           'bashbot send-message --channel '${TESTING_CHANNEL}' --msg "!bashbot regex env | grep BASHBOT_CONFIG_FILEPATH | cut -d= -f2"'
         # One cannot interpolate existing environment variables, but instead grep them from the env command
         kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
