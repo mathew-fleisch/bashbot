@@ -35,9 +35,9 @@ main() {
       found_pod=0
       for j in {3..1}; do
         bashbot_pod=$(kubectl -n ${ns} get pods -o jsonpath='{.items[0].metadata.name}')
-        # Send `!bashbot k-get-pods` via bashbot binary within bashbot pod
+        # Send `!bashbot k-get-pod` via bashbot binary within bashbot pod
         kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
-          'bashbot send-message --channel '${TESTING_CHANNEL}' --msg "!bashbot k-get-pods"'
+          'bashbot send-message --channel '${TESTING_CHANNEL}' --msg "!bashbot k-get-pod"'
         sleep 5
         last_log_line=$(kubectl -n ${ns} logs $bashbot_pod | grep $bashbot_pod)
         # Tail the last line of the bashbot pod's log looking

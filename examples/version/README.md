@@ -8,22 +8,22 @@ In this example, a bash script is executed, attempting three methods of returnin
 
 This command is triggered by sending `bashbot version` in a slack channel where Bashbot is also a member. The script is expected to exist before execution at the relative path `./examples/version/get-version.sh` and requires no additional input to execute. It takes no arguments/parameters and returns `stdout` as a slack message, in the channel it was executed from.
 
-```json
-{
-  "name": "Get Bashbot Version",
-  "description": "Displays the currently running version of Bashbot",
-  "envvars": [],
-  "dependencies": [],
-  "help": "bashbot version",
-  "trigger": "version",
-  "location": "./examples/version",
-  "command": ["./get-version.sh"],
-  "parameters": [],
-  "log": false,
-  "ephemeral": false,
-  "response": "code",
-  "permissions": ["all"]
-}
+```yaml
+name: Get Bashbot Version
+description: Displays the currently running version of Bashbot
+envvars: []
+dependencies: []
+help: "!bashbot version"
+trigger: version
+location: /bashbot/vendor/bashbot/examples/version
+command:
+- "./get-version.sh"
+parameters: []
+log: true
+ephemeral: false
+response: code
+permissions:
+- all
 ```
 
 ## Bashbot script
