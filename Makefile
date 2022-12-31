@@ -61,7 +61,7 @@ docker-build: ## build and tag bashbot:local
 docker-run-local: ## run an existing build of bashbot:local
 	@docker run -it --rm \
 		-v $(PWD)/config.yaml:/bashbot/config.yaml \
-		-e 	="/bashbot/config.yaml" \
+		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
 		-v $(PWD)/.tool-versions:/bashbot/.tool-versions \
 		-e SLACK_BOT_TOKEN=$(SLACK_BOT_TOKEN) \
 		-e SLACK_APP_TOKEN=$(SLACK_APP_TOKEN) \
@@ -74,7 +74,6 @@ docker-run-local-bash: ## run an exsting build of bashbot:local but override the
 	@docker run -it --rm --entrypoint bash \
 		-v $(PWD)/config.yaml:/bashbot/config.yaml \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
-		-e BASHBOT_ENV_VARS_FILEPATH="/bashbot/.env" \
 		-v $(PWD)/.tool-versions:/bashbot/.tool-versions \
 		-e SLACK_BOT_TOKEN=$(SLACK_BOT_TOKEN) \
 		-e SLACK_APP_TOKEN=$(SLACK_APP_TOKEN) \
