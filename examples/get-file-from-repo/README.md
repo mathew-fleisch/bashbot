@@ -18,7 +18,7 @@ This command is triggered by sending `bashbot get-file-from-repo` in a slack cha
   "command": [
     "github_org=mathew-fleisch",
     "&& github_repo=bashbot",
-    "&& github_filename=sample-config.json",
+    "&& github_filename=sample-config.yaml",
     "&& github_branch=main",
     "&& output_filename=${BASHBOT_CONFIG_FILEPATH}"
   ],

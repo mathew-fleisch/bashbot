@@ -6,5 +6,4 @@
 .DS_Store
 Dockerfile
 vendor/*
-config.json
 config.yaml
