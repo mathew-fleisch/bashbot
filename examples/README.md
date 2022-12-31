@@ -1,81 +1,30 @@
-# Example Bashbot Commands
-
-This directory contains a few sample Bashbot commands that can be applied to a configuration json by executing a helper script or by copy/pasting the json directly. Each example (directory) also contains a read-me file describing usage information. The [add-example/add-command.sh](add-example/add-command.sh) script expects the environment variable `BASH_CONFIG_FILEPATH` to be set and takes one argument (filepath of the command to add to the configuration json). The [remove-example/remove-command.sh](remove-example/remove-command.sh) script also expects the environment variable `BASH_CONFIG_FILEPATH` to be set and takes one argument (the value of the parameter `trigger` within the specific command).
-
-```bash
-# From Bashbot source root
-export BASHBOT_CONFIG_FILEPATH=${PWD}/config.json
-
-./add-example/add-command.sh version/version.json
-# version added to /Users/user/bashbot/config.json
-
-./add-example/add-command.sh version/version.json
-# Trigger already exists: version
-
-./remove-example/remove-command.sh version
-# version removed from /Users/user/bashbot/config.json
-
-./remove-example/remove-command.sh version
-# Trigger not found to remove: version
-```
-
-## Examples
+# Examples
 
 1. Simple call/response
    - [Ping/Pong](ping)
-     - \+ `./add-example/add-command.sh ping/ping.json`
-     - \- `./remove-example/remove-command.sh ping`
 2. Run bash script
    - [Get Caller Information](info)
-     - \+ `./add-example/add-command.sh info/info.json`
-     - \- `./remove-example/remove-command.sh info`
    - [Get asdf Plugins](asdf)
-     - \+ `./add-example/add-command.sh asdf/asdf.json`
-     - \- `./remove-example/remove-command.sh asdf`
-   - [Get add-example Plugins](add-example)
-     - \+ `./add-example/add-command.sh add-example/add-example.json`
-     - \- `./remove-example/remove-command.sh add-example`
-   - [Get remove-example Plugins](remove-example)
-     - \+ `./add-example/add-command.sh remove-example/remove-example.json`
-     - \- `./remove-example/remove-command.sh remove-example`
    - [Get list-examples Plugins](list-examples)
-     - \+ `./add-example/add-command.sh list-examples/list-examples.json`
-     - \- `./remove-example/remove-command.sh list-examples`
 3. Run go-lang script
    - [Get Running Version](version)
-     - \+ `./add-example/add-command.sh version/version.json`
-     - \- `./remove-example/remove-command.sh version`
 4. Parse json via jq
    - [Show Help Dialog](help)
-     - \+ `./add-example/add-command.sh help/help.json`
-     - \- `./remove-example/remove-command.sh help`
    - [List Available Commands](list)
-     - \+ `./add-example/add-command.sh list/list.json`
-     - \- `./remove-example/remove-command.sh list`
    - [Describe Command](describe)
-     - \+ `./add-example/add-command.sh describe/describe.json`
-     - \- `./remove-example/remove-command.sh describe`
 5. Curl/wget
    - [Get Latest Bashbot Release](latest-release)
-     - \+ `./add-example/add-command.sh latest-release/latest-release.json`
-     - \- `./remove-example/remove-command.sh latest-release`
    - [Get File From Repository](get-file-from-repo)
-     - \+ `./add-example/add-command.sh get-file-from-repo/get-file-from-repo.json`
-     - \- `./remove-example/remove-command.sh get-file-from-repo`
    - [Trigger Github Action](trigger-github-action)
-     - \+ `./add-example/add-command.sh trigger-github-action/trigger-github-action.json`
-     - \- `./remove-example/remove-command.sh trigger-github-action`
    - [Get Air Quality Index By Zip](aqi)
-     - \+ `./add-example/add-command.sh aqi/aqi.json`
-     - \- `./remove-example/remove-command.sh aqi`
 6. [Send message from github action](#send-message-from-github-action)
 
 ---
 
-### config.json
+### config.yaml
 
-[sample-config.json](../sample-config.json)
-The config.json file is defined as an array of json objects keyed by 'tools' and 'dependencies.' The dependencies section defines any resources that need to be downloaded or cloned from a repository before execution of commands. The following is a simplified example of a config.json file:
+[sample-config.yaml](../sample-config.yaml)
+The config.yaml file is defined as an array of yaml objects keyed by 'tools' and 'dependencies.' The dependencies section defines any resources that need to be downloaded or cloned from a repository before execution of commands. The following is a simplified example of a config.yaml file:
 
 ```json
 {
@@ -284,8 +233,9 @@ jobs:
       -
         name: Send Slack Message With Bashbot Binary
         env:
-          BASHBOT_CONFIG_FILEPATH: ./config.json
-          SLACK_TOKEN: ${{ secrets.RELEASE_SLACK_TOKEN }}
+          BASHBOT_CONFIG_FILEPATH: ./config.yaml
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_APP_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
         run: |
           echo '{"admins":[{"trigger":"bashbotexample","appName":"Bashbot Example","userIds":[""],"privateChannelId":"","logChannelId":""}],"messages":[],"tools":[],"dependencies":[]}' > $BASHBOT_CONFIG_FILEPATH
           bashbot send-message \

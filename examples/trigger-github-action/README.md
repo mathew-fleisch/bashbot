@@ -6,7 +6,7 @@ In this example, a curl is executed via bash script and triggers a github action
 
 ## Bashbot configuration
 
-This command is triggered by sending `!bashbot trigger-github-action` in a slack channel where Bashbot is also a member. The script is expected to exist before execution at the relative path `./examples/trigger-github-action/trigger-github-action` and requires the following environment variables to be set: `BASHBOT_CONFIG_FILEPATH SLACK_TOKEN SLACK_CHANNEL SLACK_USERID REPO_OWNER REPO_NAME GITHUB_TOKEN GITHUB_RUN_ID`.
+This command is triggered by sending `!bashbot trigger-github-action` in a slack channel where Bashbot is also a member. The script is expected to exist before execution at the relative path `./examples/trigger-github-action/trigger-github-action` and requires the following environment variables to be set: `BASHBOT_CONFIG_FILEPATH SLACK_BOT)TOKEN SLACK_CHANNEL SLACK_USERID REPO_OWNER REPO_NAME GITHUB_TOKEN GITHUB_RUN_ID`.
 
 ```yaml
 name: Trigger a Github Action
@@ -42,7 +42,7 @@ This script is used to trigger the github action.
 
 ```bash
 github_base="${github_base:-api.github.com}"
-expected_variables="BASHBOT_CONFIG_FILEPATH SLACK_TOKEN SLACK_CHANNEL SLACK_USERID REPO_OWNER REPO_NAME GITHUB_TOKEN"
+expected_variables="BASHBOT_CONFIG_FILEPATH SLACK_BOT_TOKEN SLACK_CHANNEL SLACK_USERID REPO_OWNER REPO_NAME GITHUB_TOKEN"
 for expect in $expected_variables; do
   if [[ -z "${!expect}" ]]; then
     echo "Missing environment variable $expect"
@@ -66,7 +66,7 @@ This script uses curl to get the latest version and job id from the github api, 
 
 ```bash
 github_base="${github_base:-api.github.com}"
-expected_variables="BASHBOT_CONFIG_FILEPATH SLACK_TOKEN SLACK_CHANNEL SLACK_USERID REPO_OWNER REPO_NAME GITHUB_TOKEN GITHUB_RUN_ID"
+expected_variables="BASHBOT_CONFIG_FILEPATH SLACK_BOT_TOKEN SLACK_CHANNEL SLACK_USERID REPO_OWNER REPO_NAME GITHUB_TOKEN GITHUB_RUN_ID"
 for expect in $expected_variables; do
   if [[ -z "${!expect}" ]]; then
     echo "Missing environment variable $expect"

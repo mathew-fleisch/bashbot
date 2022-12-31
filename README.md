@@ -201,30 +201,27 @@ bashbot --help
 # Bashbot is a slack bot, written in golang, that can be configured
 # to run bash commands or scripts based on a configuration file.
 
-# Usage: ./bashbot [flags]
+# Usage:
+#   bashbot [command]
 
-#   -config-file string
-#         [REQUIRED] Filepath to config.yaml file (or environment variable BASHBOT_CONFIG_FILEPATH set)
-#   -help
-#         Help/usage information
-#   -install-vendor-dependencies
-#         Cycle through dependencies array in config file to install extra dependencies
-#   -log-format string
-#         Display logs as yaml or text (default "text")
-#   -log-level string
-#         Log elevel to display (info,debug,warn,error) (default "info")
-#   -send-message-channel string
-#         Send stand-alone slack message to this channel (requires -send-message-text)
-#   -send-message-ephemeral
-#         Send stand-alone ephemeral slack message to a specific user (requires -send-message-channel -send-message-text and -send-message-user)
-#   -send-message-text string
-#         Send stand-alone slack message (requires -send-message-channel)
-#   -send-message-user string
-#         Send stand-alone ephemeral slack message to this slack user (requires -send-message-channel -send-message-text and -send-message-ephemeral)
-#   -slack-token string
-#         [REQUIRED] Slack token used to authenticate with api (or environment variable SLACK_TOKEN set)
-#   -version
-#         Get current version
+# Available Commands:
+#   completion           Generate the autocompletion script for the specified shell
+#   help                 Help about any command
+#   install-dependencies Cycle through dependencies array in config file to install extra dependencies
+#   run                  Run bashbot
+#   send-message         Send stand-alone slack message
+#   version              Get current version
+
+# Flags:
+#       --config-file string       [REQUIRED] Filepath to config.yaml file (or environment variable BASHBOT_CONFIG_FILEPATH set)
+#   -h, --help                     help for bashbot
+#       --log-format string        Display logs as json or text (default "text")
+#       --log-level string         Log elevel to display (info,debug,warn,error) (default "info")
+#       --slack-app-token string   [REQUIRED] Slack app token used to authenticate with api (or environment variable SLACK_APP_TOKEN set)
+#       --slack-bot-token string   [REQUIRED] Slack bot token used to authenticate with api (or environment variable SLACK_BOT_TOKEN set)
+#   -t, --toggle                   Help message for toggle
+
+# Use "bashbot [command] --help" for more information about a command.
 
 
 # If the log-level doesn't exist, set it to 'info'
