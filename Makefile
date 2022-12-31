@@ -149,7 +149,7 @@ helm-install: ## install bashbot via helm into an existing KinD cluster to /usr/
 		--debug \
 		--wait
 	sleep 3
-	timeout 30s make pod-logs 2>/dev/null || true
+	timeout 30s make pod-logs 2>/dev/null || sleep 30
 
 .PHONY: test-kind-cleanup
 test-kind-cleanup: ## delete any KinD cluster set up for bashbot

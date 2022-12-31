@@ -283,8 +283,8 @@ tools:
     description: Return a list of the dependencies installed from asdf
     envvars: []
     dependencies: []
-    help: "!bashbot asdf-list"
-    trigger: asdf-list
+    help: "!bashbot asdf"
+    trigger: asdf
     location: /bashbot/
     command:
       - ". /usr/asdf/asdf.sh && asdf list"

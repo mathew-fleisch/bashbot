@@ -35,7 +35,7 @@ main() {
       found_res=0
       for j in {3..1}; do
         bashbot_pod=$(kubectl -n ${ns} get pods -o jsonpath='{.items[0].metadata.name}')
-        # Send `!bashbot info` via bashbot binary within bashbot pod
+        # Send `!bashbot aqi [zip-code]` via bashbot binary within bashbot pod
         kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
           'bashbot send-message --channel '${TESTING_CHANNEL}' --msg "!bashbot aqi 90210"'
         sleep 5

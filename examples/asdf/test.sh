@@ -44,12 +44,35 @@ main() {
 
           kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
             'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: asdf installed successfully!"'
-          exit 0
+          break
         fi
         echo "Bashbot dependency test failed (asdf). $j more attempts..."
         sleep 5
       done
-      [ $found_asdf -eq 1 ] && exit 0 || exit 1
+
+      found_res=0
+      for j in {3..1}; do
+        bashbot_pod=$(kubectl -n ${ns} get pods -o jsonpath='{.items[0].metadata.name}')
+        # Send `!bashbot asdf` via bashbot binary within bashbot pod
+        kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
+          'bashbot send-message --channel '${TESTING_CHANNEL}' --msg "!bashbot asdf"'
+        sleep 5
+        last_log_line=$(kubectl -n ${ns} logs --tail 100 $bashbot_pod)
+        # Tail the last line of the bashbot pod's log looking
+        # for the string 'kubectl' to prove the info script
+        # is showing the correct value for whoami
+        if [[ $last_log_line =~ "kubectl" ]]; then
+          echo "asdf test successful!"
+          found_res=1
+
+          kubectl --namespace ${ns} exec $bashbot_pod -- bash -c \
+            'bashbot send-message --channel '${TESTING_CHANNEL}' --msg ":large_green_circle: asdf test successful!\nSaw \"kubectl\" installed via asdf in bashbot logs"'
+          break
+        fi
+        echo "Bashbot aqi test failed. $j more attempts..."
+        sleep 5
+      done
+      [ $found_asdf -eq 1 ] && [ $found_res -eq 1 ] && exit 0 || exit 1
     fi
 
     # Since the deployment was not ready, try again $i more times

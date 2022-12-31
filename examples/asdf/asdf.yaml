@@ -1,0 +1,15 @@
+name: List asdf plugins
+description: List the installed asdf plugins and their versions
+envvars: []
+dependencies: []
+help: "!bashbot asdf"
+trigger: asdf
+location: /bashbot/
+command:
+  - ". /usr/asdf/asdf.sh && asdf list"
+parameters: []
+log: true
+ephemeral: false
+response: code
+permissions:
+  - all
