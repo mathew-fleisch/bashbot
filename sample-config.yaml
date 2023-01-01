@@ -448,6 +448,27 @@ tools:
     response: text
     permissions:
       - GPFMM5MD2
+  - name: Trigger a Github Action Bashbot Gate
+    description: Triggers an example Github Action job, gated by bashbot, triggered by repository dispatch
+    envvars:
+      - GIT_TOKEN
+    dependencies: []
+    help: "!bashbot trigger-github-action-gate"
+    trigger: trigger-github-action-gate
+    location: /bashbot/vendor/bashbot/examples/trigger-github-action
+    command:
+      - "export REPO_OWNER=mathew-fleisch"
+      - "&& export REPO_NAME=bashbot"
+      - "&& export SLACK_CHANNEL=${TRIGGERED_CHANNEL_ID}"
+      - "&& export SLACK_USERID=${TRIGGERED_USER_ID}"
+      - "&& echo \"Running this example github action, gated by bashbot: https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/.github/workflows/example-bashbot-github-action-gate.yaml\""
+      - "&& ./trigger-gate.sh"
+    parameters: []
+    log: true
+    ephemeral: false
+    response: text
+    permissions:
+      - GPFMM5MD2
 dependencies:
   - name: Install Dependencies with asdf
     install:
