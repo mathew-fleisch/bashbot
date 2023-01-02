@@ -253,7 +253,8 @@ git push origin v2.0.0
 ```
 
 On [pull requests to the main branch](.github/workflows/pr.yaml), four jobs are run on every commit:
-  - linting and unit tests are run under the `unit_tests` job
-  - a container is built and scanned by the [anchore](https://anchore.com/) container scanning tool
-  - the go-lang code is analyzed by [codeql](https://codeql.github.com/) SAST tool
-  - a container is built and deployed in a kind cluster, to run automated tests, to maintain/verify basic functionality (see [Makefile](Makefile) target `make help` for more information)
+
+- linting and unit tests are run under the `unit_tests` job
+- a container is built and scanned by the [anchore](https://anchore.com/) container scanning tool
+- the golang code is analyzed by [codeql](https://codeql.github.com/) SAST tool
+- a container is built and deployed in a kind cluster, to run automated tests, to maintain/verify basic functionality (see [Makefile](Makefile) target `make help` for more information)
