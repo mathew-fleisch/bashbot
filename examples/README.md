@@ -1,250 +1,153 @@
 # Examples
 
-1. Simple call/response
-   - [Ping/Pong](ping)
-2. Run bash script
-   - [Get Caller Information](info)
-   - [Get asdf Plugins](asdf)
-   - [Get list-examples Plugins](list-examples)
-3. Run go-lang script
-   - [Get Running Version](version)
-4. Parse json via jq
-   - [Show Help Dialog](help)
-   - [List Available Commands](list)
-   - [Describe Command](describe)
-5. Curl/wget
-   - [Get Latest Bashbot Release](latest-release)
-   - [Get File From Repository](get-file-from-repo)
-   - [Trigger Github Action](trigger-github-action)
-   - [Get Air Quality Index By Zip](aqi)
-6. [Send message from github action](#send-message-from-github-action)
-
----
-
-### config.yaml
-
 [sample-config.yaml](../sample-config.yaml)
-The config.yaml file is defined as an array of yaml objects keyed by 'tools' and 'dependencies.' The dependencies section defines any resources that need to be downloaded or cloned from a repository before execution of commands. The following is a simplified example of a config.yaml file:
-
-```json
-{
-  "admins": [{
-    "trigger": "bashbot",
-    "appName": "BashBot",
-    "userIds": ["SLACK-USER-ID"],
-    "privateChannelId": "SLACK-CHANNEL-ID",
-    "logChannelId": "SLACK-CHANNEL-ID"
-  }],
-  "messages": [{
-    "active": true,
-    "name": "welcome",
-    "text": "Witness the power of %s"
-  },{
-    "active": true,
-    "name": "processing_command",
-    "text": ":robot_face: Processing command..."
-  },{
-    "active": true,
-    "name": "processing_raw_command",
-    "text": ":smiling_imp: Processing raw command..."
-  },{
-    "active": true,
-    "name": "command_not_found",
-    "text": ":thinking_face: Command not found..."
-  },{
-    "active": true,
-    "name": "incorrect_parameters",
-    "text": ":face_with_monocle: Incorrect number of parameters"
-  },{
-    "active": true,
-    "name": "invalid_parameter",
-    "text": ":face_with_monocle: Invalid parameter value: %s"
-  },{
-    "active": true,
-    "name": "ephemeral",
-    "text": ":shushing_face: Message only shown to user who triggered it."
-  },{
-    "active": true,
-    "name": "unauthorized",
-    "text": ":skull_and_crossbones: You are not authorized to use this command in this channel.\nAllowed in: [%s]"
-  },{
-      "active": true,
-      "name": "missingenvvar",
-      "text": ":skull_and_crossbones: This command requires this environment variable to be set: [%s]"
-    },{
-      "active": true,
-      "name": "missingdependency",
-      "text": ":skull_and_crossbones: This command requires: [%s]"
-    }],
-  "tools": [{
-      "name": "List Commands",
-      "description": "List all of the possible commands stored in bashbot",
-      "envvars": ["BASHBOT_CONFIG_FILEPATH"],
-      "dependencies": ["jq"],
-      "help": "bashbot list-commands",
-      "trigger": "list-commands",
-      "location": "./",
-      "command": ["jq -r '.tools[] | .trigger' ${BASHBOT_CONFIG_FILEPATH}"],
-      "parameters": [],
-      "log": false,
-      "ephemeral": false,
-      "response": "code",
-      "permissions": ["all"]
-    }
-  ],
-  "dependencies": [
-    {
-      "name": "BashBot scripts Scripts",
-      "install": [
-        "rm -rf bashbot-scripts || true",
-        "git clone https://github.com/mathew-fleisch/bashbot-scripts.git"
-      ]
-    }
-  ]
-}
-```
-
-Each object in the tools array defines the parameters of a single command.
-
-```
-name, description and help provide human readable information about the specific command
-trigger:      unique alphanumeric word that represents the command
-location:     absolute or relative path to dependency directory (use "./" for no dependency)
-command:      bash command using ${parameter-name} to inject white-listed parameters or environment variables
-parameters:   array of parameter objects. (more detail below)
-log:          define whether the command should be logged in log channel
-ephemeral:    define if the response should be shown to all, or just the user that triggered the command
-response:     [code|text] code displays response in a code block, text displays response as raw text
-permissions:  array of strings. private channel ids to restrict command access to
-```
-
-#### parameters
-
-Parameters passed to Bashbot cannot be arbitrary/free-form text and must come from a hard-coded list of values, or a dynamic list of values as the return of another command. In this first example a hard-coded list of values is used to print the current `date` or `uptime` by passing to bashbot `bashbot time date` or `bashbot time uptime`
-
-```json
-{
-  "name": "Date or Uptime",
-  "description": "Show the current time or uptime",
-  "envvars": [],
-  "dependencies": [],
-  "help": "bashbot time",
-  "trigger": "time",
-  "location": "./",
-  "command": ["${command}"],
-  "parameters": [
-    {
-      "name": "command",
-      "allowed": ["date","uptime"]
-    }
-  ],
-  "log": false,
-  "ephemeral": false,
-  "response": "code",
-  "permissions": ["all"]
-}
-```
-
-In this next example, the command is derived by the output of another command. The valid parameters in this case, are the "trigger" values at `.tools[].trigger` and are used to output the json object, through jq, at that array index. Running `bashbot describe describe` would therefore output itself.
-
-```json
-{
-  "name": "Describe Bashbot [command]",
-  "description": "Show the json object for a specific command",
-  "envvars": ["BASHBOT_CONFIG_FILEPATH"],
-  "dependencies": ["jq"],
-  "help": "bashbot describe [command]",
-  "trigger": "describe",
-  "location": "./",
-  "command": ["jq '.tools[] | select(.trigger==\"${command}\")' ${BASHBOT_CONFIG_FILEPATH}"],
-  "parameters": [
-    {
-      "name": "command",
-      "allowed": [],
-      "description": "a command to describe ('bashbot list')",
-      "source": ["jq -r '.tools[] | .trigger' ${BASHBOT_CONFIG_FILEPATH}"]
-    }
-  ],
-  "log": false,
-  "ephemeral": false,
-  "response": "code",
-  "permissions": ["all"]
-}
-```
-
----
-
-## Send message from github action
-
-Bashbot's binary can also be used to send a single message to a slack channel. This can be useful at the end of existing automation as a notification of success/failure. In this example, a [github-action](../.github/workflows/example-notify-slack.yaml) is triggered via curl. The [github-action itself](../.github/workflows/example-notify-slack.yaml) will [install bashbot via asdf](https://github.com/mathew-fleisch/asdf-bashbot/), then send the message from the curl's payload to a specific channel also defined in the payload.
-
-```bash
-#!/bin/bash
-# shellcheck disable=SC2086
-
-REPO_OWNER=mathew-fleisch
-REPO_NAME=bashbot
-SLACK_CHANNEL=GPFMM5MD2
-SLACK_MESSAGE="Custom Notification from Github Action"
-
-github_base="${github_base:-api.github.com}"
-expected_variables="SLACK_CHANNEL SLACK_MESSAGE REPO_OWNER REPO_NAME GITHUB_TOKEN"
-for expect in $expected_variables; do
-  if [[ -z "${!expect}" ]]; then
-    echo "Missing environment variable $expect"
-    echo "Expected: $expected_variables"
-    exit 0
-  fi
-done
-
-DATA='{"event_type":"trigger-slack-notify","client_payload": {"channel":"'${SLACK_CHANNEL}'", "text":"'${SLACK_MESSAGE}'"}}'
-DATA=$(echo "${DATA}" | jq -c .)
-curl \
-  -X POST \
-  -H "Accept: application/vnd.github.everest-preview+json" \
-  -H "Authorization: token ${GITHUB_TOKEN}" \
-  --data "${DATA}" \
-  https://${github_base}/repos/${REPO_OWNER}/${REPO_NAME}/dispatches
-
-```
-
-The above script will trigger the [github action](../.github/workflows/example-notify-slack.yaml) (also copied below). After installing bashbot via asdf, bashbot's binary can be executed using environment variables and passing values from the curl's payload. This method of installing executing Bashbot can be used in any github action pipeline.
+The config.yaml file is defined as an array of yaml objects keyed by 'tools' and 'dependencies.' The dependencies section defines any resources that need to be downloaded or cloned from a repository before execution of commands. Each command is configured by a single object. For instance, the most simple command (hello world) returns a simple message when triggered, in the [ping example](ping).
 
 ```yaml
-# Name:        example-notify-slack.yaml
-# Author:      Mathew Fleisch <mathew.fleisch@gmail.com>
-# Description: This action demonstrates how to trigger a Slack Notification from Bashbot.
-name: Example Bashbot Notify Slack
-on:
-  repository_dispatch:
-    types:
-      - trigger-slack-notify
-
-jobs:
-  build:
-    name: Example Bashbot Notify Slack
-    runs-on: ubuntu-latest
-    steps:
-      -
-        name: Install Bashbot via asdf
-        uses: asdf-vm/actions/install@v1
-        with:
-          tool_versions: bashbot 1.8.0
-      -
-        name: Send Slack Message With Bashbot Binary
-        env:
-          BASHBOT_CONFIG_FILEPATH: ./config.yaml
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          SLACK_APP_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
-        run: |
-          echo '{"admins":[{"trigger":"bashbotexample","appName":"Bashbot Example","userIds":[""],"privateChannelId":"","logChannelId":""}],"messages":[],"tools":[],"dependencies":[]}' > $BASHBOT_CONFIG_FILEPATH
-          bashbot send-message \
-            --channel ${{ github.event.client_payload.channel }} \
-            --msg "${{ github.event.client_payload.text }}"
+name: Ping/Pong
+description: Return pong on pings
+envvars: []
+dependencies: []
+help: "!bashbot ping"
+trigger: ping
+location: /bashbot/
+command:
+  - echo "pong"
+parameters: []
+log: true
+ephemeral: false
+response: text
+permissions:
+  - all
 ```
 
-Executing this action has logs/output that looks similar to this
+<img src="https://i.imgur.com/uLrCYTf.gif">
 
-<img src="https://i.imgur.com/blZLZmR.png" />
+## Parameters
 
-<img src="https://i.imgur.com/kkaClWJ.png" />
+Commands can take arguments, but require the values to either match a hard-coded list of values, value, from a sub-command, or a regular expression to be valid. Before each command is executed, a few environment variables are set, and can be leveraged in commands  `TRIGGERED_USER_NAME` `TRIGGERED_USER_ID` `TRIGGERED_CHANNEL_NAME` `TRIGGERED_CHANNEL_ID`
+
+- name(string): title of command
+- description(string): information about command
+- envvars(array of strings): required environment variables to run command
+- dependencies(array of strings): required pre-installed tools to run command
+- help(string): message to users about how to execute
+- trigger(string): single word to execute command
+- location(string): absolute/relative path to set context
+- command(array of strings): command to pass to bash -c
+- parameters(array of objects):
+  - name(string): title of command argument
+  - allowed(array of strings): hard-coded list of allowed values
+  - description(string): information about command argument
+  - match(string): regular expression to match allowed values
+  - source(array of strings): bash command to build list of allowed values
+- log(boolean): whether to log command to log channel
+- ephemeral(boolean): send response to user as ephemeral message
+- response(text|code|file): send response in raw text, surrounded by markdown code tics, or as a text file
+- permissions(array of strings): list of channel ids to restrict command to (all for unrestricted access) 
+
+An example of a command that uses a hard-coded parameter to either run the `date` command or the `uptime` command on the host.
+
+```yaml
+name: Date or Uptime
+description: Show the current time or uptime
+envvars: []
+dependencies: []
+help: "!bashbot time"
+trigger: time
+location: /bashbot/
+command:
+  - "echo \"Date/time: $(${command})\""
+parameters:
+  - name: command
+    allowed:
+      - date
+      - uptime
+log: true
+ephemeral: false
+response: code
+permissions:
+  - all
+```
+
+An example of a command that uses `source` to build a list of allowed values is the [describe example](describe). Bashbot will first use the command line yaml parser yq to build a list of `trigger` values `yq e '.tools[] | .trigger' ${BASHBOT_CONFIG_FILEPATH}`. A user would then only be able to "describe" each command that has a "trigger" value (i.e. `!bashbot describe describe` would show the following yaml)
+
+```yaml
+name: Describe Bashbot [command]
+description: Show the yaml object for a specific command
+envvars:
+  - BASHBOT_CONFIG_FILEPATH
+dependencies:
+  - yq
+help: "!bashbot describe [command]"
+trigger: describe
+location: /bashbot/
+command:
+  - yq e '.tools[] | select(.trigger=="${command}")' ${BASHBOT_CONFIG_FILEPATH}
+parameters:
+  - name: command
+    allowed: []
+    description: a command to describe ('bashbot list')
+    source:
+      - yq e '.tools[] | .trigger' ${BASHBOT_CONFIG_FILEPATH}
+log: true
+ephemeral: false
+response: code
+permissions:
+  - all
+```
+
+An example of a command that has regular expression match parameter, is the [aqi example](aqi). This command takes one argument, a zip code and a regular expression is used to validate it. The [aqi script](aqi/aqi.sh) is used to curl the [Air Now API](https://docs.airnowapi.org/), and form a custom response with emojis.
+
+```yaml
+name: Air Quality Index
+description: Get air quality index by zip code
+envvars:
+  - AIRQUALITY_API_KEY
+dependencies:
+  - curl
+  - jq
+help: "!bashbot aqi [zip-code]"
+trigger: aqi
+location: /bashbot/vendor/bashbot/examples/aqi
+command:
+  - "./aqi.sh ${zip}"
+parameters:
+  - name: zip
+    allowed: []
+    description: any zip code
+    match: (^\d{5}$)|(^\d{9}$)|(^\d{5}-\d{4}$)
+log: true
+ephemeral: false
+response: text
+permissions:
+  - all
+```
+
+---
+
+1. Simple call/response
+    - [Ping/Pong](ping)
+2. Run bash script
+    - [Get Caller Information](info)
+    - [Get asdf Plugins](asdf)
+    - [Get list-examples Plugins](list-examples)
+3. Run golang script
+    - [Get Running Version](version)
+4. Parse json via jq/yq
+    - [Show Help Dialog](help)
+    - [List Available Commands](list)
+    - [Describe Command](describe)
+5. Curl/wget
+    - [Get Latest Bashbot Release](latest-release)
+    - [Get File From Repository](get-file-from-repo)
+    - [Get Air Quality Index By Zip](aqi)
+6. In Github Actions (or other CI)
+    - [Trigger Github Action](trigger-github-action)
+    - [Trigger Gated Github Action](trigger-github-action)
+7. Kubernetes
+    - [kubectl cluster-info](kubernetes#kubectl-cluster-info)
+    - [kubectl get pod](kubernetes#kubectl-get-pod)
+    - [kubectl -n [namespace] delete pod [pod-name]](kubernetes#kubectl--n-namespace-delete-pod-pod-name)
+    - [kubectl -n [namespace] decribe pod [podname]](kubernetes#kubectl--n-namespace-decribe-pod-podname)
+    - [kubectl -n [namespace] logs -f [pod-name]](kubernetes#kubectl--n-namespace-logs--f-pod-name)

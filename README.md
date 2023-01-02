@@ -137,13 +137,13 @@ export arch=amd64
 test "$(uname -m)" == "aarch64" && export arch=arm64
 
 # Latest bashbot version/tag
-export latest=$(curl -s https://api.github.com/repos/mathew-fleisch/bashbot/releases/latest | grep tag_name | cut -d '"' -f 4)
+export latest_bashbot_version=$(curl -s https://api.github.com/repos/mathew-fleisch/bashbot/releases/latest | grep tag_name | cut -d '"' -f 4)
 
 # Remove any existing bashbot binaries
 rm -rf /usr/local/bin/bashbot || true
 
 # Get correct binary for host machine and place in user's path
-wget -qO /usr/local/bin/bashbot https://github.com/mathew-fleisch/bashbot/releases/download/${latest}/bashbot-${os}-${arch}
+wget -qO /usr/local/bin/bashbot https://github.com/mathew-fleisch/bashbot/releases/download/${latest_bashbot_version}/bashbot-${os}-${arch}
 
 # Make bashbot binary executable
 chmod +x /usr/local/bin/bashbot
@@ -203,25 +203,33 @@ bashbot run \
 
 ---
 
-- [Configuration Examples](examples)
-  1. Simple call/response
-  - [Ping/Pong](examples/ping)
-  2. Run bash script
-  - [Get Caller Information](examples/info)
-  - [Get asdf Plugins](examples/asdf)
-  - [Get list-examples Plugins](examples/list-examples)
-  3. Run golang script
-  - [Get Running Version](examples/version)
-  4. Parse json via jq/yq
-  - [Show Help Dialog](examples/help)
-  - [List Available Commands](examples/list)
-  - [Describe Command](examples/describe)
-  5. Curl/wget
-  - [Get Latest Bashbot Release](examples/latest-release)
-  - [Get File From Repository](examples/get-file-from-repo)
-  - [Trigger Github Actions](examples/trigger-github-action)
-  - [Get Air Quality Index By Zip](examples/aqi)
-  6. [Send message from github action](examples/#send-message-from-github-action)
+The [Examples](examples) directory of this repository, has many commands used in automated tests, and can illustrate how bashbot can be used to trigger automation, or as automation itself, by leveraging secrets from the host running bashbot. For instance, one command might use an api token to curl a third-party api, and return the response back to the slack user, once triggered ([aqi example](examples/aqi)). If deployed in a kubernetes cluster, with a service-account to access the kube-api, bashbot can allow slack users to execute (hopefully curated) kubectl/helm commands, for an SRE/Ops focused deployment (get/describe/delete pods/deployments/secrets etc).
+
+1. Simple call/response
+    - [Ping/Pong](examples/ping)
+2. Run bash script
+    - [Get Caller Information](examples/info)
+    - [Get asdf Plugins](examples/asdf)
+    - [Get list-examples Plugins](examples/list-examples)
+3. Run golang script
+    - [Get Running Version](examples/version)
+4. Parse json via jq/yq
+    - [Show Help Dialog](examples/help)
+    - [List Available Commands](examples/list)
+    - [Describe Command](examples/describe)
+5. Curl/wget
+    - [Get Latest Bashbot Release](examples/latest-release)
+    - [Get File From Repository](examples/get-file-from-repo)
+    - [Get Air Quality Index By Zip](examples/aqi)
+6. In Github Actions (or other CI)
+    - [Trigger Github Action](examples/trigger-github-action)
+    - [Trigger Gated Github Action](examples/trigger-github-action)
+7. Kubernetes
+    - [kubectl cluster-info](kubernetes#kubectl-cluster-info)
+    - [kubectl get pod](examples/kubernetes#kubectl-get-pod)
+    - [kubectl -n [namespace] delete pod [pod-name]](examples/kubernetes#kubectl--n-namespace-delete-pod-pod-name)
+    - [kubectl -n [namespace] decribe pod [podname]](examples/kubernetes#kubectl--n-namespace-decribe-pod-podname)
+    - [kubectl -n [namespace] logs -f [pod-name]](examples/kubernetes#kubectl--n-namespace-logs--f-pod-name)
 
 ***Steps To Prove It's Working***
 

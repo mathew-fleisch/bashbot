@@ -11,6 +11,8 @@ This command is triggered by sending `bashbot ping` in a slack channel where Bas
 ```yaml
 name: Ping/Pong
 description: Return pong on pings
+envvars: []
+dependencies: []
 help: "!bashbot ping"
 trigger: ping
 location: /bashbot/
