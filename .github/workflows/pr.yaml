@@ -165,5 +165,5 @@ jobs:
           kubectl --namespace bashbot describe pod $(kubectl --namespace bashbot get pods | grep bashbot | awk '{print $1}') || true
           echo "Logs:"
           kubectl --namespace bashbot logs $(kubectl --namespace bashbot get pods | grep bashbot | awk '{print $1}') || true
-          make test-kind-cleanup || true
+          make kind-cleanup || true
 

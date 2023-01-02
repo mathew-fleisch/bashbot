@@ -108,7 +108,7 @@ docker-run-up: ## run the latest upstream build of bashbot
 
 
 .PHONY: test-kind
-test-kind: test-kind-setup helm-install test-run ## run KinD tests
+test-kind: kind-setup helm-install test-run ## run KinD tests
 
 test-run: ## run tests designed for bashbot running in kubernetes
 	@echo "Testing: $(NAMESPACE) $(BOTNAME)"
@@ -121,22 +121,19 @@ test-run: ## run tests designed for bashbot running in kubernetes
 	./examples/kubernetes/test.sh $(NAMESPACE) $(BOTNAME)
 	./charts/bashbot/test-complete.sh $(NAMESPACE) $(BOTNAME)
 
-.PHONY: test-kind-setup
-test-kind-setup: docker-build ## setup a KinD cluster to test bashbot's helm chart
+.PHONY: kind-setup
+kind-setup: docker-build ## setup a KinD cluster to test bashbot's helm chart
 	kind create cluster || true
 	kind load docker-image bashbot:local
 
-.PHONY: test-kind-cleanup
-test-kind-cleanup: ## delete any KinD cluster set up for bashbot
-	helm --namespace $(NAMESPACE) delete $(BOTNAME) || true
-	kubectl delete clusterrolebinding $(BOTNAME) || true
+.PHONY: kind-cleanup
+kind-cleanup: ## delete any KinD cluster set up for bashbot
 	kind delete cluster
 
 .PHONY: helm-install
-helm-install: ## install bashbot via helm into an existing KinD cluster to /usr/local/bin/bashbot
+helm-install: helm-uninstall ## install bashbot via helm into an existing KinD cluster to /usr/local/bin/bashbot
 	kubectl create namespace $(NAMESPACE) || true
 	@echo "Creating kubernetes secrets from charts/bashbot/.env"
-	@kubectl --namespace $(NAMESPACE) delete secret $(BOTNAME)-env --ignore-not-found=true
 	@echo "kubectl --namespace $(NAMESPACE) get secret $(BOTNAME)-env"
 	@kubectl --namespace $(NAMESPACE) create secret generic $(BOTNAME)-env \
 		$(shell cat charts/bashbot/.env | sed -e 's/export\ /--from-literal=/g' | tr '\n' ' ');
@@ -154,6 +151,13 @@ helm-install: ## install bashbot via helm into an existing KinD cluster to /usr/
 		--wait
 	sleep 3
 	timeout 30s make pod-logs 2>/dev/null || sleep 30
+
+.PHONY: helm-uninstall
+helm-uninstall: ## uninstall bashbot via helm/kubectl from an existing cluster
+	helm uninstall $(BOTNAME) --namespace $(NAMESPACE) 2>/dev/null || true
+	kubectl --namespace $(NAMESPACE) delete secret $(BOTNAME)-env --ignore-not-found=true
+	kubectl delete clusterrolebinding $(BOTNAME) --ignore-not-found=true
+	kubectl delete namespace $(NAMESPACE) --ignore-not-found=true
 
 .PHONY: pod-get
 pod-get: ## with an existing pod bashbot pod running, use kubectl to get the pod name
