@@ -34,8 +34,8 @@ go-setup: ## install go-dependencies
 	go install -v ./...
 
 
-.PHONY: go-build-cross-compile
-go-build-cross-compile: go-clean go-setup ## build go-binaries for linux/darwin amd64/arm64
+.PHONY: go-cross-compile
+go-cross-compile: go-clean go-setup ## build go-binaries for linux/darwin amd64/arm64
 	GOOS=linux   GOARCH=amd64 $(GO_BUILD) -o $(BINARY)-linux-amd64  $(SRC_LOCATION)
 	GOOS=linux   GOARCH=arm64 $(GO_BUILD) -o $(BINARY)-linux-arm64  $(SRC_LOCATION)
 	GOOS=darwin  GOARCH=amd64 $(GO_BUILD) -o $(BINARY)-darwin-amd64 $(SRC_LOCATION)
@@ -57,8 +57,8 @@ go-version: ## run the bashbot source code with the version argument
 docker-build: ## build and tag bashbot:local
 	docker build -t bashbot:local .
 
-.PHONY: docker-run-local
-docker-run-local: ## run an existing build of bashbot:local
+.PHONY: docker-run
+docker-run: ## run an existing build of bashbot:local
 	@docker run -it --rm \
 		-v $(PWD)/config.yaml:/bashbot/config.yaml \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
@@ -69,8 +69,8 @@ docker-run-local: ## run an existing build of bashbot:local
 		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
 		bashbot:local
 
-.PHONY: docker-run-local-bash
-docker-run-local-bash: ## run an exsting build of bashbot:local but override the entrypoint with /bin/bash
+.PHONY: docker-run-bash
+docker-run-bash: ## run an exsting build of bashbot:local but override the entrypoint with /bin/bash
 	@docker run -it --rm --entrypoint bash \
 		-v $(PWD)/config.yaml:/bashbot/config.yaml \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
@@ -81,8 +81,8 @@ docker-run-local-bash: ## run an exsting build of bashbot:local but override the
 		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
 		bashbot:local
 
-.PHONY: docker-run-upstream-bash
-docker-run-upstream-bash: ## run the latest upstream build of bashbot but override the entrypoint with /bin/bash
+.PHONY: docker-run-up-bash
+docker-run-up-bash: ## run the latest upstream build of bashbot but override the entrypoint with /bin/bash
 	@docker run -it --rm --entrypoint bash \
 		-v $(PWD)/config.yaml:/bashbot/config.yaml \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
@@ -92,8 +92,8 @@ docker-run-upstream-bash: ## run the latest upstream build of bashbot but overri
 		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
 		mathewfleisch/bashbot:$(LATEST_VERSION)
 
-.PHONY: docker-run-upstream
-docker-run-upstream: ## run the latest upstream build of bashbot
+.PHONY: docker-run-up
+docker-run-up: ## run the latest upstream build of bashbot
 	@docker run -it --rm \
 		-v $(PWD)/config.yaml:/bashbot/config.yaml \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
@@ -104,7 +104,7 @@ docker-run-upstream: ## run the latest upstream build of bashbot
 		mathewfleisch/bashbot:$(LATEST_VERSION)
 
 
-##@ Helm/K8s/KinD stuff
+##@ Kubernetes stuff
 
 
 .PHONY: test-kind
@@ -121,11 +121,16 @@ test-run: ## run tests designed for bashbot running in kubernetes
 	./examples/kubernetes/test.sh $(NAMESPACE) $(BOTNAME)
 	./charts/bashbot/test-complete.sh $(NAMESPACE) $(BOTNAME)
 
-
 .PHONY: test-kind-setup
 test-kind-setup: docker-build ## setup a KinD cluster to test bashbot's helm chart
 	kind create cluster || true
 	kind load docker-image bashbot:local
+
+.PHONY: test-kind-cleanup
+test-kind-cleanup: ## delete any KinD cluster set up for bashbot
+	helm --namespace $(NAMESPACE) delete $(BOTNAME) || true
+	kubectl delete clusterrolebinding $(BOTNAME) || true
+	kind delete cluster
 
 .PHONY: helm-install
 helm-install: ## install bashbot via helm into an existing KinD cluster to /usr/local/bin/bashbot
@@ -149,12 +154,6 @@ helm-install: ## install bashbot via helm into an existing KinD cluster to /usr/
 		--wait
 	sleep 3
 	timeout 30s make pod-logs 2>/dev/null || sleep 30
-
-.PHONY: test-kind-cleanup
-test-kind-cleanup: ## delete any KinD cluster set up for bashbot
-	helm --namespace $(NAMESPACE) delete $(BOTNAME) || true
-	kubectl delete clusterrolebinding $(BOTNAME) || true
-	kind delete cluster
 
 .PHONY: pod-get
 pod-get: ## with an existing pod bashbot pod running, use kubectl to get the pod name
@@ -226,7 +225,7 @@ help: ## this
 	@echo "|  makefile targets                                             |"
 	@echo "+---------------------------------------------------------------+"
 	@echo ""
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 .PHONY: install-latest
 install-latest: ## install the latest version of the bashbot binary to /usr/local/bin/bashbot with wget
@@ -235,8 +234,8 @@ install-latest: ## install the latest version of the bashbot binary to /usr/loca
 	bashbot version
 	@echo "Run 'bashbot --help' for more information"
 
-.PHONY: update-asdf-dependencies
-update-asdf-dependencies: ## trigger github action to update asdf dependencies listed in .tool-versions (requires GIT_TOKEN)
+.PHONY: update-asdf-deps
+update-asdf-deps: ## trigger github action to update asdf dependencies listed in .tool-versions (requires GIT_TOKEN)
 	@curl -s -H "Accept: application/vnd.github.everest-preview+json" \
 	    -H "Authorization: token $(GIT_TOKEN)" \
 	    --request POST \

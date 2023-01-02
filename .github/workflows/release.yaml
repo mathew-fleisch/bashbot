@@ -30,7 +30,7 @@ jobs:
         run: |
           asdf global golang 1.19.4
           make go-setup
-          make go-build-cross-compile
+          make go-cross-compile
           echo "Go-Binaries created: $(ls bin -alF)"
 
       -
