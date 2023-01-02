@@ -1,7 +1,6 @@
 # Bashbot
 
-[![Build binaries](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-release.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-release.yaml)
-[![Build containers](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml)
+[![Release](https://github.com/mathew-fleisch/bashbot/actions/workflows/release.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/release.yaml)
 [Docker Hub](https://hub.docker.com/r/mathewfleisch/bashbot/tags?page=1&ordering=last_updated)
 
 BashBot is a slack bot written in golang for infrastructure/devops teams. A socket connection to slack provides bashbot with a stream of text from each channel it is invited to, and uses regular expressions to determine when to trigger bash commands. A [configuration file](sample-config.yaml) defines a list of commands that can be run in public and/or private channels. Restricting certain commands to private channels gives granular control, over which users can execute them. Bashbot allows infrastructure/devops teams to extend the tools and scripts they already use to manage their environments, into slack, that also acts as an execution log, and leverages slack's access controls.
@@ -61,9 +60,10 @@ Note: you can use the [asdf version manager](https://asdf-vm.com/) to install de
 action-validator 0.1.2
 dockle 0.4.3
 golangci-lint 1.44.2
-helm 3.8.1
-kind 0.12.0
-yq 4.22.1
+helm 3.10.3
+kubectl 1.26.0
+kubectx 0.9.4
+kustomize 4.5.7
 ```
 
 To set up a local [KinD cluster](https://kind.sigs.k8s.io/docs/user/quick-start/) run the following commands:
@@ -277,13 +277,16 @@ bashbot run \
 
 ## Automation (Build/Release)
 
-Included in this repository two github actions are executed on git tags. The [![build-release](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-release.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-release.yaml) action will build multiple go-binaries for each version (linux/amd64, linux/arm64, darwin/amd64, and darwin/arm64) and add them to a github release. The
-[![Build containers](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/build-container.yaml) action will use the docker plugin, buildx, to build and push a container for amd64/arm64 to docker hub.
+Included in this repository two github actions are executed on git tags. The [![release](https://github.com/mathew-fleisch/bashbot/actions/workflows/release.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/release.yaml) action will build multiple go-binaries for each version (linux/amd64, linux/arm64, darwin/amd64, and darwin/arm64) and add them to a github release and will use the docker plugin, buildx, to build and push a container for amd64/arm64 to docker hub and github container registry.
 
 ```bash
-# example semver bump: v1.8.0
-git tag v1.8.0
-git push origin v1.8.0
+# example semver bump: v2.0.0
+git tag v2.0.0
+git push origin v2.0.0
 ```
 
-There are also automated anchore container scans and codeql static analysis done on every push to the main branch.
+On [pull requests to the main branch](.github/workflows/pr.yaml), four jobs are run on every commit:
+  - linting and unit tests are run under the `unit_tests` job
+  - a container is built and scanned by the [anchore](https://anchore.com/) container scanning tool
+  - the go-lang code is analyzed by [codeql](https://codeql.github.com/) SAST tool
+  - a container is built and deployed in a kind cluster, to run automated tests, to maintain/verify basic functionality (see [Makefile](Makefile) target `make help` for more information)
