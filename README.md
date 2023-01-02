@@ -158,6 +158,8 @@ docker run --rm \
 
 ### Quick Start: Go Binary
 
+The go-binaries are saved as [release artifacts](https://github.com/mathew-fleisch/bashbot/releases) and can be downloaded with curl/wget or by the [asdf version manager](https://asdf-vm.com/) `asdf plugin add bashbot && asdf install bashbot latest && asdf global bashbot latest` (skip to `bashbot version` if installed with asdf in the following instructions)
+
 ```bash
 # Set a path to your local configuration file
 export BASH_CONFIG_FILEPATH=${PWD}/bashbot/config.yaml
@@ -230,34 +232,15 @@ LOG_LEVEL=${LOG_LEVEL:-info}
 LOG_FORMAT=${LOG_FORMAT:-text}
 
 # Run install-vendor-dependencies path
-bashbot --install-vendor-dependencies \
+bashbot install-dependencies \
   --log-level "$LOG_LEVEL" \
   --log-format "$LOG_FORMAT"
 
 # Run Bashbot binary passing the config file and the Slack token
-bashbot \
+bashbot run \
   --log-level "$LOG_LEVEL" \
   --log-format "$LOG_FORMAT"
 ```
-
-
----
-
-- [Bashbot Setup/Deployment Examples](https://github.com/mathew-fleisch/bashbot-example)
-  - Setup (one time)
-
-  - [Setup Step 0: Make the slack app and get the bot & app token](https://github.com/mathew-fleisch/bashbot-example#setup-step-0-make-the-slack-app-and-get-a-token)
-  - [Setup Step 1: Fork this repository](https://github.com/mathew-fleisch/bashbot-example#setup-step-1-fork-this-repository)
-  - [Setup Step 2: Create deploy key](https://github.com/mathew-fleisch/bashbot-example#setup-step-2-create-deploy-key) (handy for private "forks")
-  - [Setup Step 3: Upload public deploy key](https://github.com/mathew-fleisch/bashbot-example#setup-step-3-upload-public-deploy-key)
-  - [Setup Step 4: Save deploy key as github secret](https://github.com/mathew-fleisch/bashbot-example#setup-step-4-save-deploy-key-as-github-secret) (optional: used in github-actions)
-  - Running Bashbot Locally
-
-  - [***Go-Binary***](https://github.com/mathew-fleisch/bashbot-example#run-bashbot-locally-as-go-binary)
-  - [***Docker***](https://github.com/mathew-fleisch/bashbot-example#run-bashbot-locally-from-docker)
-  - Deploy Bashbot
-
-  - [Kubernetes](https://github.com/mathew-fleisch/bashbot-example#run-bashbot-in-kubernetes)
 
 ---
 
@@ -267,19 +250,17 @@ bashbot \
   2. Run bash script
   - [Get Caller Information](examples/info)
   - [Get asdf Plugins](examples/asdf)
-  - [Get add-example Plugins](examples/add-example)
-  - [Get remove-example Plugins](examples/remove-example)
   - [Get list-examples Plugins](examples/list-examples)
   3. Run golang script
   - [Get Running Version](examples/version)
-  4. Parse json via jq
+  4. Parse json via jq/yq
   - [Show Help Dialog](examples/help)
   - [List Available Commands](examples/list)
   - [Describe Command](examples/describe)
   5. Curl/wget
   - [Get Latest Bashbot Release](examples/latest-release)
   - [Get File From Repository](examples/get-file-from-repo)
-  - [Trigger Github Action](examples/trigger-github-action)
+  - [Trigger Github Actions](examples/trigger-github-action)
   - [Get Air Quality Index By Zip](examples/aqi)
   6. [Send message from github action](examples/#send-message-from-github-action)
 
@@ -289,7 +270,7 @@ bashbot \
 - Create a new public channel in your slack called `#bot-test`
 - Invite the BashBot into your channel by typing `@BashBot`
 - Slackbot should respond with the message: `OK! I’ve invited @BashBot to this channel.`
-- Now type `bashbot help`
+- Now type `!bashbot help`
 - If all is configured correctly, you should see BashBot respond immediately with `Processing command...` and momentarily post a full list of commands that are defined in config.yaml
 
 ---
