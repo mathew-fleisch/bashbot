@@ -73,49 +73,8 @@ To set up a local [KinD cluster](https://kind.sigs.k8s.io/docs/user/quick-start/
 cp sample-env-file charts/bashbot/.env
 cp sample-config.yaml charts/bashbot/config.yaml
 cp .tool-versions charts/bashbot/.tool-versions
-make test-kind
-# docker build -t bashbot:local .
-# [+] Building 29.8s (17/17) FINISHED  
-# ...
-#  => => writing image sha256:9d5d360ad6de055ae2f5f9ef859c86b10b8c3613ce078d354f255e3efa8ec000  0.0s
-#  => => naming to docker.io/library/bashbot:local  0.0s
-# kind create cluster
-# Creating cluster "kind" ...
-#  ✓ Ensuring node image (kindest/node:v1.21.1) 🖼 
-#  ✓ Preparing nodes 📦  
-#  ✓ Writing configuration 📜 
-#  ✓ Starting control-plane 🕹️ 
-#  ✓ Installing CNI 🔌 
-#  ✓ Installing StorageClass 💾 
-# Set kubectl context to "kind-kind"
-# You can now use your cluster with:
-# kubectl cluster-info --context kind-kind
-# Have a question, bug, or feature request? Let us know! https://kind.sigs.k8s.io/#community 🙂
-# kind load docker-image bashbot:local
-# Image: "bashbot:local" with ID "sha256:9d5d360ad6de055ae2f5f9ef859c86b10b8c3613ce078d354f255e3efa8ec000" not yet present on node "kind-control-plane", loading...
-# helm install bashbot charts/bashbot \
-#  --namespace bashbot \
-#  --create-namespace \
-#  --set image.repository=bashbot \
-#  --set image.tag=local
-# NAME: bashbot
-# LAST DEPLOYED: Fri Feb 25 13:07:13 2022
-# NAMESPACE: bashbot
-# STATUS: deployed
-# REVISION: 1
-# TEST SUITE: None
-# Waiting for bashbot to come up...
-# sleep 1
-# ./charts/bashbot/test-deployment.sh
-# Deployment not found or not ready. 20 more attempts...
-# Deployment not found or not ready. 19 more attempts...
-# Deployment not found or not ready. 18 more attempts...
-# Deployment not found or not ready. 17 more attempts...
-# Deployment not found or not ready. 16 more attempts...
-# Bashbot deployment confirmed!
-# NAME  READY  UP-TO-DATE  AVAILABLE  AGE
-# bashbot  1/1  1  1  17s
-# Helm test complete!
+make kind-setup
+make helm-install
 
 # At this point you should have a KinD cluster running with a bashbot deployment inside
 kubectl cluster-info
