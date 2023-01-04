@@ -35,7 +35,7 @@ jobs:
         run: |
           cat <<EOF > $BASHBOT_CONFIG_FILEPATH
           admins:
-            - trigger: !example-gate
+            - trigger: "!example-gate"
               appName: Bashbot Example Gate
               userIds:
                 - "UP3BBQX34"
