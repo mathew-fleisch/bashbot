@@ -1,0 +1,17 @@
+name: List Available Bashbot Commands
+description: List all of the possible commands stored in bashbot
+envvars:
+  - BASHBOT_CONFIG_FILEPATH
+dependencies:
+  - yq
+help: "!bashbot list"
+trigger: list
+location: /bashbot/
+command:
+  - yq e '.tools[] | .trigger' ${BASHBOT_CONFIG_FILEPATH}
+parameters: []
+log: true
+ephemeral: false
+response: code
+permissions:
+  - all

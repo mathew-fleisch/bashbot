@@ -1,0 +1,22 @@
+name: BashBot Help
+description: Show this message
+envvars:
+  - BASHBOT_CONFIG_FILEPATH
+dependencies:
+  - yq
+help: "!bashbot help"
+trigger: help
+location: /bashbot/
+command:
+  - echo "BashBot is a tool for infrastructure/devops teams to automate tasks triggered by slash-command-like declarative configuration" &&
+  - echo '```' &&
+  - "yq e '.tools[] | {.help: .description}' \"${BASHBOT_CONFIG_FILEPATH}\""
+  - "| sed -e 's/\\\"//g'"
+  - "| sed -e 's/:/ -/g' &&"
+  - echo '```'
+parameters: []
+log: true
+ephemeral: false
+response: text
+permissions:
+  - all

@@ -1,0 +1,9 @@
+#Ignoring git and cache folders
+.git
+.git*
+.cache
+**.env*
+.DS_Store
+Dockerfile
+vendor/*
+config.yaml

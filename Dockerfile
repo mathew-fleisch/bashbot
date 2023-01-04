@@ -1,36 +1,32 @@
-FROM alpine:latest
-LABEL maintainer="Mathew Fleisch <mathew.fleisch@gmail.com>"
-ENV BASHBOT_CONFIG_FILEPATH=/bashbot/config.json
-ENV BASHBOT_ENV_VARS_FILEPATH ""
-ENV SLACK_TOKEN ""
-ENV LOG_LEVEL "info"
-ENV LOG_FORMAT "text"
-ENV ASDF_DATA_DIR /root/.asdf
+FROM golang:1.19 as builder
 
-RUN apk add --update bash curl git make go jq python3 py3-pip openssh vim \
-    && rm /bin/sh && ln -s /bin/bash /bin/sh \
-    && ln -s /usr/bin/python3 /usr/local/bin/python
-
-# Install asdf dependencies
-WORKDIR /root
-COPY .tool-versions /root/.tool-versions
-COPY pin /root/pin
-RUN mkdir -p $ASDF_DATA_DIR \
-    && git clone --depth 1 https://github.com/asdf-vm/asdf.git $ASDF_DATA_DIR --branch v0.8.1 \
-    && . $ASDF_DATA_DIR/asdf.sh \
-    && echo -e '\n. $ASDF_DATA_DIR/asdf.sh' >> $HOME/.bashrc \
-    && echo -e '\n. $ASDF_DATA_DIR/asdf.sh' >> $HOME/.profile \
-    && while IFS= read -r line; do asdf plugin add $(echo "$line" | awk '{print $1}'); done < .tool-versions \
-    && asdf install
-
-RUN mkdir -p /bashbot
 WORKDIR /bashbot
 COPY . .
-RUN mkdir -p vendor
-RUN . ${ASDF_DATA_DIR}/asdf.sh \
-    && make build \
-    && mv bin/bashbot-* /usr/local/bin/bashbot \
-    && chmod +x /usr/local/bin/bashbot \
-    && rm -rf /tmp/*
+RUN make
 
-CMD /bin/sh -c ". ${ASDF_DATA_DIR}/asdf.sh && ./entrypoint.sh"
+FROM alpine:latest
+LABEL maintainer="Mathew Fleisch <mathew.fleisch@gmail.com>"
+ENV BASHBOT_CONFIG_FILEPATH=/bashbot/config.yaml
+ENV BASHBOT_ENV_VARS_FILEPATH ""
+ENV SLACK_BOT_TOKEN ""
+ENV SLACK_APP_TOKEN ""
+ENV LOG_LEVEL "info"
+ENV LOG_FORMAT "text"
+ARG NRUSER=bb
+
+RUN apk add --update --no-cache bash curl git make jq yq \
+    && rm -rf /var/cache/apk/* \
+    && addgroup -S ${NRUSER} \
+    && adduser -D -S ${NRUSER} -G ${NRUSER} \
+    && rm /bin/sh && ln -s /bin/bash /bin/sh
+
+WORKDIR /bashbot
+COPY --from=builder --chown=${NRUSER}:${NRUSER} /bashbot/bin/bashbot-* /usr/local/bin/bashbot
+COPY . .
+RUN chmod +x /usr/local/bin/bashbot \
+    && mkdir -p /usr/asdf \
+    && chown -R ${NRUSER}:${NRUSER} /usr/asdf \
+    && chown -R ${NRUSER}:${NRUSER} /bashbot
+USER ${NRUSER}
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "which", "bashbot" ]
+CMD [ "/bashbot/entrypoint.sh" ]

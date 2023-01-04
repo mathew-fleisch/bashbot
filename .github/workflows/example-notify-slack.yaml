@@ -16,16 +16,28 @@ jobs:
         name: Install Bashbot via asdf
         uses: asdf-vm/actions/install@v1
         with:
-          tool_versions: bashbot 1.6.15
+          tool_versions: bashbot latest
       -
         name: Send Slack Message With Bashbot Binary
         env:
-          BASHBOT_CONFIG_FILEPATH: ./config.json
-          SLACK_TOKEN: ${{ secrets.RELEASE_SLACK_TOKEN }}
+          BASHBOT_CONFIG_FILEPATH: ./config.yaml
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_APP_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
         run: |
-          echo '{"admins":[{"trigger":"bashbotexample","appName":"Bashbot Notify Example","userIds":[""],"privateChannelId":"","logChannelId":""}],"messages":[],"tools":[],"dependencies":[]}' > $BASHBOT_CONFIG_FILEPATH
-          bashbot \
-            --send-message-channel ${{ github.event.client_payload.channel }} \
-            --send-message-text "${{ github.event.client_payload.text }}"
+          cat <<EOF > $BASHBOT_CONFIG_FILEPATH
+          admins:
+            - trigger: bashbotexample
+              appName: Bashbot Notify Example
+              userIds:
+                - "UP3BBQX34"
+              privateChannelId: "GPFMM5MD2"
+              logChannelId: "CPJ1NFPL7"
+          messages: []
+          tools: []
+          dependencies: []
+          EOF
+          bashbot send-message \
+            --channel ${{ github.event.client_payload.channel }} \
+            --msg "${{ github.event.client_payload.text }}"
 
           

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 github_base="${github_base:-api.github.com}"
-expected_variables="BASHBOT_CONFIG_FILEPATH SLACK_TOKEN SLACK_CHANNEL SLACK_USERID REPO_OWNER REPO_NAME GITHUB_TOKEN GITHUB_RUN_ID"
+expected_variables="BASHBOT_CONFIG_FILEPATH SLACK_BOT_TOKEN SLACK_CHANNEL SLACK_USERID REPO_OWNER REPO_NAME GITHUB_TOKEN GITHUB_RUN_ID"
 for expect in $expected_variables; do
   if [[ -z "${!expect}" ]]; then
     echo "Missing environment variable $expect"
@@ -16,6 +16,6 @@ arch=amd64
 os=$(uname | tr '[:upper:]' '[:lower:]')
 wget -q https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/download/${LATEST_VERSION}/bashbot-${os}-${arch} -O bashbot
 chmod +x bashbot
-./bashbot \
-    --send-message-channel ${SLACK_CHANNEL} \
-    --send-message-text "<@${SLACK_USERID}> Bashbot triggered this job"
+./bashbot send-message \
+    --channel ${SLACK_CHANNEL} \
+    --msg "<@${SLACK_USERID}> Bashbot triggered this job"

@@ -1,0 +1,20 @@
+name: Curl Example
+description: Pass a valid url to curl
+envvars: []
+dependencies:
+  - curl
+help: "!bashbot curl [url]"
+trigger: curl
+location: /bashbot/
+command:
+  - curl -s ${url} | jq -r ".body" | tr "\n" " "
+parameters:
+  - name: url
+    allowed: []
+    description: A valid url (Expecting json with key body)
+    match: ^(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$
+log: true
+ephemeral: false
+response: code
+permissions:
+  - all

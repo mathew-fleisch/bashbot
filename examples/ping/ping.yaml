@@ -1,0 +1,15 @@
+name: Ping/Pong
+description: Return pong on pings
+envvars: []
+dependencies: []
+help: "!bashbot ping"
+trigger: ping
+location: /bashbot/
+command:
+  - echo "pong"
+parameters: []
+log: true
+ephemeral: false
+response: text
+permissions:
+  - all

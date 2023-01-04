@@ -1,0 +1,22 @@
+name: Air Quality Index
+description: Get air quality index by zip code
+envvars:
+  - AIRQUALITY_API_KEY
+dependencies:
+  - curl
+  - jq
+help: "!bashbot aqi [zip-code]"
+trigger: aqi
+location: /bashbot/vendor/bashbot/examples/aqi
+command:
+  - "./aqi.sh ${zip}"
+parameters:
+  - name: zip
+    allowed: []
+    description: any zip code
+    match: (^\d{5}$)|(^\d{9}$)|(^\d{5}-\d{4}$)
+log: true
+ephemeral: false
+response: text
+permissions:
+  - all

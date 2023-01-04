@@ -6,37 +6,22 @@ In this example, a few asdf commands are combined to display the installed versi
 
 ## Bashbot Configuration
 
-This command is triggered by sending `bashbot asdf` in a slack channel where Bashbot is also a member. There is no external script for this command, takes no arugments/parameters, and expects asdf and asdf plugins to already be installed on the host machine. The command first echos some title headers. Then it pipes the output of `asdf plugin list` to `xargs` in order to get the installed version for each plugin. It then uses `printf` (along with `awk` to remove leading spaces from `asdf list [ASDF-PLUGIN-NAME]` command) to print each asdf plugin name and its version, in a table format. Escaping single and double quotes in bashbot's json syntax can be difficult. 
+This command is triggered by sending `!bashbot asdf` in a slack channel where Bashbot is also a member. There is no external script for this command, takes no arugments/parameters, and expects asdf and asdf plugins to already be installed on the host machine/container.
 
-```json
-{
-  "name": "List asdf plugins",
-  "description": "List the installed asdf plugins and their versions",
-  "envvars": [],
-  "dependencies": ["asdf"],
-  "help": "bashbot asdf",
-  "trigger": "asdf",
-  "location": "./",
-  "command": [
-    "echo \"•──────────────────────────────•\"",
-    "&& echo \"│ <https://asdf-vm.com/|asdf version: $(asdf version)> |\"",
-    "&& echo \"├───────────────────┰──────────┤\"",
-    "&& echo \"│       asdf plugin │ version  │\"",
-    "&& echo \"├───────────────────┼──────────┤\"",
-    "&& asdf plugin list",
-      "| xargs -I {} bash -c",
-        "'printf \"│ %17s │ %-8s │\"",
-        "\"{}\"",
-        "\"$(asdf list {} | awk '\"'\"'{print $1}'\"'\"')\"",
-        "&& echo'",
-    "&& echo \"•──────────────────────────────•\""
-  ],
-  "parameters": [],
-  "log": true,
-  "ephemeral": false,
-  "response": "code",
-  "permissions": [
-    "all"
-  ]
-}
+```yaml
+name: List asdf plugins
+description: List the installed asdf plugins and their versions
+envvars: []
+dependencies: []
+help: "!bashbot asdf"
+trigger: asdf
+location: /bashbot/
+command:
+  - ". /usr/asdf/asdf.sh && asdf list"
+parameters: []
+log: true
+ephemeral: false
+response: code
+permissions:
+  - all
 ```

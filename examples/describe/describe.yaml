@@ -1,0 +1,22 @@
+name: Describe Bashbot [command]
+description: Show the yaml object for a specific command
+envvars:
+  - BASHBOT_CONFIG_FILEPATH
+dependencies:
+  - yq
+help: "!bashbot describe [command]"
+trigger: describe
+location: /bashbot/
+command:
+  - yq e '.tools[] | select(.trigger=="${command}")' ${BASHBOT_CONFIG_FILEPATH}
+parameters:
+  - name: command
+    allowed: []
+    description: a command to describe ('bashbot list')
+    source:
+      - yq e '.tools[] | .trigger' ${BASHBOT_CONFIG_FILEPATH}
+log: true
+ephemeral: false
+response: code
+permissions:
+  - all

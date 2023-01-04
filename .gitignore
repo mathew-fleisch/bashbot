@@ -19,7 +19,7 @@
 */vendor/*
 vendor/*
 
-config.json
+config.yaml
 
 tmp/*
 bin/*

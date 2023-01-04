@@ -1,0 +1,110 @@
+# Name:        example-bashbot-github-action-gate.yaml
+# Author:      Mathew Fleisch <mathew.fleisch@gmail.com>
+# Description: This action demonstrates how to trigger a GitHub action from Bashbot,
+#              spawning another instance of bashbot to act as a manual approval gate.
+name: Example Bashbot Triggered GitHub Action Gate
+on:
+  repository_dispatch:
+    types:
+      - trigger-github-action-gate
+
+jobs:
+  build:
+    name: Example Bashbot Triggered GitHub Action Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - 
+        name: Install bashbot with asdf
+        uses: asdf-vm/actions/install@v1
+        with:
+          tool_versions: |
+            bashbot latest
+            yq latest
+      -
+        name: Send Slack Message With Bashbot Binary
+        env:
+          BASHBOT_CONFIG_FILEPATH: ./config.yaml
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_APP_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
+          SLACK_CHANNEL: ${{ github.event.client_payload.channel }}
+          SLACK_USERID: ${{ github.event.client_payload.user_id }}
+          LOG_LEVEL: info
+          LOG_FORMAT: text
+          GIT_TOKEN: ${{ github.token }}
+        run: |
+          cat <<EOF > $BASHBOT_CONFIG_FILEPATH
+          admins:
+            - trigger: !example-gate
+              appName: Bashbot Example Gate
+              userIds:
+                - "UP3BBQX34"
+              privateChannelId: "GPFMM5MD2"
+              logChannelId: "CPJ1NFPL7"
+          messages: []
+          tools:
+          - name: BashBot Gate Help
+            description: Show this message
+            envvars:
+              - BASHBOT_CONFIG_FILEPATH
+            dependencies:
+              - yq
+            help: "!example-gate help"
+            trigger: help
+            location: ./
+            command:
+              - echo "BashBot gate running in a Github Action will auto-fail in 5min after startup" &&
+              - echo '```' &&
+              - "yq e '.tools[] | {.help: .description}' \"${BASHBOT_CONFIG_FILEPATH}\""
+              - "| sed -e 's/\\\"//g'"
+              - "| sed -e 's/:/ -/g' &&"
+              - echo '```'
+            parameters: []
+            log: true
+            ephemeral: false
+            response: text
+            permissions:
+              - all
+          - name: Pass
+            description: Send exit 0 to pass job successfully
+            envvars: []
+            dependencies: []
+            help: "!example-gate pass"
+            trigger: pass
+            location: ./
+            command:
+              - echo "Job passed" && exit 0
+            parameters: []
+            log: true
+            ephemeral: false
+            response: text
+            permissions:
+              - GPFMM5MD2
+          - name: Fail
+            description: Send exit 1 to fail job
+            envvars: []
+            dependencies: []
+            help: "!example-gate fail"
+            trigger: fail
+            location: ./
+            command:
+              - echo "Job failed" && exit 1
+            parameters: []
+            log: true
+            ephemeral: false
+            response: text
+            permissions:
+              - GPFMM5MD2
+          dependencies: []
+          EOF
+          # Send user notification bashbot gate has started
+          bashbot send-message \
+            --log-level "${LOG_LEVEL}" \
+            --log-format "${LOG_FORMAT}" \
+            --channel ${SLACK_CHANNEL} \
+            --msg "Bashbot gate started by <@${SLACK_USERID}>. To see options, run: !example-gate help"
+          # Start bashbot
+          bashbot run \
+            --log-level "${LOG_LEVEL}" \
+            --log-format "${LOG_FORMAT}"
+          

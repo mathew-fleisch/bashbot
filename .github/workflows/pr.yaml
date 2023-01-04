@@ -1,0 +1,169 @@
+# Name:        pr.yaml
+# Author:      Mathew Fleisch <mathew.fleisch@gmail.com>
+# Description: This action will run go lint/unit tests as well as
+#              build a docker container and test it against a KinD cluster.
+#              See Makefile for more details (make help).
+name: PR Tests
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+
+  anchore-container-scan:
+    name: Anchore Container Scan
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout the code
+      uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: make docker-build
+    - name: Run the Anchore scan action itself with GitHub Advanced Security code scanning integration enabled
+      uses: anchore/scan-action@main
+      with:
+        image: "bashbot:local"
+        fail-build: false
+        acs-report-enable: true
+    - name: Upload Anchore Scan Report
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: results.sarif
+
+  codeql-code-scan:
+    name: CodeQL
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'go' ]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install Golang via asdf
+      uses: asdf-vm/actions/install@v1
+      with:
+        tool_versions: golang 1.19.4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+
+    - run: |
+        asdf global golang 1.19.4
+        make go-setup
+        make go-build
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+  unit_test:
+    name: Lint and Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - 
+        name: Install stuff with asdf
+        uses: asdf-vm/actions/install@v1
+        with:
+          tool_versions: |
+            action-validator 0.1.2
+            dockle 0.4.5
+            helm 3.8.1
+            golangci-lint 1.44.2
+            yq 4.22.1
+      -
+        name: Lint Actions
+        run: make test-lint-actions
+
+      -
+        name: Lint Go
+        run: make test-lint
+
+      -
+        name: Unit Tests
+        run: make test-go
+
+      # -
+      #   name: Docker Login
+      #   uses: docker/login-action@v2
+      #   with:
+      #     registry: docker.io
+      #     username: ${{ secrets.REGISTRY_USERNAME }}
+      #     password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      # -
+      #   name: Lint Container Using Dockle
+      #   run: make test-docker
+
+  integration_test:
+    name: KinD Integration Tests
+    # needs: [unit_test]
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      -
+        name: KinD Test
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_APP_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
+          AIRQUALITY_API_KEY: ${{ secrets.AIRQUALITY_API_KEY }}
+          BASHBOT_CONFIG_FILEPATH: /bashbot/config.yaml
+          GIT_TOKEN: not-used
+        run: |
+          cp sample-config.yaml charts/bashbot/config.yaml
+          cp sample-config.yaml config.yaml
+          cp .tool-versions charts/bashbot/.tool-versions
+          if [[ -z "$SLACK_BOT_TOKEN" ]] || [[ -z "$SLACK_APP_TOKEN" ]]; then
+            echo "Missing github secret(s): SLACK_BOT_TOKEN, SLACK_APP_TOKEN"
+            exit 1
+          fi
+          cat sample-env-file | envsubst > charts/bashbot/.env \
+            && cp charts/bashbot/.env .env \
+            && make test-kind \
+            && rm -rf charts/bashbot/.env \
+            && rm -rf .env \
+            && echo "Deployment assets and KinD cluster removed"
+      -
+        name: Debug 
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          make help
+          ls -alF
+          kubectl version
+          helm version
+          helm list -n bashbot
+          echo "Deployments:"
+          kubectl --namespace bashbot get deployments -o wide
+          echo "Pods:"
+          kubectl --namespace bashbot get pods -o wide
+          echo "Service Accounts:"
+          kubectl --namespace bashbot get serviceaccounts
+          echo "Secrets:"
+          kubectl --namespace bashbot get secrets
+          echo "Configmaps:"
+          kubectl --namespace bashbot get configmaps
+          # echo "bashbot Config:"
+          # kubectl --namespace bashbot get configmaps bashbot-configmap -o jsonpath='{.data.config\.json}' | jq '.' || true
+          echo "Describe bashbot pod:"
+          kubectl --namespace bashbot describe pod $(kubectl --namespace bashbot get pods | grep bashbot | awk '{print $1}') || true
+          echo "Logs:"
+          kubectl --namespace bashbot logs $(kubectl --namespace bashbot get pods | grep bashbot | awk '{print $1}') || true
+          make kind-cleanup || true
+

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.botname }}-configmap
+  namespace: {{ .Values.namespace }}
+data:
+  {{- $files := .Files }}
+  {{- range tuple "config.yaml" ".tool-versions" }}
+  {{ . }}: |-
+{{ $files.Get . | indent 3 }}
+  {{- end }}

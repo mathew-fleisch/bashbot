@@ -1,0 +1,130 @@
+# Name:        release.yaml
+# Author:      Mathew Fleisch <mathew.fleisch@gmail.com>
+# Description: This action will build and push a multi-arch docker container,
+#              cross compile go-binaries and save as release artifacts,
+#              and package a helm chart as gh-pages env, when triggered by
+#              pushing a new git tag (that starts with the letter 'v').
+name: Build Bashbot Containers
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Release Bashbot Binaries
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout Bashbot source
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - 
+        name: Install Golang via asdf
+        uses: asdf-vm/actions/install@v1
+        with:
+          tool_versions: golang 1.19.4
+      -
+        name: Build go-binaries
+        run: |
+          asdf global golang 1.19.4
+          make go-setup
+          make go-cross-compile
+          echo "Go-Binaries created: $(ls bin -alF)"
+
+      -
+        name: Cut Github Release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GIT_TOKEN }}
+          allowUpdates: true
+          artifacts: "bin/*"
+  build:
+    name: Build and Push Bashbot Container
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - 
+        name: Set tag environment variable
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      -
+        name: Set up QEMU
+        id: qemu
+        uses: docker/setup-qemu-action@v2
+      -
+        name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+      -
+        name: Docker Login
+        uses: docker/login-action@v2
+        with:
+          registry: docker.io
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+      -
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GIT_TOKEN }}
+      -
+        name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          context: .
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/bashbot/bashbot:latest
+            ghcr.io/${{ github.repository_owner }}/bashbot/bashbot:${{ env.RELEASE_VERSION }}
+            mathewfleisch/bashbot:latest
+            mathewfleisch/bashbot:${{ env.RELEASE_VERSION }}
+          cache-from: type=registry,ref=mathewfleisch/bashbot:latest
+          cache-to: type=inline
+      - 
+        name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+      - 
+        name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.1.0
+        env:
+          CR_TOKEN: "${{ secrets.GIT_TOKEN }}"
+      - 
+        name: Install Bashbot via asdf
+        uses: asdf-vm/actions/install@v1
+        with:
+          tool_versions: bashbot latest
+      -
+        name: Notify Release Channel
+        env:
+          BASHBOT_CONFIG_FILEPATH: ./config.yaml
+          SLACK_CHANNEL: C02A1SH4GLT
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_APP_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
+        run: |
+          cat <<EOF > $BASHBOT_CONFIG_FILEPATH
+          admins:
+            - trigger: bashbotrelease
+              appName: Bashbot Releases
+              userIds:
+                - "UP3BBQX34"
+              privateChannelId: "GPFMM5MD2"
+              logChannelId: "CPJ1NFPL7"
+          messages: []
+          tools: []
+          dependencies: []
+          EOF
+          bashbot version
+          bashbot send-message \
+            --channel ${SLACK_CHANNEL} \
+            --msg "Bashbot <https://github.com/mathew-fleisch/bashbot/releases/tag/${{ env.RELEASE_VERSION}}|${{ env.RELEASE_VERSION }}> has been released and <https://hub.docker.com/r/mathewfleisch/bashbot/tags|multi-arch containers> have been pushed!"

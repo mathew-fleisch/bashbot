@@ -14,7 +14,9 @@ on:
 jobs:
   build:
     name: Update asdf versions
-    runs-on: generic-runner
+    runs-on:
+      - self-hosted
+      - generic-runner
     steps:
       - name: "Update asdf versions"
         env:
