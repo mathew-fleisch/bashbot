@@ -63,18 +63,9 @@ tools:
   dependencies: []
   help: "!example-gate info"
   trigger: info
-  location: "./"
+  location: "./examples/info"
   command:
-    - "echo '$ whoami' &&"
-    - "whoami &&"
-    - "echo '$ uname -a' &&"
-    - "uname -a &&"
-    - "echo '$ uptime' &&"
-    - "uptime &&"
-    - "echo '$ pwd' &&"
-    - "pwd &&"
-    - "echo '$ ls -alF' &&"
-    - "ls -alF"
+    - "./get-info.sh"
   parameters: []
   log: true
   ephemeral: false
