@@ -5,7 +5,7 @@
 #              See Makefile for more details (make help).
 name: PR Tests
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - main
 
