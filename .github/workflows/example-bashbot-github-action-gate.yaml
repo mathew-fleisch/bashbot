@@ -41,13 +41,14 @@ jobs:
             --log-level "${LOG_LEVEL}" \
             --log-format "${LOG_FORMAT}" \
             --channel ${SLACK_CHANNEL} \
-            --msg "!example-gate help"
-          sleep 2
-          bashbot send-message \
+            --msg "Bashbot gate started by <@${SLACK_USERID}>. To see options, run: !example-gate help"
+          
+          sleep 3 && bashbot send-message \
             --log-level "${LOG_LEVEL}" \
             --log-format "${LOG_FORMAT}" \
             --channel ${SLACK_CHANNEL} \
-            --msg "Bashbot gate started by <@${SLACK_USERID}>. To see options, run: !example-gate help"
+            --msg "!example-gate help" &
+
           # Start bashbot
           bashbot run \
             --log-level "${LOG_LEVEL}" \
