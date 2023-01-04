@@ -103,7 +103,7 @@ jobs:
         name: Install Bashbot via asdf
         uses: asdf-vm/actions/install@v1
         with:
-          tool_versions: bashbot latest
+          tool_versions: bashbot 2.0.0
       -
         name: Notify Release Channel
         env:
@@ -112,7 +112,6 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_APP_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
         run: |
-          asdf global bashbot latest
           cat <<EOF > $BASHBOT_CONFIG_FILEPATH
           admins:
             - trigger: bashbotrelease

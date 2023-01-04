@@ -63,8 +63,10 @@ docker-run: ## run an existing build of bashbot:local
 		-v $(PWD)/config.yaml:/bashbot/config.yaml \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
 		-v $(PWD)/.tool-versions:/bashbot/.tool-versions \
-		-e SLACK_BOT_TOKEN=$(SLACK_BOT_TOKEN) \
-		-e SLACK_APP_TOKEN=$(SLACK_APP_TOKEN) \
+		-e GIT_TOKEN \
+		-e AIRQUALITY_API_KEY \
+		-e SLACK_BOT_TOKEN \
+		-e SLACK_APP_TOKEN \
 		-e LOG_LEVEL="$(BASHBOT_LOG_LEVEL)" \
 		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
 		bashbot:local
@@ -75,8 +77,10 @@ docker-run-bash: ## run an exsting build of bashbot:local but override the entry
 		-v $(PWD)/config.yaml:/bashbot/config.yaml \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
 		-v $(PWD)/.tool-versions:/bashbot/.tool-versions \
-		-e SLACK_BOT_TOKEN=$(SLACK_BOT_TOKEN) \
-		-e SLACK_APP_TOKEN=$(SLACK_APP_TOKEN) \
+		-e GIT_TOKEN \
+		-e AIRQUALITY_API_KEY \
+		-e SLACK_BOT_TOKEN \
+		-e SLACK_APP_TOKEN \
 		-e LOG_LEVEL="$(BASHBOT_LOG_LEVEL)" \
 		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
 		bashbot:local
@@ -86,8 +90,10 @@ docker-run-up-bash: ## run the latest upstream build of bashbot but override the
 	@docker run -it --rm --entrypoint bash \
 		-v $(PWD)/config.yaml:/bashbot/config.yaml \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
-		-e SLACK_BOT_TOKEN=$(SLACK_BOT_TOKEN) \
-		-e SLACK_APP_TOKEN=$(SLACK_APP_TOKEN) \
+		-e GIT_TOKEN \
+		-e AIRQUALITY_API_KEY \
+		-e SLACK_BOT_TOKEN \
+		-e SLACK_APP_TOKEN \
 		-e LOG_LEVEL="$(BASHBOT_LOG_LEVEL)" \
 		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
 		mathewfleisch/bashbot:$(LATEST_VERSION)
@@ -97,8 +103,10 @@ docker-run-up: ## run the latest upstream build of bashbot
 	@docker run -it --rm \
 		-v $(PWD)/config.yaml:/bashbot/config.yaml \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
-		-e SLACK_BOT_TOKEN=$(SLACK_BOT_TOKEN) \
-		-e SLACK_APP_TOKEN=$(SLACK_APP_TOKEN) \
+		-e GIT_TOKEN \
+		-e AIRQUALITY_API_KEY \
+		-e SLACK_BOT_TOKEN \
+		-e SLACK_APP_TOKEN \
 		-e LOG_LEVEL="$(BASHBOT_LOG_LEVEL)" \
 		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
 		mathewfleisch/bashbot:$(LATEST_VERSION)
