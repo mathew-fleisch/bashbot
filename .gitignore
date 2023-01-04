@@ -20,6 +20,7 @@
 vendor/*
 
 config.yaml
+bashbot-log-*
 
 tmp/*
 bin/*

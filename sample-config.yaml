@@ -47,7 +47,7 @@ tools:
       - yq
     help: "!bashbot help"
     trigger: help
-    location: /bashbot/
+    location: ./
     command:
       - echo "BashBot is a tool for infrastructure/devops teams to automate tasks triggered by slash-command-like declarative configuration" &&
       - echo '```' &&
@@ -70,7 +70,7 @@ tools:
       - jq
     help: "!bashbot aqi [zip-code]"
     trigger: aqi
-    location: /bashbot/vendor/bashbot/examples/aqi
+    location: ./vendor/bashbot/examples/aqi
     command:
       - "./aqi.sh ${zip}"
     parameters:
@@ -89,7 +89,7 @@ tools:
     dependencies: []
     help: "!bashbot info"
     trigger: info
-    location: /bashbot/vendor/bashbot/examples/info
+    location: ./vendor/bashbot/examples/info
     command:
       - "./get-info.sh"
     parameters: []
@@ -105,7 +105,7 @@ tools:
       - yq
     help: "!bashbot dump"
     trigger: dump
-    location: /bashbot/
+    location: ./
     command:
       - yq e '.' ${BASHBOT_CONFIG_FILEPATH}
     parameters: []
@@ -122,7 +122,7 @@ tools:
       - yq
     help: "!bashbot list"
     trigger: list
-    location: /bashbot/
+    location: ./
     command:
       - yq e '.tools[] | .trigger' ${BASHBOT_CONFIG_FILEPATH}
     parameters: []
@@ -137,7 +137,7 @@ tools:
     dependencies: []
     help: "!bashbot list-examples"
     trigger: list-examples
-    location: /bashbot/vendor/bashbot/examples
+    location: ./vendor/bashbot/examples
     command:
       - find . -name "*.json"
       - "| xargs -I {} bash -c"
@@ -157,7 +157,7 @@ tools:
     dependencies: []
     help: "!bashbot regex $([command])"
     trigger: regex
-    location: /bashbot/
+    location: ./
     command:
       - ". /usr/asdf/asdf.sh && ${command} || true"
     parameters:
@@ -177,7 +177,7 @@ tools:
       - curl
     help: "!bashbot curl [url]"
     trigger: curl
-    location: /bashbot/
+    location: ./
     command:
       - curl -s ${url} | jq -r ".body" | tr "\n" " "
     parameters:
@@ -198,7 +198,7 @@ tools:
       - yq
     help: "!bashbot describe [command]"
     trigger: describe
-    location: /bashbot/
+    location: ./
     command:
       - yq e '.tools[] | select(.trigger=="${command}")' ${BASHBOT_CONFIG_FILEPATH}
     parameters:
@@ -222,7 +222,7 @@ tools:
     dependencies: []
     help: "!bashbot env-var-test"
     trigger: env-var-test
-    location: /bashbot/
+    location: ./
     command:
       - "echo \"Username[id]: ${TRIGGERED_USER_NAME}[${TRIGGERED_USER_ID}]\""
       - "&& echo \" Channel[id]: ${TRIGGERED_CHANNEL_NAME}[${TRIGGERED_CHANNEL_ID}] <@${TRIGGERED_USER_ID}>\""
@@ -238,7 +238,7 @@ tools:
     dependencies: []
     help: "!bashbot time"
     trigger: time
-    location: /bashbot/
+    location: ./
     command:
       - "echo \"Date/time: $(${command})\""
     parameters:
@@ -257,7 +257,7 @@ tools:
     dependencies: []
     help: "!bashbot version"
     trigger: version
-    location: /bashbot/vendor/bashbot/examples/version
+    location: ./vendor/bashbot/examples/version
     command:
       - "./get-version.sh"
     parameters: []
@@ -270,7 +270,7 @@ tools:
     description: Return pong on pings
     help: "!bashbot ping"
     trigger: ping
-    location: /bashbot/
+    location: ./
     command:
       - echo "pong"
     parameters: []
@@ -285,7 +285,7 @@ tools:
     dependencies: []
     help: "!bashbot asdf"
     trigger: asdf
-    location: /bashbot/
+    location: ./
     command:
       - ". /usr/asdf/asdf.sh && asdf list"
     parameters: []
@@ -300,7 +300,7 @@ tools:
     dependencies: []
     help: "!bashbot k-info"
     trigger: k-info
-    location: /bashbot/
+    location: ./
     command:
       - ". /usr/asdf/asdf.sh && kubectl cluster-info"
     parameters: []
@@ -317,7 +317,7 @@ tools:
     dependencies: []
     help: "!bashbot k-get-pod"
     trigger: k-get-pod
-    location: /bashbot/
+    location: ./
     command:
       - ". /usr/asdf/asdf.sh"
       - "&& kubectl --namespace ${NAMESPACE} get pods | grep -E \"NAME|${BOTNAME}\""
@@ -333,7 +333,7 @@ tools:
     dependencies: []
     help: "!bashbot k-delete-pod [namespace] [podname]"
     trigger: k-delete-pod
-    location: /bashbot/
+    location: ./
     command:
       - ". /usr/asdf/asdf.sh"
       - "&& kubectl -n ${namespace} delete pod ${podname} --ignore-not-found=true"
@@ -361,7 +361,7 @@ tools:
     dependencies: []
     help: "!bashbot k-describe-pod [namespace] [podname]"
     trigger: k-describe-pod
-    location: /bashbot/
+    location: ./
     command:
       - ". /usr/asdf/asdf.sh"
       - "&& kubectl -n ${namespace} describe pod ${podname}"
@@ -389,7 +389,7 @@ tools:
     dependencies: []
     help: "!bashbot k-pod-logs [namespace] [podname]"
     trigger: k-pod-logs
-    location: /bashbot/
+    location: ./
     command:
       - ". /usr/asdf/asdf.sh"
       - "&& kubectl -n ${namespace} logs --tail 10 ${podname}"
@@ -417,7 +417,7 @@ tools:
     dependencies: []
     help: "!bashbot latest-release"
     trigger: latest-release
-    location: /bashbot/
+    location: ./
     command:
       - latest_version=$(curl -s https://api.github.com/repos/mathew-fleisch/bashbot/releases/latest | grep tag_name | cut -d '"' -f 4)
       - "&& echo \"The latest version of <https://github.com/mathew-fleisch/bashbot|Bashbot>: <https://github.com/mathew-fleisch/bashbot/releases/tag/$latest_version|$latest_version>\""
@@ -434,7 +434,7 @@ tools:
     dependencies: []
     help: "!bashbot trigger-github-action"
     trigger: trigger-github-action
-    location: /bashbot/vendor/bashbot/examples/trigger-github-action
+    location: ./vendor/bashbot/examples/trigger-github-action
     command:
       - "export REPO_OWNER=mathew-fleisch"
       - "&& export REPO_NAME=bashbot"
@@ -455,7 +455,7 @@ tools:
     dependencies: []
     help: "!bashbot trigger-github-action-gate"
     trigger: trigger-github-action-gate
-    location: /bashbot/vendor/bashbot/examples/trigger-github-action
+    location: ./vendor/bashbot/examples/trigger-github-action
     command:
       - "export REPO_OWNER=mathew-fleisch"
       - "&& export REPO_NAME=bashbot"

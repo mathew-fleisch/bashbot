@@ -7,3 +7,4 @@
 Dockerfile
 vendor/*
 config.yaml
+bashbot-log-*
