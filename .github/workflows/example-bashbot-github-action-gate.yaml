@@ -33,6 +33,7 @@ jobs:
           LOG_FORMAT: text
           GIT_TOKEN: ${{ github.token }}
         run: |
+          asdf global yq 4.30.6
           cat <<EOF > $BASHBOT_CONFIG_FILEPATH
           admins:
             - trigger: "!example-gate"
@@ -51,7 +52,7 @@ jobs:
               - yq
             help: "!example-gate help"
             trigger: help
-            location: ./
+            location: "./"
             command:
               - echo "BashBot gate running in a Github Action will auto-fail in 5min after startup" &&
               - echo '```' &&
@@ -71,7 +72,7 @@ jobs:
             dependencies: []
             help: "!example-gate pass"
             trigger: pass
-            location: ./
+            location: "./"
             command:
               - echo "Job passed" && exit 0
             parameters: []
@@ -86,7 +87,7 @@ jobs:
             dependencies: []
             help: "!example-gate fail"
             trigger: fail
-            location: ./
+            location: "./"
             command:
               - echo "Job failed" && exit 1
             parameters: []
