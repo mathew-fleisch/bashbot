@@ -112,6 +112,7 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_APP_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
         run: |
+          asdf global bashbot latest
           cat <<EOF > $BASHBOT_CONFIG_FILEPATH
           admins:
             - trigger: bashbotrelease
