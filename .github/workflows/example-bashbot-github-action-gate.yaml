@@ -24,7 +24,7 @@ jobs:
             bashbot 2.0.0
             yq 4.30.6
       -
-        name: Send Slack Message With Bashbot Binary
+        name: Run Bashbot as debugging gate to job
         env:
           BASHBOT_CONFIG_FILEPATH: ./examples/trigger-github-action/example-gate-config.yaml
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -37,6 +37,12 @@ jobs:
         run: |
           asdf global yq 4.30.6
           # Send user notification bashbot gate has started
+          bashbot send-message \
+            --log-level "${LOG_LEVEL}" \
+            --log-format "${LOG_FORMAT}" \
+            --channel ${SLACK_CHANNEL} \
+            --msg "!example-gate help"
+          sleep 2
           bashbot send-message \
             --log-level "${LOG_LEVEL}" \
             --log-format "${LOG_FORMAT}" \
