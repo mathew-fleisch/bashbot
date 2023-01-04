@@ -1,0 +1,103 @@
+
+admins:
+  - trigger: "!example-gate"
+    appName: Bashbot Example Gate
+    userIds:
+      - "UP3BBQX34"
+    privateChannelId: "GPFMM5MD2"
+    logChannelId: "CPJ1NFPL7"
+messages:
+- active: true
+  name: processing_command
+  text: ":robot_face: Processing command..."
+- active: true
+  name: command_not_found
+  text: ":thinking_face: Command not found..."
+- active: true
+  name: incorrect_parameters
+  text: ":face_with_monocle: Incorrect number of parameters"
+- active: true
+  name: invalid_parameter
+  text: ":face_with_monocle: Invalid parameter value: %s"
+- active: true
+  name: ephemeral
+  text: ":shushing_face: Message only shown to user who triggered it."
+- active: true
+  name: unauthorized
+  text: |-
+    :skull_and_crossbones: You are not authorized to use this command in this channel.
+    Allowed in: [%s]
+- active: true
+  name: missingenvvar
+  text: ":skull_and_crossbones: This command requires this environment variable to be set: [%s]"
+- active: true
+  name: missingdependency
+  text: ":skull_and_crossbones: This command requires: [%s]"
+tools:
+- name: BashBot Gate Help
+  description: Show this message
+  envvars:
+    - BASHBOT_CONFIG_FILEPATH
+  dependencies:
+    - yq
+  help: "!example-gate help"
+  trigger: help
+  location: "./"
+  command:
+    - "echo 'BashBot gate running in a Github Action will auto-fail in 5min after startup' &&"
+    - "echo '```!example-gate exit 0 - pass job successfully' &&"
+    - "echo '!example-gate exit 1 - fail job' &&"
+    - "yq e '.tools[] | {.help: .description}' \"${BASHBOT_CONFIG_FILEPATH}\""
+    - "| sed -e 's/\\\"//g'"
+    - "| sed -e 's/:/ -/g' &&"
+    - "echo '```'"
+  parameters: []
+  log: true
+  ephemeral: false
+  response: text
+  permissions:
+    - GPFMM5MD2
+- name: Info about host
+  description: Show debugging information about host
+  envvars: []
+  dependencies: []
+  help: "!example-gate info"
+  trigger: info
+  location: "./"
+  command:
+    - "echo '$ whoami' &&"
+    - "whoami &&"
+    - "echo '$ uname -a' &&"
+    - "uname -a &&"
+    - "echo '$ uptime' &&"
+    - "uptime &&"
+    - "echo '$ pwd' &&"
+    - "pwd &&"
+    - "echo '$ ls -alF' &&"
+    - "ls -alF"
+  parameters: []
+  log: true
+  ephemeral: false
+  response: file
+  permissions:
+    - GPFMM5MD2
+- name: Debug state of host
+  description: With great power, comes great responsibility
+  envvars: []
+  dependencies: []
+  help: "!example-gate debug $([command])"
+  trigger: debug
+  location: ./
+  command:
+    - "${command} || true"
+  parameters:
+    - name: command
+      allowed: []
+      description: This should allow any text to be used as input
+      match: .*
+  log: false
+  ephemeral: false
+  response: code
+  permissions:
+    - GPFMM5MD2
+dependencies: []
