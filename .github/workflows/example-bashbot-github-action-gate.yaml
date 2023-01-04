@@ -19,8 +19,8 @@ jobs:
         uses: asdf-vm/actions/install@v1
         with:
           tool_versions: |
-            bashbot latest
-            yq latest
+            bashbot 2.0.0
+            yq 4.30.6
       -
         name: Send Slack Message With Bashbot Binary
         env:
