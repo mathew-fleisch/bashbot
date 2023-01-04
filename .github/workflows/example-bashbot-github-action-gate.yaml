@@ -81,12 +81,12 @@ jobs:
             location: "./"
             command:
               - "echo 'BashBot gate running in a Github Action will auto-fail in 5min after startup' &&"
-              - "echo '```!example-gate exit 0 - pass job successfully' &&"
+              - "echo '\`\`\`!example-gate exit 0 - pass job successfully' &&"
               - "echo '!example-gate exit 1 - fail job' &&"
               - "yq e '.tools[] | {.help: .description}' \"${BASHBOT_CONFIG_FILEPATH}\""
               - "| sed -e 's/\\\"//g'"
               - "| sed -e 's/:/ -/g' &&"
-              - "echo '```'"
+              - "echo '\`\`\`'"
             parameters: []
             log: true
             ephemeral: false
@@ -114,7 +114,7 @@ jobs:
             parameters: []
             log: true
             ephemeral: false
-            response: text
+            response: file
             permissions:
               - GPFMM5MD2
           - name: Debug state of host
@@ -125,7 +125,7 @@ jobs:
             trigger: debug
             location: ./
             command:
-              - "${command} || true"
+              - "\${command} || true"
             parameters:
               - name: command
                 allowed: []
