@@ -8,6 +8,7 @@ log_level: info
 log_format: text
 
 image:
+  # repository: ghcr.io/mathew-fleisch/bashbot
   repository: mathewfleisch/bashbot
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
