@@ -126,17 +126,13 @@ jobs:
           BASHBOT_CONFIG_FILEPATH: /bashbot/config.yaml
           GIT_TOKEN: not-used
         run: |
-          cp sample-config.yaml charts/bashbot/config.yaml
           cp sample-config.yaml config.yaml
-          cp .tool-versions charts/bashbot/.tool-versions
           if [[ -z "$SLACK_BOT_TOKEN" ]] || [[ -z "$SLACK_APP_TOKEN" ]]; then
             echo "Missing github secret(s): SLACK_BOT_TOKEN, SLACK_APP_TOKEN"
             exit 1
           fi
-          cat sample-env-file | envsubst > charts/bashbot/.env \
-            && cp charts/bashbot/.env .env \
+          cat sample-env-file | envsubst > .env \
             && make test-kind \
-            && rm -rf charts/bashbot/.env \
             && rm -rf .env \
             && echo "Deployment assets and KinD cluster removed"
       -
