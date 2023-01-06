@@ -12,6 +12,9 @@ TESTING_CHANNEL?=C034FNXS3FA
 ADMIN_CHANNEL?=GPFMM5MD2
 NAMESPACE?=bashbot
 BOTNAME?=bashbot
+HELM_CONFIG_YAML?=$(PWD)/config.yaml
+HELM_TOOL_VERSIONS?=$(PWD)/.tool-versions
+HELM_ENV?=${PWD}/.env
 
 
 ##@ Go stuff
@@ -61,9 +64,9 @@ docker-build: ## build and tag bashbot:local
 .PHONY: docker-run
 docker-run: ## run an existing build of bashbot:local
 	@docker run -it --rm \
-		-v $(PWD)/config.yaml:/bashbot/config.yaml \
+		-v $(HELM_CONFIG_YAML):/bashbot/config.yaml \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
-		-v $(PWD)/.tool-versions:/bashbot/.tool-versions \
+		-v $(HELM_TOOL_VERSIONS):/bashbot/.tool-versions \
 		-e GIT_TOKEN \
 		-e AIRQUALITY_API_KEY \
 		-e SLACK_BOT_TOKEN \
@@ -75,9 +78,9 @@ docker-run: ## run an existing build of bashbot:local
 .PHONY: docker-run-bash
 docker-run-bash: ## run an exsting build of bashbot:local but override the entrypoint with /bin/bash
 	@docker run -it --rm --entrypoint bash \
-		-v $(PWD)/config.yaml:/bashbot/config.yaml \
+		-v $(HELM_CONFIG_YAML):/bashbot/config.yaml \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
-		-v $(PWD)/.tool-versions:/bashbot/.tool-versions \
+		-v $(HELM_TOOL_VERSIONS):/bashbot/.tool-versions \
 		-e GIT_TOKEN \
 		-e AIRQUALITY_API_KEY \
 		-e SLACK_BOT_TOKEN \
@@ -89,8 +92,9 @@ docker-run-bash: ## run an exsting build of bashbot:local but override the entry
 .PHONY: docker-run-up-bash
 docker-run-up-bash: ## run the latest upstream build of bashbot but override the entrypoint with /bin/bash
 	@docker run -it --rm --entrypoint bash \
-		-v $(PWD)/config.yaml:/bashbot/config.yaml \
+		-v $(HELM_CONFIG_YAML):/bashbot/config.yaml \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
+		-v $(HELM_TOOL_VERSIONS):/bashbot/.tool-versions \
 		-e GIT_TOKEN \
 		-e AIRQUALITY_API_KEY \
 		-e SLACK_BOT_TOKEN \
@@ -102,8 +106,9 @@ docker-run-up-bash: ## run the latest upstream build of bashbot but override the
 .PHONY: docker-run-up
 docker-run-up: ## run the latest upstream build of bashbot
 	@docker run -it --rm \
-		-v $(PWD)/config.yaml:/bashbot/config.yaml \
+		-v $(HELM_CONFIG_YAML):/bashbot/config.yaml \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
+		-v $(HELM_TOOL_VERSIONS):/bashbot/.tool-versions \
 		-e GIT_TOKEN \
 		-e AIRQUALITY_API_KEY \
 		-e SLACK_BOT_TOKEN \
@@ -158,10 +163,10 @@ helm-bump-major: ## Bump-major the semantic version of the helm chart using semv
 .PHONY: helm-install
 helm-install: helm-uninstall ## install bashbot via helm into an existing KinD cluster to /usr/local/bin/bashbot
 	kubectl create namespace $(NAMESPACE) || true
-	@echo "Creating kubernetes secrets from charts/bashbot/.env"
+	@echo "Creating kubernetes secrets from $(HELM_ENV)"
 	@echo "kubectl --namespace $(NAMESPACE) get secret $(BOTNAME)-env"
 	@kubectl --namespace $(NAMESPACE) create secret generic $(BOTNAME)-env \
-		$(shell cat charts/bashbot/.env | sed -e 's/export\ /--from-literal=/g' | tr '\n' ' ');
+		$(shell cat $(HELM_ENV) | sed -e 's/export\ /--from-literal=/g' | tr '\n' ' ');
 	helm upgrade $(BOTNAME) charts/bashbot \
 		--install \
 		--timeout 2m0s \
@@ -172,6 +177,8 @@ helm-install: helm-uninstall ## install bashbot via helm into an existing KinD c
 		--set image.tag=local \
 		--set log_level=$(BASHBOT_LOG_LEVEL) \
 		--set log_format=$(BASHBOT_LOG_TYPE) \
+		--set-file '\.tool-versions'=$(HELM_TOOL_VERSIONS) \
+		--set-file 'config\.yaml'=$(HELM_CONFIG_YAML) \
 		--debug \
 		--wait
 	sleep 3
@@ -260,6 +267,10 @@ help: ## this
 install-latest: ## install the latest version of the bashbot binary to /usr/local/bin/bashbot with wget
 	wget -q -O /usr/local/bin/bashbot https://github.com/mathew-fleisch/bashbot/releases/download/$(LATEST_VERSION)/bashbot-$(GOOS)-$(GOARCH)
 	chmod +x /usr/local/bin/bashbot
+ifeq ($(shell uname -s),Darwin)
+	@echo "To add bashbot to an allowlist:"
+	@echo "xattr -d com.apple.quarantine /usr/local/bin/bashbot"
+endif
 	bashbot version
 	@echo "Run 'bashbot --help' for more information"
 

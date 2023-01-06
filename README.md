@@ -1,7 +1,7 @@
 # Bashbot
 
-[![Release](https://github.com/mathew-fleisch/bashbot/actions/workflows/release.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/release.yaml)
-[Docker Hub](https://hub.docker.com/r/mathewfleisch/bashbot/tags?page=1&ordering=last_updated)
+[![Release](https://github.com/mathew-fleisch/bashbot/actions/workflows/release.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/release.yaml) |
+[Docker Hub](https://hub.docker.com/r/mathewfleisch/bashbot/tags?page=1&ordering=last_updated) | [ghcr](https://github.com/mathew-fleisch/bashbot/pkgs/container/bashbot)
 
 BashBot is a slack bot written in golang for infrastructure/devops teams. A socket connection to slack provides bashbot with a stream of text from each channel it is invited to, and uses regular expressions to determine when to trigger bash commands. A [configuration file](sample-config.yaml) defines a list of commands that can be run in public and/or private channels. Restricting certain commands to private channels gives granular control, over which users can execute them. Bashbot allows infrastructure/devops teams to extend the tools and scripts they already use to manage their environments, into slack, that also acts as an execution log, and leverages slack's access controls.
 
@@ -45,6 +45,33 @@ Bashbot uses the Slack API's "[Socket Mode](https://api.slack.com/apis/connectio
 
 Note: Prior to version 2, Bashbot required a "classic app" to be configured to get the correct type of token to connect to Slack. After logging into Slack via browser, visit [https://api.slack.com/apps?new_classic_app=1](https://api.slack.com/apps?new_classic_app=1) to set up a new "legacy bot user", "Bot User OAuth Access Token," add bashbot to your workspace, and invite to a channel. See the [Setup/Deployment Examples Repository](https://github.com/mathew-fleisch/bashbot-example) for more detailed information about how to deploy Bashbot in your infrastructure.
 
+### Quick Start: Helm Install
+
+To install bashbot from the public helm repo, rather than with the source, the slack app/bot tokens are required to be saved as kubernetes secret, and local versions of the config.yaml and .tool-versions file.
+
+```bash
+# Get sample-config.yaml and .tool-versions
+wget https://raw.githubusercontent.com/mathew-fleisch/bashbot/main/.tool-versions -q -O ${PWD}/.tool-versions
+wget https://raw.githubusercontent.com/mathew-fleisch/bashbot/main/sample-config.yaml -q -O ${PWD}/config.yaml
+
+# Add the public helm repo
+helm repo add bashbot https://mathew-fleisch.github.io/bashbot
+
+# Define your bashbot instance and namespace names
+export BOTNAME=bashbot
+export NAMESPACE=bashbot
+helm install \
+  --debug --wait \
+  --namespace ${NAMESPACE} \
+  --set namespace=${NAMESPACE} \
+  --set botname=${BOTNAME} \
+  --set-file '\.tool-versions'=${PWD}/.tool-versions \
+  --set-file 'config\.yaml'=${PWD}/config.yaml \
+  --repo https://mathew-fleisch.github.io/bashbot \
+  bashbot bashbot
+
+```
+
 ### Quick Start: KinD cluster
 
 ***KinD Prerequisites***
@@ -70,11 +97,9 @@ To set up a local [KinD cluster](https://kind.sigs.k8s.io/docs/user/quick-start/
 
 ```bash
 # Copy .env, config.yaml and .tool-versions sample files to helm directory and replace with custom values.
-cp sample-env-file charts/bashbot/.env
-cp sample-config.yaml charts/bashbot/config.yaml
-cp .tool-versions charts/bashbot/.tool-versions
-make kind-setup
-make helm-install
+cp sample-env-file .env
+cp sample-config.yaml config.yaml
+make test-kind
 
 # At this point you should have a KinD cluster running with a bashbot deployment inside
 kubectl cluster-info
@@ -147,6 +172,9 @@ wget -qO /usr/local/bin/bashbot https://github.com/mathew-fleisch/bashbot/releas
 
 # Make bashbot binary executable
 chmod +x /usr/local/bin/bashbot
+
+# Disable security check on macs (only run once)
+test "${os}" == "darwin" && xattr -d com.apple.quarantine /usr/local/bin/bashbot
 
 # To verify installation run version or help commands
 bashbot version
@@ -258,3 +286,27 @@ On [pull requests to the main branch](.github/workflows/pr.yaml), four jobs are 
 - a container is built and scanned by the [anchore](https://anchore.com/) container scanning tool
 - the golang code is analyzed by [codeql](https://codeql.github.com/) SAST tool
 - a container is built and deployed in a kind cluster, to run automated tests, to maintain/verify basic functionality (see [Makefile](Makefile) target `make help` for more information)
+
+### Makefile
+
+run `make help` for a full list of targets. Any of these environment variables can be overridden by exporting a new value before running any makefile target.
+
+```makefile
+GOOS?=$(shell go env GOOS)
+GOARCH?=$(shell go env GOARCH)
+VERSION?=$(shell make version)
+LATEST_VERSION?=$(shell curl -s https://api.github.com/repos/mathew-fleisch/bashbot/releases/latest | grep tag_name | cut -d '"' -f 4)
+BINARY?=bin/bashbot
+SRC_LOCATION?=main.go
+BASHBOT_LOG_LEVEL?=info
+BASHBOT_LOG_TYPE?=text
+TESTING_CHANNEL?=C034FNXS3FA
+ADMIN_CHANNEL?=GPFMM5MD2
+NAMESPACE?=bashbot
+BOTNAME?=bashbot
+HELM_CONFIG_YAML?=$(PWD)/config.yaml
+HELM_TOOL_VERSIONS?=$(PWD)/.tool-versions
+HELM_ENV?=${PWD}/.env
+```
+
+Note: [yq](https://github.com/mikefarah/yq) is a dependency of running many makefile targets and can be installed with the binary: `wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -q -O /usr/local/bin/yq && chmod +x /usr/local/bin/yq`
