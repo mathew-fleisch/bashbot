@@ -40,15 +40,6 @@ jobs:
           make go-setup
           make go-cross-compile
           echo "Go-Binaries created: $(ls bin -alF)"
-
-      -
-        name: Cut Github Release
-        uses: ncipollo/release-action@v1
-        with:
-          token: ${{ secrets.GIT_TOKEN }}
-          allowUpdates: true
-          artifacts: "bin/*"
-          tag: ${{ env.RELEASE_VERSION }}
       -
         name: Set up QEMU
         id: qemu
@@ -97,6 +88,14 @@ jobs:
         env:
           CR_TOKEN: "${{ secrets.GIT_TOKEN }}"
           CR_SKIP_EXISTING: true
+      -
+        name: Cut Github Release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GIT_TOKEN }}
+          allowUpdates: true
+          artifacts: "bin/*"
+          tag: ${{ env.RELEASE_VERSION }}
       - 
         name: Install Bashbot via asdf from release artifacts
         uses: asdf-vm/actions/install@v1
