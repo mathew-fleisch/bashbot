@@ -4,8 +4,9 @@ metadata:
   name: {{ .Values.botname }}-configmap
   namespace: {{ .Values.namespace }}
 data:
-  {{- $files := .Files }}
-  {{- range tuple "config.yaml" ".tool-versions" }}
-  {{ . }}: |-
-{{ $files.Get . | indent 3 }}
+  {{- if index .Values "config.yaml" }}
+  config.yaml: |
+{{ index .Values "config.yaml" | indent 3 }}
+  .tool-versions: |
+{{ index .Values ".tool-versions" | indent 3 }}
   {{- end }}
