@@ -53,7 +53,7 @@ To install bashbot from the public helm repo, rather than with the source, the s
 # Define your bashbot instance and namespace names
 export BOTNAME=bashbot
 export NAMESPACE=bashbot
-export TARGET_VERSION=v2.0.0
+export TARGET_VERSION=v2.0.1
 
 # Get sample-env-file, sample-config.yaml, and .tool-versions
 wget https://raw.githubusercontent.com/mathew-fleisch/bashbot/main/.tool-versions -q -O ${PWD}/.tool-versions
@@ -185,7 +185,7 @@ test "${os}" == "darwin" && xattr -d com.apple.quarantine /usr/local/bin/bashbot
 
 # To verify installation run version or help commands
 bashbot version
-# bashbot-darwin-amd64    v2.0.0
+# bashbot-darwin-amd64    v2.0.1
 
 bashbot --help
 #  ____            _     ____        _   
@@ -282,9 +282,9 @@ The [Examples](examples) directory of this repository, has many commands used in
 Included in this repository two github actions are executed on git tags. The [![release](https://github.com/mathew-fleisch/bashbot/actions/workflows/release.yaml/badge.svg)](https://github.com/mathew-fleisch/bashbot/actions/workflows/release.yaml) action will build multiple go-binaries for each version (linux/amd64, linux/arm64, darwin/amd64, and darwin/arm64) and add them to a github release and will use the docker plugin, buildx, to build and push a container for amd64/arm64 to docker hub and github container registry.
 
 ```bash
-# example semver bump: v2.0.0
-git tag v2.0.0
-git push origin v2.0.0
+# example semver bump: v2.0.1
+git tag v2.0.1
+git push origin v2.0.1
 ```
 
 On [pull requests to the main branch](.github/workflows/pr.yaml), four jobs are run on every commit:
