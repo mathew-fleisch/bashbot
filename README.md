@@ -50,18 +50,26 @@ Note: Prior to version 2, Bashbot required a "classic app" to be configured to g
 To install bashbot from the public helm repo, rather than with the source, the slack app/bot tokens are required to be saved as kubernetes secret, and local versions of the config.yaml and .tool-versions file.
 
 ```bash
-# Get sample-config.yaml and .tool-versions
-wget https://raw.githubusercontent.com/mathew-fleisch/bashbot/main/.tool-versions -q -O ${PWD}/.tool-versions
-wget https://raw.githubusercontent.com/mathew-fleisch/bashbot/main/sample-config.yaml -q -O ${PWD}/config.yaml
-
-# Add the public helm repo
-helm repo add bashbot https://mathew-fleisch.github.io/bashbot
-
 # Define your bashbot instance and namespace names
 export BOTNAME=bashbot
 export NAMESPACE=bashbot
-helm install \
-  --debug --wait \
+export TARGET_VERSION=v2.0.0
+
+# Get sample-env-file, sample-config.yaml, and .tool-versions
+wget https://raw.githubusercontent.com/mathew-fleisch/bashbot/main/.tool-versions -q -O ${PWD}/.tool-versions
+wget https://raw.githubusercontent.com/mathew-fleisch/bashbot/main/sample-config.yaml -q -O ${PWD}/config.yaml
+wget https://raw.githubusercontent.com/mathew-fleisch/bashbot/main/sample-env-file -q -O ${PWD}/.env
+
+# Add the public helm repo (one time)
+helm repo add bashbot https://mathew-fleisch.github.io/bashbot
+
+# Build kubernetes secrets from .env file (don't forget to fill the .env file with your secrets)
+kubectl --namespace ${NAMESPACE} create secret generic ${BOTNAME}-env \
+  $(cat ${PWD}/.env | sed -e 's/export\ /--from-literal=/g' | tr '\n' ' ')
+
+# Install a specific version of bashbot (remove --version for latest)
+helm install --debug --wait \
+  --version=${TARGET_VERSION} \
   --namespace ${NAMESPACE} \
   --set namespace=${NAMESPACE} \
   --set botname=${BOTNAME} \
@@ -69,7 +77,6 @@ helm install \
   --set-file 'config\.yaml'=${PWD}/config.yaml \
   --repo https://mathew-fleisch.github.io/bashbot \
   bashbot bashbot
-
 ```
 
 ### Quick Start: KinD cluster
