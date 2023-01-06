@@ -94,10 +94,9 @@ jobs:
       - 
         name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.4.1
-        with:
-          charts_dir: charts
         env:
           CR_TOKEN: "${{ secrets.GIT_TOKEN }}"
+          CR_SKIP_EXISTING: true
       - 
         name: Install Bashbot via asdf from release artifacts
         uses: asdf-vm/actions/install@v1
