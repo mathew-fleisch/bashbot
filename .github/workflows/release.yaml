@@ -95,7 +95,7 @@ jobs:
           token: ${{ secrets.GIT_TOKEN }}
           allowUpdates: true
           artifacts: "bin/*"
-          tag: ${{ env.RELEASE_VERSION }}
+          tag: bashbot-${{ env.RELEASE_VERSION }}
       - 
         name: Install Bashbot via asdf from release artifacts
         uses: asdf-vm/actions/install@v1
