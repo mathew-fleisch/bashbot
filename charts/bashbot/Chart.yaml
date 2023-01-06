@@ -1,6 +1,6 @@
 apiVersion: v2
 name: bashbot
-description: A Helm chart to run Bashbot in Kubernetes
+description: Bashbot is a slack chat-ops tool for infra/devops teams
 type: application
 version: v2.0.0
 appVersion: v2.0.0
