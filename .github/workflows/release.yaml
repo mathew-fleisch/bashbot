@@ -4,7 +4,7 @@
 #              cross compile go-binaries and save as release artifacts,
 #              and package a helm chart as gh-pages env, when triggered by
 #              pushing a new git tag (that starts with the letter 'v').
-name: Build Bashbot Containers
+name: Release Bashbot
 on:
   push:
     branches:
@@ -22,20 +22,21 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - 
+        name: Install stuff with asdf
+        uses: asdf-vm/actions/install@v1
+        with:
+          tool_versions: |
+            golang 1.19.4
+            yq 4.30.6
       -
         name: Set tag environment variable
         run: |
           echo "RELEASE_VERSION=$(make version)" >> $GITHUB_ENV
           echo "RELEASE_VERSION_NO_V=$(make version)" | sed -e 's/v//g' >> $GITHUB_ENV
-      - 
-        name: Install Golang via asdf
-        uses: asdf-vm/actions/install@v1
-        with:
-          tool_versions: golang 1.19.4
       -
         name: Build go-binaries
         run: |
-          asdf global golang 1.19.4
           make go-setup
           make go-cross-compile
           echo "Go-Binaries created: $(ls bin -alF)"
@@ -95,7 +96,7 @@ jobs:
         env:
           CR_TOKEN: "${{ secrets.GIT_TOKEN }}"
       - 
-        name: Install Bashbot via asdf
+        name: Install Bashbot via asdf from release artifacts
         uses: asdf-vm/actions/install@v1
         with:
           tool_versions: bashbot ${{ env.RELEASE_VERSION_NO_V }}
