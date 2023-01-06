@@ -1,14 +1,15 @@
 GOOS?=$(shell go env GOOS)
 GOARCH?=$(shell go env GOARCH)
-VERSION?=$(shell git describe --abbrev=0 --tags)
+VERSION?=$(shell make version)
 LATEST_VERSION?=$(shell curl -s https://api.github.com/repos/mathew-fleisch/bashbot/releases/latest | grep tag_name | cut -d '"' -f 4)
 BINARY?=bin/bashbot
 SRC_LOCATION?=main.go
-LDFLAGS="-X main.Version=${VERSION}"
+LDFLAGS="-X github.com/mathew-fleisch/bashbot/cmd.Version=${VERSION}"
 GO_BUILD=go build -ldflags=$(LDFLAGS)
 BASHBOT_LOG_LEVEL?=info
 BASHBOT_LOG_TYPE?=text
 TESTING_CHANNEL?=C034FNXS3FA
+ADMIN_CHANNEL?=GPFMM5MD2
 NAMESPACE?=bashbot
 BOTNAME?=bashbot
 
@@ -138,6 +139,22 @@ kind-setup: docker-build ## setup a KinD cluster to test bashbot's helm chart
 kind-cleanup: ## delete any KinD cluster set up for bashbot
 	kind delete cluster
 
+.PHONY: version
+version: ## get the current helm chart version
+	@yq e '.version' charts/bashbot/Chart.yaml
+
+.PHONY: helm-bump-patch
+helm-bump-patch: ## Bump-patch the semantic version of the helm chart using semver tool
+	sed -i 's/'$(shell make version)'/v'$(shell semver bump patch $(shell make version))'/g' charts/bashbot/Chart.yaml
+
+.PHONY: helm-bump-minor
+helm-bump-minor: ## Bump-minor the semantic version of the helm chart using semver tool
+	sed -i 's/'$(shell make version)'/v'$(shell semver bump minor $(shell make version))'/g' charts/bashbot/Chart.yaml
+
+.PHONY: helm-bump-major
+helm-bump-major: ## Bump-major the semantic version of the helm chart using semver tool
+	sed -i 's/'$(shell make version)'/v'$(shell semver bump major $(shell make version))'/g' charts/bashbot/Chart.yaml
+
 .PHONY: helm-install
 helm-install: helm-uninstall ## install bashbot via helm into an existing KinD cluster to /usr/local/bin/bashbot
 	kubectl create namespace $(NAMESPACE) || true
@@ -236,7 +253,7 @@ help: ## this
 	@echo "|                                                               |"
 	@echo "|  makefile targets                                             |"
 	@echo "+---------------------------------------------------------------+"
-	@echo ""
+	@echo "$(VERSION)"
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 .PHONY: install-latest

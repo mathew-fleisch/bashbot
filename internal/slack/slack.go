@@ -21,8 +21,6 @@ type Client struct {
 	cfg          *Config
 }
 
-var Version = "development"
-
 // NewSlackClient creates a new slack client.
 func NewSlackClient(configFile, botToken, appToken string) *Client {
 	if configFile == "" {
