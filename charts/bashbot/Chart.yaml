@@ -1,6 +1,6 @@
 apiVersion: v2
 name: bashbot
-description: Bashbot is a slack Chat-Ops tool for Infra/dev-ops teams
+description: Bashbot is a slack Chat-Ops tool for Infra/Dev-Ops teams
 type: application
 version: v2.0.0
 appVersion: v2.0.0
