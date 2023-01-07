@@ -134,15 +134,16 @@ export SLACK_APP_TOKEN=xapp-xxxxxxxxx-xxxxxxx
 wget -O config.yaml https://raw.githubusercontent.com/mathew-fleisch/bashbot/main/sample-config.yaml
 
 # Pass environment variable and mount configuration yaml to run container
-docker run --rm \
+docker run -it --rm \
+  --pull always \
   --name bashbot \
   -v ${PWD}/config.yaml:/bashbot/config.yaml \
   -e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
-  -e SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN} \
-  -e SLACK_APP_TOKEN=${SLACK_APP_TOKEN} \
+  -e SLACK_BOT_TOKEN \
+  -e SLACK_APP_TOKEN \
   -e LOG_LEVEL="info" \
   -e LOG_FORMAT="text" \
-  -it mathewfleisch/bashbot:latest
+  mathewfleisch/bashbot:latest
 ```
 
 ---
