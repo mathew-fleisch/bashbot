@@ -1,0 +1,618 @@
+---
+# Source: bashbot/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bashbot
+  labels:
+    helm.sh/chart: bashbot-v2.0.2
+    app.kubernetes.io/name: bashbot
+    app.kubernetes.io/instance: bashbot
+    app.kubernetes.io/version: "v2.0.2"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: bashbot/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bashbot-configmap
+  namespace: bashbot
+data:
+  config.yaml: |
+   admins:
+     - trigger: "!bashbot"
+       appName: BashBot
+       userIds:
+         - UP3BBQX34
+       privateChannelId: GPFMM5MD2
+       logChannelId: CPJ1NFPL7
+   messages:
+     - active: true
+       name: welcome
+       text: Witness the power of %s
+     - active: true
+       name: processing_command
+       text: ":robot_face: Processing command..."
+     - active: true
+       name: processing_raw_command
+       text: ":smiling_imp: Processing raw command..."
+     - active: true
+       name: command_not_found
+       text: ":thinking_face: Command not found..."
+     - active: true
+       name: incorrect_parameters
+       text: ":face_with_monocle: Incorrect number of parameters"
+     - active: true
+       name: invalid_parameter
+       text: ":face_with_monocle: Invalid parameter value: %s"
+     - active: true
+       name: ephemeral
+       text: ":shushing_face: Message only shown to user who triggered it."
+     - active: true
+       name: unauthorized
+       text: |-
+         :skull_and_crossbones: You are not authorized to use this command in this channel.
+         Allowed in: [%s]
+     - active: true
+       name: missingenvvar
+       text: ":skull_and_crossbones: This command requires this environment variable to be set: [%s]"
+     - active: true
+       name: missingdependency
+       text: ":skull_and_crossbones: This command requires: [%s]"
+   tools:
+     - name: BashBot Help
+       description: Show this message
+       envvars:
+         - BASHBOT_CONFIG_FILEPATH
+       dependencies:
+         - yq
+       help: "!bashbot help"
+       trigger: help
+       location: ./
+       command:
+         - echo "BashBot is a tool for infrastructure/devops teams to automate tasks triggered by slash-command-like declarative configuration" &&
+         - echo '```' &&
+         - "yq e '.tools[] | {.help: .description}' \"${BASHBOT_CONFIG_FILEPATH}\""
+         - "| sed -e 's/\\\"//g'"
+         - "| sed -e 's/:/ -/g' &&"
+         - echo '```'
+       parameters: []
+       log: true
+       ephemeral: false
+       response: text
+       permissions:
+         - all
+     - name: Air Quality Index
+       description: Get air quality index by zip code
+       envvars:
+         - AIRQUALITY_API_KEY
+       dependencies:
+         - curl
+         - jq
+       help: "!bashbot aqi [zip-code]"
+       trigger: aqi
+       location: ./vendor/bashbot/examples/aqi
+       command:
+         - "./aqi.sh ${zip}"
+       parameters:
+         - name: zip
+           allowed: []
+           description: any zip code
+           match: (^\d{5}$)|(^\d{9}$)|(^\d{5}-\d{4}$)
+       log: true
+       ephemeral: false
+       response: text
+       permissions:
+         - all
+     - name: Get User/Channel Info
+       description: Get information about the user and channel command is being run from
+       envvars: []
+       dependencies: []
+       help: "!bashbot info"
+       trigger: info
+       location: ./vendor/bashbot/examples/info
+       command:
+         - "./get-info.sh"
+       parameters: []
+       log: true
+       ephemeral: false
+       response: code
+       permissions:
+         - all
+     - name: Display Configuration
+       description: dump configuration as yaml blob
+       envvars: []
+       dependencies:
+         - yq
+       help: "!bashbot dump"
+       trigger: dump
+       location: ./
+       command:
+         - yq e '.' ${BASHBOT_CONFIG_FILEPATH}
+       parameters: []
+       log: true
+       ephemeral: false
+       response: file
+       permissions:
+         - all
+     - name: List Available Bashbot Commands
+       description: List all of the possible commands stored in bashbot
+       envvars:
+         - BASHBOT_CONFIG_FILEPATH
+       dependencies:
+         - yq
+       help: "!bashbot list"
+       trigger: list
+       location: ./
+       command:
+         - yq e '.tools[] | .trigger' ${BASHBOT_CONFIG_FILEPATH}
+       parameters: []
+       log: true
+       ephemeral: false
+       response: code
+       permissions:
+         - all
+     - name: List Example Commands
+       description: List commands from bashbot example commands
+       envvars: []
+       dependencies: []
+       help: "!bashbot list-examples"
+       trigger: list-examples
+       location: ./vendor/bashbot/examples
+       command:
+         - find . -name "*.json"
+         - "| xargs -I {} bash -c"
+         - "'export example=$(basename {} .json)"
+         - "&& printf \"%21s - %s\" \"$example\" \"https://github.com/mathew-fleisch/bashbot/tree/main/examples/$example\""
+         - "&& echo'"
+         - "| sort -k 2"
+       parameters: []
+       log: true
+       ephemeral: false
+       response: code
+       permissions:
+         - all
+     - name: Regular expression example
+       description: With great power, comes great responsibility
+       envvars: []
+       dependencies: []
+       help: "!bashbot regex $([command])"
+       trigger: regex
+       location: ./
+       command:
+         - ". /usr/asdf/asdf.sh && ${command} || true"
+       parameters:
+         - name: command
+           allowed: []
+           description: This should allow any text to be used as input
+           match: .*
+       log: false
+       ephemeral: false
+       response: code
+       permissions:
+         - GPFMM5MD2
+     - name: Curl Example
+       description: Pass a valid url to curl
+       envvars: []
+       dependencies:
+         - curl
+       help: "!bashbot curl [url]"
+       trigger: curl
+       location: ./
+       command:
+         - curl -s ${url} | jq -r ".body" | tr "\n" " "
+       parameters:
+         - name: url
+           allowed: []
+           description: A valid url (Expecting json with key body)
+           match: ^(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$
+       log: true
+       ephemeral: false
+       response: code
+       permissions:
+         - all
+     - name: Describe Bashbot [command]
+       description: Show the yaml object for a specific command
+       envvars:
+         - BASHBOT_CONFIG_FILEPATH
+       dependencies:
+         - yq
+       help: "!bashbot describe [command]"
+       trigger: describe
+       location: ./
+       command:
+         - yq e '.tools[] | select(.trigger=="${command}")' ${BASHBOT_CONFIG_FILEPATH}
+       parameters:
+         - name: command
+           allowed: []
+           description: a command to describe ('bashbot list')
+           source:
+             - yq e '.tools[] | .trigger' ${BASHBOT_CONFIG_FILEPATH}
+       log: true
+       ephemeral: false
+       response: code
+       permissions:
+         - all
+     - name: Environment variable test
+       description: Show an example of how to only run a command if specific env vars are defined.
+       envvars:
+         - TRIGGERED_USER_NAME
+         - TRIGGERED_USER_ID
+         - TRIGGERED_CHANNEL_NAME
+         - TRIGGERED_CHANNEL_ID
+       dependencies: []
+       help: "!bashbot env-var-test"
+       trigger: env-var-test
+       location: ./
+       command:
+         - "echo \"Username[id]: ${TRIGGERED_USER_NAME}[${TRIGGERED_USER_ID}]\""
+         - "&& echo \" Channel[id]: ${TRIGGERED_CHANNEL_NAME}[${TRIGGERED_CHANNEL_ID}] <@${TRIGGERED_USER_ID}>\""
+       parameters: []
+       log: true
+       ephemeral: false
+       response: code
+       permissions:
+         - all
+     - name: Date or Uptime
+       description: Show the current time or uptime
+       envvars: []
+       dependencies: []
+       help: "!bashbot time"
+       trigger: time
+       location: ./
+       command:
+         - "echo \"Date/time: $(${command})\""
+       parameters:
+         - name: command
+           allowed:
+             - date
+             - uptime
+       log: true
+       ephemeral: false
+       response: code
+       permissions:
+         - all
+     - name: Get Bashbot Version
+       description: Displays the currently running version of Bashbot
+       envvars: []
+       dependencies: []
+       help: "!bashbot version"
+       trigger: version
+       location: ./vendor/bashbot/examples/version
+       command:
+         - "./get-version.sh"
+       parameters: []
+       log: true
+       ephemeral: false
+       response: code
+       permissions:
+         - all
+     - name: Ping/Pong
+       description: Return pong on pings
+       help: "!bashbot ping"
+       trigger: ping
+       location: ./
+       command:
+         - echo "pong"
+       parameters: []
+       log: true
+       ephemeral: false
+       response: text
+       permissions:
+         - all
+     - name: List asdf dependencies
+       description: Return a list of the dependencies installed from asdf
+       envvars: []
+       dependencies: []
+       help: "!bashbot asdf"
+       trigger: asdf
+       location: ./
+       command:
+         - ". /usr/asdf/asdf.sh && asdf list"
+       parameters: []
+       log: true
+       ephemeral: false
+       response: code
+       permissions:
+         - all
+     - name: Kubectl cluster-info
+       description: Return cluster-info by kubectl command
+       envvars: []
+       dependencies: []
+       help: "!bashbot k-info"
+       trigger: k-info
+       location: ./
+       command:
+         - ". /usr/asdf/asdf.sh && kubectl cluster-info"
+       parameters: []
+       log: true
+       ephemeral: false
+       response: code
+       permissions:
+         - all
+     - name: kubectl get bashbot pod
+       description: Get the bashbot pod using kubectl
+       envvars:
+         - BOTNAME
+         - NAMESPACE
+       dependencies: []
+       help: "!bashbot k-get-pod"
+       trigger: k-get-pod
+       location: ./
+       command:
+         - ". /usr/asdf/asdf.sh"
+         - "&& kubectl --namespace ${NAMESPACE} get pods | grep -E \"NAME|${BOTNAME}\""
+       parameters: []
+       log: true
+       ephemeral: false
+       response: code
+       permissions:
+         - all
+     - name: kubectl -n [namespace] delete pod [podname]
+       description: Delete a pod
+       envvars: []
+       dependencies: []
+       help: "!bashbot k-delete-pod [namespace] [podname]"
+       trigger: k-delete-pod
+       location: ./
+       command:
+         - ". /usr/asdf/asdf.sh"
+         - "&& kubectl -n ${namespace} delete pod ${podname} --ignore-not-found=true"
+       parameters:
+         - name: namespace
+           allowed: []
+           description: List all of the namespaces in the cluster
+           source:
+             - ". /usr/asdf/asdf.sh"
+             - "&& kubectl get namespaces | grep -v NAME | awk \"{print $1}\""
+         - name: podname
+           allowed: []
+           description: List all of the pods in the cluster by name
+           source:
+             - ". /usr/asdf/asdf.sh"
+             - "&& kubectl get pods -A | grep -v NAME | awk \"{print $2}\""
+       log: true
+       ephemeral: false
+       response: code
+       permissions:
+         - all
+     - name: kubectl -n [namespace] describe pod [podname]
+       description: Return pod information
+       envvars: []
+       dependencies: []
+       help: "!bashbot k-describe-pod [namespace] [podname]"
+       trigger: k-describe-pod
+       location: ./
+       command:
+         - ". /usr/asdf/asdf.sh"
+         - "&& kubectl -n ${namespace} describe pod ${podname}"
+       parameters:
+         - name: namespace
+           allowed: []
+           description: List all of the namespaces in the cluster
+           source:
+             - ". /usr/asdf/asdf.sh"
+             - "&& kubectl get namespaces | grep -v NAME | awk '{print $1}'"
+         - name: podname
+           allowed: []
+           description: List all of the pods in the cluster by name
+           source:
+             - ". /usr/asdf/asdf.sh"
+             - "&& kubectl get pods -A | grep -v NAME | awk '{print $2}'"
+       log: true
+       ephemeral: false
+       response: file
+       permissions:
+         - all
+     - name: kubectl -n [namespace] logs --tail 10 [podname]
+       description: Return last 10 lines of pod logs
+       envvars: []
+       dependencies: []
+       help: "!bashbot k-pod-logs [namespace] [podname]"
+       trigger: k-pod-logs
+       location: ./
+       command:
+         - ". /usr/asdf/asdf.sh"
+         - "&& kubectl -n ${namespace} logs --tail 10 ${podname}"
+       parameters:
+         - name: namespace
+           allowed: []
+           description: List all of the namespaces in the cluster
+           source:
+             - ". /usr/asdf/asdf.sh"
+             - "&& kubectl get namespaces | grep -v NAME | awk \"{print $1}\""
+         - name: podname
+           allowed: []
+           description: List all of the pods in the cluster by name
+           source:
+             - ". /usr/asdf/asdf.sh"
+             - "&& kubectl get pods -A | grep -v NAME | awk \"{print $2}\""
+       log: true
+       ephemeral: false
+       response: code
+       permissions:
+         - all
+     - name: Get Latest Bashbot Version
+       description: Returns the latest version of Bashbot via curl
+       envvars: []
+       dependencies: []
+       help: "!bashbot latest-release"
+       trigger: latest-release
+       location: ./
+       command:
+         - latest_version=$(curl -s https://api.github.com/repos/mathew-fleisch/bashbot/releases/latest | grep tag_name | cut -d '"' -f 4)
+         - "&& echo \"The latest version of <https://github.com/mathew-fleisch/bashbot|Bashbot>: <https://github.com/mathew-fleisch/bashbot/releases/tag/$latest_version|$latest_version>\""
+       parameters: []
+       log: true
+       ephemeral: false
+       response: text
+       permissions:
+         - all
+     - name: Trigger a Github Action
+       description: Triggers an example Github Action job by repository dispatch
+       envvars:
+         - GIT_TOKEN
+       dependencies: []
+       help: "!bashbot trigger-github-action"
+       trigger: trigger-github-action
+       location: ./vendor/bashbot/examples/trigger-github-action
+       command:
+         - "export REPO_OWNER=mathew-fleisch"
+         - "&& export REPO_NAME=bashbot"
+         - "&& export SLACK_CHANNEL=${TRIGGERED_CHANNEL_ID}"
+         - "&& export SLACK_USERID=${TRIGGERED_USER_ID}"
+         - "&& echo \"Running this example github action: https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/.github/workflows/example-bashbot-github-action.yaml\""
+         - "&& ./trigger.sh"
+       parameters: []
+       log: true
+       ephemeral: false
+       response: text
+       permissions:
+         - GPFMM5MD2
+     - name: Trigger a Github Action Bashbot Gate
+       description: Triggers an example Github Action job, gated by bashbot, triggered by repository dispatch
+       envvars:
+         - GIT_TOKEN
+       dependencies: []
+       help: "!bashbot trigger-github-action-gate"
+       trigger: trigger-github-action-gate
+       location: ./vendor/bashbot/examples/trigger-github-action
+       command:
+         - "export REPO_OWNER=mathew-fleisch"
+         - "&& export REPO_NAME=bashbot"
+         - "&& export SLACK_CHANNEL=${TRIGGERED_CHANNEL_ID}"
+         - "&& export SLACK_USERID=${TRIGGERED_USER_ID}"
+         - "&& echo \"Running this example github action, gated by bashbot: https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/.github/workflows/example-bashbot-github-action-gate.yaml\""
+         - "&& ./trigger-gate.sh"
+       parameters: []
+       log: true
+       ephemeral: false
+       response: text
+       permissions:
+         - GPFMM5MD2
+   dependencies:
+     - name: Install Dependencies with asdf
+       install:
+         - "mkdir -p /usr/asdf; "
+         - "git clone --depth 1 https://github.com/asdf-vm/asdf.git /usr/asdf --branch v0.8.1; "
+         - ". /usr/asdf/asdf.sh; "
+         - "cat /bashbot/.tool-versions "
+         - "| grep -vE '^#' "
+         - "| awk '{print $1}' "
+         - "| xargs -I {} asdf plugin add {}; "
+         - "asdf install; "
+         - "echo 'asdf installed and configured!'; "
+         - "echo 'Source asdf before command to use installed dependencies:'; "
+         - "echo '. /usr/asdf/asdf.sh'; "
+         - "asdf list; echo "
+     - name: "Bashbot Inception: download bashbot source code into vendor directory"
+       install:
+         - "rm -rf bashbot || true; "
+         - "git clone https://github.com/mathew-fleisch/bashbot.git"
+   
+  .tool-versions: |
+   helm 3.10.3
+   kubectl 1.26.0
+   kubectx 0.9.4
+   kustomize 4.5.7
+---
+# Source: bashbot/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: bashbot
+  namespace: bashbot
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: bashbot
+  namespace: bashbot
+---
+# Source: bashbot/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: bashbot
+  name: bashbot
+  namespace: bashbot
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: bashbot
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: bashbot
+    spec:
+      containers:
+        - env:
+            - name: LOG_LEVEL
+              value: info
+            - name: LOG_FORMAT
+              value: text
+            - name: BOTNAME
+              value: bashbot
+            - name: NAMESPACE
+              value: bashbot
+            - name: SLACK_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bashbot-env
+                  key: SLACK_BOT_TOKEN
+            - name: SLACK_APP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bashbot-env
+                  key: SLACK_APP_TOKEN
+            - name: GIT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bashbot-env
+                  key: GIT_TOKEN
+                  optional: true
+            - name: AIRQUALITY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: bashbot-env
+                  key: AIRQUALITY_API_KEY
+                  optional: true
+          image: "mathewfleisch/bashbot:v2.0.2"
+          imagePullPolicy: 
+          name: bashbot
+          command:
+            - "/bashbot/entrypoint.sh"
+          args:
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          workingDir: /bashbot
+          volumeMounts:
+            - name: bashbot-configmap
+              mountPath: /bashbot/config.yaml
+              subPath: config.yaml
+            - name: bashbot-configmap
+              mountPath: /bashbot/.tool-versions
+              subPath: .tool-versions
+      volumes:
+        - name: bashbot-configmap
+          configMap:
+            name: bashbot-configmap
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+
+      serviceAccount:  bashbot
+      serviceAccountName:  bashbot
+      automountServiceAccountToken: true
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 0
