@@ -5,8 +5,8 @@ metadata:
   namespace: {{ .Values.namespace }}
 data:
   {{- if index .Values "config.yaml" }}
-  config.yaml: |
-{{ index .Values "config.yaml" | indent 3 }}
   .tool-versions: |
 {{ index .Values ".tool-versions" | indent 3 }}
+  config.yaml: |
+{{ index .Values "config.yaml" | indent 3 }}
   {{- end }}
