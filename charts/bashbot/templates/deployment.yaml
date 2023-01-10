@@ -52,6 +52,18 @@ spec:
                   name: {{ .Values.botname }}-env
                   key: AIRQUALITY_API_KEY
                   optional: true
+            - name: NASA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.botname }}-env
+                  key: NASA_API_KEY
+                  optional: true
+            - name: GIPHY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.botname }}-env
+                  key: GIPHY_API_KEY
+                  optional: true
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.pullPolicy }}
           name: {{ .Values.botname }}
