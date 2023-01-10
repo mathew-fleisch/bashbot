@@ -23,7 +23,7 @@ Bashbot uses the Slack API's "[Socket Mode](https://api.slack.com/apis/connectio
 
 - Click "Create New App" from the [Slack Apps](https://api.slack.com/apps) page and follow the "From Scratch" prompts to give your instance of bashbot a unique name and a workspace for it to be installed in
 - The "Basic Information" page gives controls to set a profile picture toward the bottom (make sure to save any changes)
-- Enable "Socket Mode" from the "Socket Mode" page and add the default scopes `conversations.read` and note the "[App-Level Token](https://api.slack.com/authentication/token-types#app)" that is generated to save in the .env file as `SLACK_APP_TOKEN`
+- Enable "Socket Mode" from the "Socket Mode" page and add the default scopes `conversations.write` and note the "[App-Level Token](https://api.slack.com/authentication/token-types#app)" that is generated to save in the .env file as `SLACK_APP_TOKEN`
 - Enable events from the "Event Subscriptions" page and add the following bot event subscriptions and save changes
   - `app_mention`
   - `message.channels`
@@ -65,7 +65,7 @@ helm repo add bashbot https://mathew-fleisch.github.io/bashbot
 
 # Build kubernetes secrets from .env file (don't forget to fill the .env file with your secrets)
 kubectl --namespace ${NAMESPACE} create secret generic ${BOTNAME}-env \
-  $(cat ${PWD}/.env | sed -e 's/export\ /--from-literal=/g' | tr '\n' ' ')
+  $(cat ${PWD}/.env | sed -e 's/^#.*//g' | sed -e 's/export\ /--from-literal=/g' | tr '\n' ' ')
 
 # Install a specific version of bashbot (remove --version for latest)
 helm install --debug --wait \
@@ -76,7 +76,7 @@ helm install --debug --wait \
   --set-file '\.tool-versions'=${PWD}/.tool-versions \
   --set-file 'config\.yaml'=${PWD}/config.yaml \
   --repo https://mathew-fleisch.github.io/bashbot \
-  bashbot bashbot
+  ${BOTNAME} bashbot
 ```
 
 ### Quick Start: KinD cluster
