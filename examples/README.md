@@ -197,6 +197,8 @@ docker run -it --rm \
 
 To deploy bashbot with raw kubernetes manifests, see the rendered helm template for an example deployment with service account: [kubernetes-manifests-withsa.yaml](kubernetes/kubernetes-manifests-withsa.yaml)
 
+Note: For bashbot to pick up changes to the configmap/values, a running pod must be deleted to trigger a restart.
+
 ```bash
 # generated with
 wget https://raw.githubusercontent.com/mathew-fleisch/bashbot/main/.tool-versions -q -O .tool-versions
@@ -217,6 +219,8 @@ helm template --debug \
 ```
 
 To deploy bashbot with raw kubernetes manifests, see the rendered helm template for an example deployment WITHOUT a service account: [kubernetes-manifests.yaml](kubernetes/kubernetes-manifests.yaml)
+
+Note: For bashbot to pick up changes to the configmap/values, a running pod must be deleted to trigger a restart.
 
 ```bash
 # generated with
@@ -242,6 +246,8 @@ helm template --debug \
 
 To install bashbot from the public helm repo, the slack app/bot tokens are required to be saved as kubernetes secret, and local versions of the config.yaml and .tool-versions file. To install the local helm chart from source, run the makefile target `make helm-install` after exporting the slack-app-token and slack-bot-token environment variables.
 
+Note: For bashbot to pick up changes to the configmap/values, a running pod must be deleted to trigger a restart.
+
 ```bash
 # Define your bashbot instance and namespace names
 export BOTNAME=bashbot
@@ -259,7 +265,7 @@ helm repo add bashbot https://mathew-fleisch.github.io/bashbot
 # Build kubernetes secrets from .env file (don't forget to fill the .env file with your secrets)
 cat ${PWD}/sample-env-file | envsubst > ${PWD}/.env
 kubectl --namespace ${NAMESPACE} create secret generic ${BOTNAME}-env \
-  $(cat ${PWD}/.env | sed -e 's/^#.*//g' | sed -e 's/export\ /--from-literal=/g' | tr '\n' ' ')
+  $(cat ${PWD}/.env | grep -vE '^#' | sed -e 's/export\ /--from-literal=/g' | tr '\n' ' ')
 
 # Install a specific version of bashbot (remove --version for latest)
 helm install --debug --wait \
@@ -319,6 +325,8 @@ kubectl --namespace bashbot get secrets
 ### ArgoCD
 
 Bashbot works great with ArgoCD because the values.yaml of the helm chart can override/set/customize any value, to customize for any deployment scenario. Note: updating the values in the config.yaml or .tool-versions section, only update a config-map, and the bashbot pod will need to be deleted, so the replacement pod will include the new configmap. [example-argocd-application.yam](example-argocd-application.yaml)
+
+Note: For bashbot to pick up changes to the configmap/values, a running pod must be deleted to trigger a restart.
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1

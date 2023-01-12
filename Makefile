@@ -166,7 +166,7 @@ helm-install: helm-uninstall ## install bashbot via helm into an existing KinD c
 	@echo "Creating kubernetes secrets from $(HELM_ENV)"
 	@echo "kubectl --namespace $(NAMESPACE) get secret $(BOTNAME)-env"
 	@kubectl --namespace $(NAMESPACE) create secret generic $(BOTNAME)-env \
-		$(shell cat $(HELM_ENV) | sed -e 's/export\ /--from-literal=/g' | tr '\n' ' ');
+		$(shell cat $(HELM_ENV) | grep -vE '^#' | sed -e 's/export\ /--from-literal=/g' | tr '\n' ' ');
 	helm upgrade $(BOTNAME) charts/bashbot \
 		--install \
 		--timeout 2m0s \

@@ -34,7 +34,7 @@ permissions:
 
 ## Bashbot scripts
 
-There are two scripts associated with this Bashbot command: [trigger.sh](trigger.sh) and [github-action.sh])(github-action.sh). The [trigger.sh](trigger.sh) script sends off a POST request via curl to the repository's dispatch function to trigger a github action. The [github-action](../.github/workflows/example-bashbot-github-action.yaml) uses the [github-action.sh])(github-action.sh) script to simulate a long running job, and return back status to slack via Bashbot binary.
+There are two scripts associated with this Bashbot command: [trigger.sh](trigger.sh) and [github-action.sh](github-action.sh). The [trigger.sh](trigger.sh) script sends off a POST request via curl to the repository's dispatch function to trigger a github action. The [github-action](../.github/workflows/example-bashbot-github-action.yaml) uses the [github-action.sh](github-action.sh) script to simulate a long running job, and return back status to slack via Bashbot binary.
 
 ### trigger.sh and trigger-gate.sh
 
