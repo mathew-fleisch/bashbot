@@ -25,7 +25,7 @@ permissions:
   - all
 ```
 
-<img src="https://i.imgur.com/uLrCYTf.gif">
+<img src="https://i.imgur.com/zedS8RR.gif">
 
 In this example, a user triggers a Jenkins job using Bashbot and another instance of Bashbot is deployed in a Jenkins job as a gating mechanism. The configuration for the secondary Bashbot could get info about the Jenkins job/host and provides controls to manually decide if the job should pass or fail, at a certain stage in the build.This method of deploying Bashbot gives basic Jenkins controls (trigger, pass, fail) to users in an organization, without giving them access to Jenkins itself. Bashbot commands can be restricted to private channels to limit access within slack.
 
