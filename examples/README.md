@@ -394,7 +394,7 @@ permissions:
   - all
 ```
 
-<img src="https://i.imgur.com/zedS8RR.gif">
+<img src="https://i.imgur.com/zedS8RR.mp4">
 
 ### Parameters and Arguments
 
