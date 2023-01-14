@@ -283,3 +283,7 @@ update-asdf-deps: ## trigger github action to update asdf dependencies listed in
 	    https://api.github.com/repos/mathew-fleisch/bashbot/dispatches
 	@echo "Updating asdf dependencies via github-action: https://github.com/mathew-fleisch/bashbot/actions/workflows/update-asdf-versions.yaml"
 
+.PHONY: gif
+gif: ## Create a gif from a quicktime screen recording that has been exported to .mp4 from imovie
+	@echo "Generating gif"
+	@ffmpeg -i examples/$(example)/$(example).mp4 -r 10 -pix_fmt rgb24 examples/$(example)/$(example).gif
