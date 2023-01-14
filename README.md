@@ -5,7 +5,29 @@
 
 BashBot is a slack bot written in golang for infrastructure/devops teams. A socket connection to slack provides bashbot with a stream of text from each channel it is invited to, and uses regular expressions to determine when to trigger bash commands. A [configuration file](sample-config.yaml) defines a list of commands that can be run in public and/or private channels. Restricting certain commands to private channels gives granular control, over which users can execute them. Bashbot allows infrastructure/devops teams to extend the tools and scripts they already use to manage their environments, into slack, that also acts as an execution log, and leverages slack's access controls.
 
-See the [examples](examples) directory for more information about deploying, configuring and customizing Bashbot for your team. In this example, a user triggers a Jenkins job using Bashbot and another instance of Bashbot is deployed in a Jenkins job as a gating mechanism. The configuration for the secondary Bashbot could get info about the Jenkins job/host and provides controls to manually decide if the job should pass or fail, at a certain stage in the build. This method of deploying Bashbot gives basic Jenkins controls (trigger, pass, fail) to users in an organization, without giving them access to Jenkins itself. Bashbot commands can be restricted to private channels to limit access within slack.
+See the [examples](examples) directory for more information about deploying, configuring and customizing Bashbot for your team. The most basic example of a bashbot command will just echo a string back to the user when triggered.
+
+```yaml
+name: Ping/Pong
+description: Return pong on pings
+envvars: []
+dependencies: []
+help: "!bashbot ping"
+trigger: ping
+location: ./
+command:
+  - echo "pong"
+parameters: []
+log: true
+ephemeral: false
+response: text
+permissions:
+  - all
+```
+
+<img src="https://i.imgur.com/uLrCYTf.gif">
+
+In this example, a user triggers a Jenkins job using Bashbot and another instance of Bashbot is deployed in a Jenkins job as a gating mechanism. The configuration for the secondary Bashbot could get info about the Jenkins job/host and provides controls to manually decide if the job should pass or fail, at a certain stage in the build.This method of deploying Bashbot gives basic Jenkins controls (trigger, pass, fail) to users in an organization, without giving them access to Jenkins itself. Bashbot commands can be restricted to private channels to limit access within slack.
 
 <img src="https://i.imgur.com/P6IL10y.gif" />
 
