@@ -2,7 +2,7 @@
 
 In this example, the configuration yaml file for Bashbot is parsed via yq to display the help and description values for each command
 
-<img src="https://i.imgur.com/sJxh2Qk.gif" />
+<img src="https://i.imgur.com/QC2av32.gif" />
 
 ## Bashbot Configuration
 

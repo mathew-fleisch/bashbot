@@ -2,7 +2,7 @@
 
 In this example, the configuration yaml file for Bashbot is parsed via yq to display the trigger and name of each command in the file.
 
-<img src="https://i.imgur.com/HHzHlFK.gif">
+<img src="https://i.imgur.com/7SqxU9Q.gif">
 
 ## Bashbot Configuration
 
