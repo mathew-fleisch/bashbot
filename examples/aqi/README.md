@@ -2,7 +2,7 @@
 
 In this example, a curl is executed via bash script from the [Air Now API](https://docs.airnowapi.org/) and the response json is parsed via jq to send a formatted message back to slack.
 
-<img src="https://i.imgur.com/GTgpdYf.png" />
+<img src="https://i.imgur.com/YV13qKC.gif" />
 
 ## Bashbot configuration
 

@@ -499,4 +499,4 @@ permissions:
   - all
 ```
 
-<img src="https://i.imgur.com/GTgpdYf.png" />
+<img src="https://i.imgur.com/YV13qKC.gif" />
