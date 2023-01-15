@@ -17,10 +17,10 @@ help: "!bashbot list-examples"
 trigger: list-examples
 location: /bashbot/vendor/bashbot/examples
 command:
-  - find . -name "*.json"
+  - find . -name "*.yaml"
   - "| xargs -I {} bash -c"
-  - "'export example=$(basename {} .json)"
-  - "&& printf \"%21s - %s\" \"$example\" \"https://github.com/mathew-fleisch/bashbot/tree/main/examples/$example\""
+  - "'export example=$(basename {} .yaml)"
+  - "&& echo \"- <https://github.com/mathew-fleisch/bashbot/tree/main/examples/$example|$example>\""
   - "&& echo'"
   - "| sort -k 2"
 parameters: []

@@ -1,6 +1,8 @@
 # Bashbot Example - Regex Command
 
-In this example, a url is validated with a regular expression and curl is used to return the output as a message.
+In this example, a url is validated with a regular expression and curl is used to return the output as a message. Afterwards, the following (terrifying) examples, the user can pass any string directly to bash, and the stdout/stderr is returned as a message.
+
+<img src="https://i.imgur.com/JwCKJO4.gif">
 
 ## Bashbot Configuration
 
@@ -30,3 +32,27 @@ permissions:
 ```
 
 To match telephone numbers: `<tel:\+[0-9]+\|\+[0-9]+>`
+
+Note: Don't do this...
+
+```yaml
+name: Regular expression example
+description: With great power, comes great responsibility
+envvars: []
+dependencies: []
+help: "!bashbot regex $([command])"
+trigger: regex
+location: ./
+command:
+  - ". /usr/asdf/asdf.sh && ${command} || true"
+parameters:
+  - name: command
+    allowed: []
+    description: This should allow any text to be used as input
+    match: .*
+log: false
+ephemeral: false
+response: code
+permissions:
+  - PRIVATE-CHANNEL-ID
+```
