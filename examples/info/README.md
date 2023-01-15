@@ -2,7 +2,7 @@
 
 In this example, a bash script is executed to return information about the environment Bashbot is running in, and the channel/user name/id from which it was executed.
 
-<img src="https://i.imgur.com/GDK3Khr.gif">
+<img src="https://i.imgur.com/pIi7Pg2.gif">
 
 ## Bashbot configuration
 
