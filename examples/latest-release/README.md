@@ -2,7 +2,7 @@
 
 In this example, a curl is used to determine the latest version of Bashbot through the github release api
 
-<img src="https://i.imgur.com/w3wouOR.gif">
+<img src="https://i.imgur.com/VPEtFZC.gif">
 
 ## Bashbot configuration
 

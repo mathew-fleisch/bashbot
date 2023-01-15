@@ -2,6 +2,8 @@
 
 In this example, all of the yaml filenames are aggregated and sorted as a list.
 
+<img src="https://i.imgur.com/e4nEuSE.gif">
+
 ## Bashbot Configuration
 
 This command is triggered by sending `!bashbot list-examples` in a slack channel where Bashbot is also a member. There is no external script for this command, takes no arugments/parameters, and expects Bashbot's examples directory to exist. This command takes no arguments.
