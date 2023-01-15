@@ -2,7 +2,7 @@
 
 In this example, the configuration yaml file for Bashbot is parsed via [jq](https://stedolan.github.io/jq/) to display the trigger and name of each command in the file.
 
-<img src="https://i.imgur.com/bQZKRjX.gif">
+<img src="https://i.imgur.com/HAJ3TS2.gif">
 
 ## Bashbot Configuration
 

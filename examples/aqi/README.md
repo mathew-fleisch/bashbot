@@ -33,7 +33,7 @@ permissions:
   - all
 ```
 
-## Bashbot scripts
+---
 
 There is one script ([aqi.sh](aqi.sh)) associated with this example and takes one argument/parameter to retrieve the air quality index value for specific zip codes. The raw json response from the [Air Now API](https://docs.airnowapi.org/) before [aqi.sh](aqi.sh) parses the values that are displayed in slack:
 

@@ -470,7 +470,7 @@ permissions:
   - all
 ```
 
-<img src="https://i.imgur.com/bQZKRjX.gif">
+<img src="https://i.imgur.com/HAJ3TS2.gif">
 
 An example of a command that has regular expression match parameter, is the [aqi example](aqi). This command takes one argument, a zip code and a regular expression is used to validate it. The [aqi script](aqi/aqi.sh) is used to curl the [Air Now API](https://docs.airnowapi.org/), and form a custom response with emojis.
 
