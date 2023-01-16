@@ -5,10 +5,10 @@ kind: ServiceAccount
 metadata:
   name: bashbot
   labels:
-    helm.sh/chart: bashbot-v2.0.2
+    helm.sh/chart: bashbot-v2.0.3
     app.kubernetes.io/name: bashbot
     app.kubernetes.io/instance: bashbot
-    app.kubernetes.io/version: "v2.0.2"
+    app.kubernetes.io/version: "v2.0.3"
     app.kubernetes.io/managed-by: Helm
 ---
 # Source: bashbot/templates/configmap.yaml
@@ -586,7 +586,7 @@ spec:
                   name: bashbot-env
                   key: AIRQUALITY_API_KEY
                   optional: true
-          image: "mathewfleisch/bashbot:v2.0.2"
+          image: "mathewfleisch/bashbot:v2.0.3"
           imagePullPolicy: 
           name: bashbot
           command:

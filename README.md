@@ -111,7 +111,7 @@ Note: [yq](https://github.com/mikefarah/yq) is a dependency of running many make
 |                                                               |
 |  makefile targets                                             |
 +---------------------------------------------------------------+
-v2.0.2
+v2.0.3
 
 Usage:
   make <target>
