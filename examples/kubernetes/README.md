@@ -64,13 +64,13 @@ parameters:
     description: List all of the namespaces in the cluster
     source:
       - ". /usr/asdf/asdf.sh"
-      - "&& kubectl get namespaces | grep -v NAME | awk \"{print $1}\""
+      - "&& kubectl get namespaces | grep -v NAME | awk '{print $1}'"
   - name: podname
     allowed: []
     description: List all of the pods in the cluster by name
     source:
       - ". /usr/asdf/asdf.sh"
-      - "&& kubectl get pods -A | grep -v NAME | awk \"{print $2}\""
+      - "&& kubectl get pods -A | grep -v NAME | awk '{print $2}'"
 log: true
 ephemeral: false
 response: code
@@ -130,13 +130,13 @@ parameters:
     description: List all of the namespaces in the cluster
     source:
       - ". /usr/asdf/asdf.sh"
-      - "&& kubectl get namespaces | grep -v NAME | awk \"{print $1}\""
+      - "&& kubectl get namespaces | grep -v NAME | awk '{print $1}'"
   - name: podname
     allowed: []
     description: List all of the pods in the cluster by name
     source:
       - ". /usr/asdf/asdf.sh"
-      - "&& kubectl get pods -A | grep -v NAME | awk \"{print $2}\""
+      - "&& kubectl get pods -A | grep -v NAME | awk '{print $2}'"
 log: true
 ephemeral: false
 response: code
