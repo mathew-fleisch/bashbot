@@ -559,7 +559,7 @@ spec:
                   name: bashbot-env
                   key: AIRQUALITY_API_KEY
                   optional: true
-          image: "mathewfleisch/bashbot:v2.0.2"
+          image: "mathewfleisch/bashbot:v2.0.3"
           imagePullPolicy: 
           name: bashbot
           command:
