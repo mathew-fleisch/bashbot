@@ -20,9 +20,10 @@ ARG NRUSER=bb
 
 RUN apk add --update --no-cache bash curl git make jq yq \
     && rm -rf /var/cache/apk/* \
-    && addgroup -S ${NRUSER} \
-    && adduser -D -S ${NRUSER} -G ${NRUSER} \
-    && rm /bin/sh && ln -s /bin/bash /bin/sh
+    && rm /bin/sh && ln -s /bin/bash /bin/sh \
+    && if [[ "${NRUSER}" != "root" ]]; then \
+        addgroup -S ${NRUSER} && adduser -D -S ${NRUSER} -G ${NRUSER}; \
+    fi
 
 WORKDIR /bashbot
 COPY --from=builder --chown=${NRUSER}:${NRUSER} /bashbot/bin/bashbot-* /usr/local/bin/bashbot

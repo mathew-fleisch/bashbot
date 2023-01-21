@@ -125,11 +125,9 @@ Go stuff
   go-version          run the bashbot source code with the version argument
 
 Docker stuff
-  docker-build        build and tag bashbot:local
-  docker-run          run an existing build of bashbot:local
-  docker-run-bash     run an exsting build of bashbot:local but override the entrypoint with /bin/bash
-  docker-run-up-bash  run the latest upstream build of bashbot but override the entrypoint with /bin/bash
-  docker-run-up       run the latest upstream build of bashbot
+  docker-build        build and tag $(REGISTRY_NAME):$(REGISTRY_TAG)
+  docker-run          run an existing build of $(REGISTRY_NAME):$(REGISTRY_TAG)
+  docker-run-bash     run an exsting build of $(REGISTRY_NAME):$(REGISTRY_TAG) but override the entrypoint with /bin/bash
 
 Kubernetes stuff
   test-kind           run KinD tests
@@ -170,6 +168,11 @@ VERSION?=$(shell make version)
 LATEST_VERSION?=$(shell curl -s https://api.github.com/repos/mathew-fleisch/bashbot/releases/latest | grep tag_name | cut -d '"' -f 4)
 BINARY?=bin/bashbot
 SRC_LOCATION?=main.go
+# Public builds:  REGISTRY_NAME=mathewfleisch/bashbot or REGISTRY_NAME=ghcr.io/mathew-fleisch/bashbot
+REGISTRY_NAME?=bashbot
+# For latest tag: REGISTRY_TAG=latest"
+REGISTRY_TAG?=local
+NRUSER?=bb
 BASHBOT_LOG_LEVEL?=info
 BASHBOT_LOG_TYPE?=text
 TESTING_CHANNEL?=C034FNXS3FA
