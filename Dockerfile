@@ -22,7 +22,8 @@ RUN apk add --update --no-cache bash curl git make jq yq \
     && rm -rf /var/cache/apk/* \
     && rm /bin/sh && ln -s /bin/bash /bin/sh \
     && if [[ "${NRUSER}" != "root" ]]; then \
-        addgroup -S ${NRUSER} && adduser -D -S ${NRUSER} -G ${NRUSER}; \
+        addgroup -S ${NRUSER} && \
+        adduser -D -S ${NRUSER} -G ${NRUSER}; \
     fi
 
 WORKDIR /bashbot
