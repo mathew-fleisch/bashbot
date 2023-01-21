@@ -88,7 +88,7 @@ test "${os}" == "darwin" && xattr -d com.apple.quarantine /usr/local/bin/bashbot
 
 # To verify installation run version or help commands
 bashbot version
-# bashbot-darwin-amd64    v2.0.3
+# bashbot-darwin-amd64    v2.0.4
 
 bashbot --help
 #  ____            _     ____        _   
@@ -159,12 +159,12 @@ export LOG_LEVEL=info
 export LOG_FORMAT=text
 
 asdf plugin add bashbot
-asdf install bashbot 2.0.3
-asdf global bashbot 2.0.3
+asdf install bashbot 2.0.4
+asdf global bashbot 2.0.4
 
 # To verify installation run version or help commands
 bashbot version
-# bashbot-darwin-amd64    v2.0.3
+# bashbot-darwin-amd64    v2.0.4
 
 # See binary instructions after `bashbot verison`
 ```
@@ -252,7 +252,7 @@ Note: For bashbot to pick up changes to the configmap/values, a running pod must
 # Define your bashbot instance and namespace names
 export BOTNAME=bashbot
 export NAMESPACE=bashbot
-export TARGET_VERSION=v2.0.3
+export TARGET_VERSION=v2.0.4
 
 # Get sample-env-file, sample-config.yaml, and .tool-versions
 wget https://raw.githubusercontent.com/mathew-fleisch/bashbot/main/.tool-versions -q -O ${PWD}/.tool-versions
@@ -339,7 +339,7 @@ spec:
   source:
     chart: bashbot
     repoURL: https://mathew-fleisch.github.io/bashbot
-    targetRevision: v2.0.3
+    targetRevision: v2.0.4
     helm:
       releaseName: bashbot
       values: |

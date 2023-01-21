@@ -21,7 +21,7 @@ jobs:
         uses: asdf-vm/actions/install@v1
         with:
           tool_versions: |
-            bashbot 2.0.3
+            bashbot 2.0.4
             yq 4.30.6
       -
         name: Run Bashbot as debugging gate to job

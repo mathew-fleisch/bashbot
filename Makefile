@@ -6,6 +6,11 @@ BINARY?=bin/bashbot
 SRC_LOCATION?=main.go
 LDFLAGS="-X github.com/mathew-fleisch/bashbot/cmd.Version=${VERSION}"
 GO_BUILD=go build -ldflags=$(LDFLAGS)
+# Public builds:  REGISTRY_NAME=mathewfleisch/bashbot or REGISTRY_NAME=ghcr.io/mathew-fleisch/bashbot
+REGISTRY_NAME?=bashbot
+# For latest tag: REGISTRY_TAG=latest"
+REGISTRY_TAG?=local
+NRUSER?=bb
 BASHBOT_LOG_LEVEL?=info
 BASHBOT_LOG_TYPE?=text
 TESTING_CHANNEL?=C034FNXS3FA
@@ -59,11 +64,14 @@ go-version: ## run the bashbot source code with the version argument
 
 .PHONY: docker-build
 docker-build: ## build and tag bashbot:local
-	docker build -t bashbot:local .
+
+	docker build --build-arg NRUSER=$(NRUSER) -t $(REGISTRY_NAME):$(REGISTRY_TAG) .
 
 .PHONY: docker-run
-docker-run: ## run an existing build of bashbot:local
-	@docker run -it --rm \
+docker-run: ## run an existing build of $(REGISTRY_NAME):$(REGISTRY_TAG)
+	@echo "Public Builds:  REGISTRY_NAME=mathewfleisch/bashbot or REGISTRY_NAME=ghcr.io/mathew-fleisch/bashbot"
+	@echo "for latest tag: REGISTRY_TAG=latest"
+	docker run -it --rm \
 		-v $(HELM_CONFIG_YAML):/bashbot/config.yaml \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
 		-v $(HELM_TOOL_VERSIONS):/bashbot/.tool-versions \
@@ -73,11 +81,13 @@ docker-run: ## run an existing build of bashbot:local
 		-e SLACK_APP_TOKEN \
 		-e LOG_LEVEL="$(BASHBOT_LOG_LEVEL)" \
 		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
-		bashbot:local
+		$(REGISTRY_NAME):$(REGISTRY_TAG)
 
 .PHONY: docker-run-bash
-docker-run-bash: ## run an exsting build of bashbot:local but override the entrypoint with /bin/bash
-	@docker run -it --rm --entrypoint bash \
+docker-run-bash: ## run an exsting build of $(REGISTRY_NAME):$(REGISTRY_TAG) but override the entrypoint with /bin/bash
+	@echo "Public Builds:  REGISTRY_NAME=mathewfleisch/bashbot or REGISTRY_NAME=ghcr.io/mathew-fleisch/bashbot"
+	@echo "for latest tag: REGISTRY_TAG=latest"
+	docker run -it --rm --entrypoint bash \
 		-v $(HELM_CONFIG_YAML):/bashbot/config.yaml \
 		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
 		-v $(HELM_TOOL_VERSIONS):/bashbot/.tool-versions \
@@ -87,35 +97,8 @@ docker-run-bash: ## run an exsting build of bashbot:local but override the entry
 		-e SLACK_APP_TOKEN \
 		-e LOG_LEVEL="$(BASHBOT_LOG_LEVEL)" \
 		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
-		bashbot:local
+		$(REGISTRY_NAME):$(REGISTRY_TAG)
 
-.PHONY: docker-run-up-bash
-docker-run-up-bash: ## run the latest upstream build of bashbot but override the entrypoint with /bin/bash
-	@docker run -it --rm --entrypoint bash \
-		-v $(HELM_CONFIG_YAML):/bashbot/config.yaml \
-		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
-		-v $(HELM_TOOL_VERSIONS):/bashbot/.tool-versions \
-		-e GIT_TOKEN \
-		-e AIRQUALITY_API_KEY \
-		-e SLACK_BOT_TOKEN \
-		-e SLACK_APP_TOKEN \
-		-e LOG_LEVEL="$(BASHBOT_LOG_LEVEL)" \
-		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
-		mathewfleisch/bashbot:$(LATEST_VERSION)
-
-.PHONY: docker-run-up
-docker-run-up: ## run the latest upstream build of bashbot
-	@docker run -it --rm \
-		-v $(HELM_CONFIG_YAML):/bashbot/config.yaml \
-		-e BASHBOT_CONFIG_FILEPATH="/bashbot/config.yaml" \
-		-v $(HELM_TOOL_VERSIONS):/bashbot/.tool-versions \
-		-e GIT_TOKEN \
-		-e AIRQUALITY_API_KEY \
-		-e SLACK_BOT_TOKEN \
-		-e SLACK_APP_TOKEN \
-		-e LOG_LEVEL="$(BASHBOT_LOG_LEVEL)" \
-		-e LOG_FORMAT="$(BASHBOT_LOG_TYPE)" \
-		mathewfleisch/bashbot:$(LATEST_VERSION)
 
 
 ##@ Kubernetes stuff
@@ -138,7 +121,7 @@ test-run: ## run tests designed for bashbot running in kubernetes
 .PHONY: kind-setup
 kind-setup: docker-build ## setup a KinD cluster to test bashbot's helm chart
 	kind create cluster || true
-	kind load docker-image bashbot:local
+	kind load docker-image $(REGISTRY_NAME):$(REGISTRY_TAG)
 
 .PHONY: kind-cleanup
 kind-cleanup: ## delete any KinD cluster set up for bashbot
@@ -173,8 +156,8 @@ helm-install: helm-uninstall ## install bashbot via helm into an existing KinD c
 		--namespace $(NAMESPACE) \
 		--set namespace=$(NAMESPACE) \
 		--set botname=$(BOTNAME) \
-		--set image.repository=bashbot \
-		--set image.tag=local \
+		--set image.repository=$(REGISTRY_NAME) \
+		--set image.tag=$(REGISTRY_TAG) \
 		--set log_level=$(BASHBOT_LOG_LEVEL) \
 		--set log_format=$(BASHBOT_LOG_TYPE) \
 		--set-file '\.tool-versions'=$(HELM_TOOL_VERSIONS) \
@@ -237,7 +220,7 @@ test-lint: ## lint go source with golangci-lint
 test-docker: ## use dockle to test the dockerfile for best practices
 	export DOCKER_CONTENT_TRUST=1 \
 		&& make docker-build \
-		&& dockle bashbot:local
+		&& dockle $(REGISTRY_NAME):$(REGISTRY_TAG)
 
 # go test -cover -v ./...
 .PHONY: test-go
