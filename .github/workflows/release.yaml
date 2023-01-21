@@ -79,7 +79,7 @@ jobs:
           cache-to: type=inline
       -
         name: Build and push root container
-        id: docker_build
+        id: docker_build_root
         uses: docker/build-push-action@v3
         with:
           push: true
