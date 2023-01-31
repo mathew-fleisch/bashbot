@@ -18,13 +18,31 @@ jobs:
       - self-hosted
       - generic-runner
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GIT_TOKEN }}
+          fetch-depth: 0
+
       - name: "Update asdf versions"
-        env:
-          GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
-          REPO_OWNER: mathew-fleisch
-          REPO_NAME: bashbot
-          REPO_BRANCH: main
-        # See the tools repo for more information: https://github.com/mathew-fleisch/tools
-        run: wget -qO- https://raw.githubusercontent.com/mathew-fleisch/tools/main/scripts/update-asdf-to-latest.sh | bash
+        run: |
+          echo "Current .tool-versions:"
+          cat .tool-versions
+          new=""
+          for dep in $(cat .tool-versions | cut -d' ' -f1); do
+          new="$new$dep $(asdf latest $dep)\n"
+          done
+          echo "Latest .tool-versions:"
+          echo "$new"
+          echo "$new" > .tool-versions
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          if [[ $(git status --porcelain) ]]; then
+            git add .tool-versions
+            git commit -m "New asdf dependencies updated"
+            git push origin main
+          else
+            echo "There were no new updates to asdf dependencies..."
+          fi
 
 
