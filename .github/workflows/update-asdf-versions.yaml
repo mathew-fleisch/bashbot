@@ -28,13 +28,13 @@ jobs:
         run: |
           echo "Current .tool-versions:"
           cat .tool-versions
-          new=""
+          touch new-tool-versions
           for dep in $(cat .tool-versions | cut -d' ' -f1); do
-          new="$new$dep $(asdf latest $dep)\n"
+            echo "$dep $(asdf latest $dep)" >> new-tool-versions
           done
           echo "Latest .tool-versions:"
-          echo "$new"
-          echo "$new" > .tool-versions
+          cat new-tool-versions
+          cat new-tool-versions > .tool-versions
           git config user.name github-actions
           git config user.email github-actions@github.com
           if [[ $(git status --porcelain) ]]; then
