@@ -33,7 +33,7 @@ This command is triggered by sending `bashbot get-file-from-repo` in a slack cha
 
 ## Bashbot script
 
-This script expects environment variables to be set before executing and is designed to download a single file from a public or private repository. This command is useful to update the configuration json of a running instance of Bashbot without rebuilding or restarting. Each command that is executed in Bashbot will re-parse the json file at `$BASH_CONFIG_FILEPATH`. Running this command will replace the running configuration json.
+This script expects environment variables to be set before executing and is designed to download a single file from a public or private repository. This command is useful to update the configuration json of a running instance of Bashbot without rebuilding or restarting. Each command that is executed in Bashbot will re-parse the json file at `$BASHBOT_CONFIG_FILEPATH`. Running this command will replace the running configuration json.
 
 ```bash
 github_base="${github_base:-api.github.com}"

@@ -56,7 +56,7 @@ wget https://raw.githubusercontent.com/mathew-fleisch/bashbot/main/sample-config
 wget https://raw.githubusercontent.com/mathew-fleisch/bashbot/main/sample-env-file -q -O ${PWD}/.env
 
 # Set a path to your local configuration file
-export BASH_CONFIG_FILEPATH=${PWD}/config.yaml
+export BASHBOT_CONFIG_FILEPATH=${PWD}/config.yaml
 # Set `Bot User OAuth Access Token` as SLACK_BOT_TOKEN environment variable
 export SLACK_BOT_TOKEN=xoxb-xxxxxxxxx-xxxxxxx
 # Set `Bot App Access Token` as SLACK_APP_TOKEN environment variable
@@ -146,9 +146,9 @@ wget https://raw.githubusercontent.com/mathew-fleisch/bashbot/main/sample-config
 wget https://raw.githubusercontent.com/mathew-fleisch/bashbot/main/sample-env-file -q -O ${PWD}/.env
 
 # Set a path to your local configuration file
-export BASH_CONFIG_FILEPATH=${PWD}/config.yaml
+export BASHBOT_CONFIG_FILEPATH=${PWD}/config.yaml
 # Set a path to your local configuration file
-export BASH_CONFIG_FILEPATH=${PWD}/bashbot/config.yaml
+export BASHBOT_CONFIG_FILEPATH=${PWD}/bashbot/config.yaml
 # Set `Bot User OAuth Access Token` as SLACK_BOT_TOKEN environment variable
 export SLACK_BOT_TOKEN=xoxb-xxxxxxxxx-xxxxxxx
 # Set `Bot App Access Token` as SLACK_APP_TOKEN environment variable
