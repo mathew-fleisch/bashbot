@@ -2,12 +2,13 @@ package slack
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"gopkg.in/yaml.v2"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/slack-go/slack"
@@ -196,7 +197,7 @@ func (c *Client) SendMessageToChannel(channel, msg string) {
 	log.Infof("Sent slack message[Channel:%s]: %s", channelID, msg)
 }
 
-// SendMessageToUser sends to message to a slack user in a slack channel.
+// SendMessageToUser sends a message to a slack user in a slack channel.
 func (c *Client) SendMessageToUser(channel, user, msg string) {
 	messageParams := slack.PostMessageParameters{UnfurlLinks: true, UnfurlMedia: true}
 	_, err := c.slackClient.PostEphemeral(
@@ -211,6 +212,15 @@ func (c *Client) SendMessageToUser(channel, user, msg string) {
 		return
 	}
 	log.Info("Sent ephemeral slack message[Channel:" + channel + "]: " + msg)
+}
+
+// SendFileToChannel sends a file to a slack channel.
+func (c *Client) SendFileToChannel(channel, filename string) error {
+	_, err := c.slackClient.UploadFile(slack.FileUploadParameters{
+		Channels: []string{channel},
+		File:     filename,
+	})
+	return err
 }
 
 func truncateString(str string, num int) string {
@@ -538,8 +548,6 @@ func (c *Client) processValidCommand(cmds []string, tool Tool, channel, user, ti
 		}
 	}
 	if tool.Log {
-		// c.logToChannel(channel, user, ret)
-
 		var tFile = fmt.Sprintf("bashbot-log-%s.txt", timestamp)
 		log.Info(tFile)
 		f, err := os.Create(tFile)
