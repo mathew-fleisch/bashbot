@@ -1,4 +1,4 @@
-# Bashbot Example - Rip-Mp3 Command
+# Bashbot Example - Rip-Mp3 (from youtube) Command
 
 In this example, a youtube url is passed to the rip-mp3 command with the [youtube-dl tool](https://youtube-dl.org/) installed on the bashbot host. An audio file is stripped from the youtube video, and returned as a message with the `bashbot send-file` command. A full example can be found at [rip-mp3.yaml](rip-mp3.yaml)
 
