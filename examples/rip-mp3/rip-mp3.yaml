@@ -1,0 +1,86 @@
+botname: bashbot
+namespace: bashbot
+log_level: info
+log_format: text
+
+image:
+  repository: mathewfleisch/bashbot
+  tag: latest-root
+  pullPolicy: IfNotPresent
+  command:
+  - /bashbot/entrypoint.sh
+serviceAccount:
+  create: false
+
+config.yaml: |
+  admins:
+    - trigger: "!bashbot"
+      appName: Bashbot
+      userIds:
+        - UUC6G0TT8
+      privateChannelId: C023GSDGJEP
+      logChannelId: C017PPHT4HY
+  messages:
+    - active: true
+      name: welcome
+      text: Witness the power of %s
+    - active: true
+      name: processing_command
+      text: ":robot_face: Processing command..."
+    - active: true
+      name: processing_raw_command
+      text: ":smiling_imp: Processing raw command..."
+    - active: true
+      name: command_not_found
+      text: ":thinking_face: Command not found..."
+    - active: true
+      name: incorrect_parameters
+      text: ":face_with_monocle: Incorrect number of parameters"
+    - active: true
+      name: invalid_parameter
+      text: ":face_with_monocle: Invalid parameter value: %s"
+    - active: true
+      name: ephemeral
+      text: ":shushing_face: Message only shown to user who triggered it."
+    - active: true
+      name: unauthorized
+      text: |-
+        :skull_and_crossbones: You are not authorized to use this command in this channel.
+        Allowed in: [%s]
+    - active: true
+      name: missingenvvar
+      text: ":skull_and_crossbones: This command requires this environment variable to be set: [%s]"
+    - active: true
+      name: missingdependency
+      text: ":skull_and_crossbones: This command requires: [%s]"
+  tools:
+    - name: Rip mp3 from Youtube
+      description: Use the youtube-dl tool to download the audio file from a youtube videop
+      envvars: []
+      dependencies:
+        - python3
+        - ffmpeg
+        - youtube-dl
+      help: "!bashbot rip-mp3 [youtube-url]"
+      trigger: rip-mp3
+      location: ./
+      command:
+        - "youtube-dl -q -o 'bashbot-youtube-rip-${TRIGGERED_AT}.%(ext)s' -x --audio-format mp3 ${url} &&"
+        - "bashbot send-file --channel ${TRIGGERED_CHANNEL_ID} --file ${PWD}/bashbot-youtube-rip-${TRIGGERED_AT}.mp3"
+      parameters:
+        - name: url
+          allowed: []
+          description: A valid url (Expecting youtube)
+          match: ^(https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$
+      log: true
+      ephemeral: false
+      response: text
+      permissions:
+        - all
+  dependencies:
+    - name: "Install youtube-dl tool"
+      install:
+        - "apk add python3 py3-pip ffmpeg &&"
+        - "ln -s /usr/bin/python3 /usr/local/bin/python &&"
+        - "wget https://yt-dl.org/downloads/latest/youtube-dl -O /usr/local/bin/youtube-dl &&"
+        - "chmod +x /usr/local/bin/youtube-dl"
