@@ -1,4 +1,4 @@
 helm 3.11.2
-kubectl 1.26.2
+kubectl 1.26.3
 kubectx 0.9.4
-kustomize 5.0.0
+kustomize 
