@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v3
       - 
         name: Install bashbot with asdf
-        uses: asdf-vm/actions/install@v1
+        uses: asdf-vm/actions/install@v2
         with:
           tool_versions: |
             bashbot 2.0.5

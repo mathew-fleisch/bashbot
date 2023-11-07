@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 0
       - 
         name: Install stuff with asdf
-        uses: asdf-vm/actions/install@v1
+        uses: asdf-vm/actions/install@v2
         with:
           tool_versions: |
             golang 1.19.4
@@ -114,7 +114,7 @@ jobs:
           tag: bashbot-${{ env.RELEASE_VERSION }}
       - 
         name: Install Bashbot via asdf from release artifacts
-        uses: asdf-vm/actions/install@v1
+        uses: asdf-vm/actions/install@v2
         with:
           tool_versions: bashbot ${{ env.RELEASE_VERSION_NO_V }}
       -
