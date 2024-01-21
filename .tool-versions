@@ -1,3 +1,3 @@
-helm 3.13.3
-kubectl 1.29.0
+helm 3.14.0
+kubectl 1.29.1
 kubectx 0.9.5
