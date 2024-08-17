@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/sirupsen/logrus v1.9.2
+	github.com/sirupsen/logrus v1.9.3
 	github.com/slack-go/slack v0.12.2-0.20221224054449-a73519980223
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.19.0
