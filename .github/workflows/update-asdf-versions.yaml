@@ -8,9 +8,7 @@ name: Update asdf versions
 on:
   schedule: # trigger Sundays at 12:20am PT (19:20UTC)
     - cron: '20 19 * * 0'
-  repository_dispatch:
-    types:
-      - trigger-asdf-update
+  workflow_dispatch:
 jobs:
   build:
     name: Update asdf versions
