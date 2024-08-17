@@ -37,7 +37,7 @@ jobs:
           cat new-tool-versions > .tool-versions
           git config user.name github-actions
           git config user.email github-actions@github.com
-          if [[ $(git status --porcelain) ]]; then
+          if [ -n "$(git status -s)" ]; then
             git add .tool-versions
             git commit -m "New asdf dependencies updated"
             git push origin main
