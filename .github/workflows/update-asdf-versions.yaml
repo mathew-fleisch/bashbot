@@ -37,6 +37,7 @@ jobs:
           cat new-tool-versions > .tool-versions
           git config user.name github-actions
           git config user.email github-actions@github.com
+          git pull origin main
           if [ -n "$(git status -s)" ]; then
             git add .tool-versions
             git commit -m "New asdf dependencies updated"
