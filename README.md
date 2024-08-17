@@ -135,9 +135,9 @@ Kubernetes stuff
   kind-setup          setup a KinD cluster to test bashbot's helm chart
   kind-cleanup        delete any KinD cluster set up for bashbot
   version             get the current helm chart version
-  helm-bump-patch     Bump-patch the semantic version of the helm chart using semver tool
-  helm-bump-minor     Bump-minor the semantic version of the helm chart using semver tool
-  helm-bump-major     Bump-major the semantic version of the helm chart using semver tool
+  bump-patch     Bump-patch the semantic version of the helm chart using semver tool
+  bump-minor     Bump-minor the semantic version of the helm chart using semver tool
+  bump-major     Bump-major the semantic version of the helm chart using semver tool
   helm-install        install bashbot via helm into an existing KinD cluster to /usr/local/bin/bashbot
   helm-uninstall      uninstall bashbot via helm/kubectl from an existing cluster
   pod-get             with an existing pod bashbot pod running, use kubectl to get the pod name

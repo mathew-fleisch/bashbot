@@ -22,6 +22,64 @@ HELM_TOOL_VERSIONS?=$(PWD)/.tool-versions
 HELM_ENV?=${PWD}/.env
 
 
+##@ Misc stuff
+
+.PHONY: help
+help: ## this
+	@echo "+---------------------------------------------------------------+"
+	@echo "|   ____            _     ____        _                         |"
+	@echo "|  |  _ \          | |   |  _ \      | |                        |"
+	@echo "|  | |_) | __ _ ___| |__ | |_) | ___ | |_                       |"
+	@echo "|  |  _ < / _' / __| '_ \|  _ < / _ \| __|                      |"
+	@echo "|  | |_) | (_| \__ \ | | | |_) | (_) | |_                       |"
+	@echo "|  |____/ \__,_|___/_| |_|____/ \___/ \__|                      |"
+	@echo "|                                                               |"
+	@echo "|  makefile targets                                             |"
+	@echo "+---------------------------------------------------------------+"
+	@echo "$(VERSION)"
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+
+.PHONY: version
+version: ## get the current helm chart version
+	@yq e '.version' charts/bashbot/Chart.yaml
+
+.PHONY: bump-patch
+bump-patch: ## Bump-patch the semantic version of the helm chart using semver tool
+	sed -i 's/'$(shell make version)'/v'$(shell semver bump patch $(shell make version))'/g' charts/bashbot/Chart.yaml
+
+.PHONY: bump-minor
+bump-minor: ## Bump-minor the semantic version of the helm chart using semver tool
+	sed -i 's/'$(shell make version)'/v'$(shell semver bump minor $(shell make version))'/g' charts/bashbot/Chart.yaml
+
+.PHONY: bump-major
+bump-major: ## Bump-major the semantic version of the helm chart using semver tool
+	sed -i 's/'$(shell make version)'/v'$(shell semver bump major $(shell make version))'/g' charts/bashbot/Chart.yaml
+
+.PHONY: install-latest
+install-latest: ## install the latest version of the bashbot binary to /usr/local/bin/bashbot with wget
+	wget -q -O /usr/local/bin/bashbot https://github.com/mathew-fleisch/bashbot/releases/download/$(LATEST_VERSION)/bashbot-$(GOOS)-$(GOARCH)
+	chmod +x /usr/local/bin/bashbot
+ifeq ($(shell uname -s),Darwin)
+	@echo "To add bashbot to an allowlist:"
+	@echo "xattr -d com.apple.quarantine /usr/local/bin/bashbot"
+endif
+	bashbot version
+	@echo "Run 'bashbot --help' for more information"
+
+.PHONY: update-asdf-deps
+update-asdf-deps: ## trigger github action to update asdf dependencies listed in .tool-versions (requires GIT_TOKEN)
+	@curl -s -H "Accept: application/vnd.github.everest-preview+json" \
+	    -H "Authorization: token $(GIT_TOKEN)" \
+	    --request POST \
+	    --data '{"event_type": "trigger-asdf-update"}' \
+	    https://api.github.com/repos/mathew-fleisch/bashbot/dispatches
+	@echo "Updating asdf dependencies via github-action: https://github.com/mathew-fleisch/bashbot/actions/workflows/update-asdf-versions.yaml"
+
+.PHONY: gif
+gif: ## Create a gif from a quicktime screen recording that has been exported to .mp4 from imovie
+	@echo "Generating gif"
+	@ffmpeg -i examples/$(example)/$(example).mp4 -r 10 -pix_fmt rgb24 examples/$(example)/$(example).gif
+
 ##@ Go stuff
 
 .PHONY: go-build
@@ -127,21 +185,6 @@ kind-setup: docker-build ## setup a KinD cluster to test bashbot's helm chart
 kind-cleanup: ## delete any KinD cluster set up for bashbot
 	kind delete cluster
 
-.PHONY: version
-version: ## get the current helm chart version
-	@yq e '.version' charts/bashbot/Chart.yaml
-
-.PHONY: helm-bump-patch
-helm-bump-patch: ## Bump-patch the semantic version of the helm chart using semver tool
-	sed -i 's/'$(shell make version)'/v'$(shell semver bump patch $(shell make version))'/g' charts/bashbot/Chart.yaml
-
-.PHONY: helm-bump-minor
-helm-bump-minor: ## Bump-minor the semantic version of the helm chart using semver tool
-	sed -i 's/'$(shell make version)'/v'$(shell semver bump minor $(shell make version))'/g' charts/bashbot/Chart.yaml
-
-.PHONY: helm-bump-major
-helm-bump-major: ## Bump-major the semantic version of the helm chart using semver tool
-	sed -i 's/'$(shell make version)'/v'$(shell semver bump major $(shell make version))'/g' charts/bashbot/Chart.yaml
 
 .PHONY: helm-install
 helm-install: helm-uninstall ## install bashbot via helm into an existing KinD cluster to /usr/local/bin/bashbot
@@ -226,47 +269,3 @@ test-docker: ## use dockle to test the dockerfile for best practices
 .PHONY: test-go
 test-go: ## run go coverage tests
 	@echo "no tests..."
-
-
-##@ Other stuff
-
-
-.PHONY: help
-help: ## this
-	@echo "+---------------------------------------------------------------+"
-	@echo "|   ____            _     ____        _                         |"
-	@echo "|  |  _ \          | |   |  _ \      | |                        |"
-	@echo "|  | |_) | __ _ ___| |__ | |_) | ___ | |_                       |"
-	@echo "|  |  _ < / _' / __| '_ \|  _ < / _ \| __|                      |"
-	@echo "|  | |_) | (_| \__ \ | | | |_) | (_) | |_                       |"
-	@echo "|  |____/ \__,_|___/_| |_|____/ \___/ \__|                      |"
-	@echo "|                                                               |"
-	@echo "|  makefile targets                                             |"
-	@echo "+---------------------------------------------------------------+"
-	@echo "$(VERSION)"
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
-
-.PHONY: install-latest
-install-latest: ## install the latest version of the bashbot binary to /usr/local/bin/bashbot with wget
-	wget -q -O /usr/local/bin/bashbot https://github.com/mathew-fleisch/bashbot/releases/download/$(LATEST_VERSION)/bashbot-$(GOOS)-$(GOARCH)
-	chmod +x /usr/local/bin/bashbot
-ifeq ($(shell uname -s),Darwin)
-	@echo "To add bashbot to an allowlist:"
-	@echo "xattr -d com.apple.quarantine /usr/local/bin/bashbot"
-endif
-	bashbot version
-	@echo "Run 'bashbot --help' for more information"
-
-.PHONY: update-asdf-deps
-update-asdf-deps: ## trigger github action to update asdf dependencies listed in .tool-versions (requires GIT_TOKEN)
-	@curl -s -H "Accept: application/vnd.github.everest-preview+json" \
-	    -H "Authorization: token $(GIT_TOKEN)" \
-	    --request POST \
-	    --data '{"event_type": "trigger-asdf-update"}' \
-	    https://api.github.com/repos/mathew-fleisch/bashbot/dispatches
-	@echo "Updating asdf dependencies via github-action: https://github.com/mathew-fleisch/bashbot/actions/workflows/update-asdf-versions.yaml"
-
-.PHONY: gif
-gif: ## Create a gif from a quicktime screen recording that has been exported to .mp4 from imovie
-	@echo "Generating gif"
-	@ffmpeg -i examples/$(example)/$(example).mp4 -r 10 -pix_fmt rgb24 examples/$(example)/$(example).gif
