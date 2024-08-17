@@ -8,9 +8,7 @@ name: Update asdf versions
 on:
   schedule: # trigger Sundays at 12:20am PT (19:20UTC)
     - cron: '20 19 * * 0'
-  repository_dispatch:
-    types:
-      - trigger-asdf-update
+  workflow_dispatch:
 jobs:
   build:
     name: Update asdf versions
@@ -37,7 +35,8 @@ jobs:
           cat new-tool-versions > .tool-versions
           git config user.name github-actions
           git config user.email github-actions@github.com
-          if [[ $(git status --porcelain) ]]; then
+          git pull origin main
+          if [ -n "$(git status -s)" ]; then
             git add .tool-versions
             git commit -m "New asdf dependencies updated"
             git push origin main
