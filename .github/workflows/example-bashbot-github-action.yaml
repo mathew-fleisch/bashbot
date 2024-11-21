@@ -14,7 +14,7 @@ jobs:
     steps:
       - 
         name: Install stuff with asdf
-        uses: asdf-vm/actions/install@v2
+        uses: asdf-vm/actions/install@v3
         with:
           tool_versions: |
             bashbot 2.0.5
