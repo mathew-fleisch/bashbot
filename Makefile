@@ -94,9 +94,8 @@ go-clean: ## delete any existing binaries at ./bin/*
 .PHONY: go-setup
 go-setup: ## install go-dependencies
 	go mod tidy
-	go get github.com/slack-go/slack@master
+	go get github.com/slack-go/slack@v0.15.0
 	go get github.com/sirupsen/logrus
-	go get -u golang.org/x/sys
 	go mod vendor
 	go install -v ./...
 

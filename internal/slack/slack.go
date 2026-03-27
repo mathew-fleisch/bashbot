@@ -222,9 +222,10 @@ func (c *Client) SendMessageToUser(channel, user, msg string) {
 
 // SendFileToChannel sends a file to a slack channel.
 func (c *Client) SendFileToChannel(channel, filename string) error {
-	_, err := c.slackClient.UploadFile(slack.FileUploadParameters{
-		Channels: []string{channel},
+	_, err := c.slackClient.UploadFileV2(slack.UploadFileV2Parameters{
+		Channel:  channel,
 		File:     filename,
+		Filename: filename,
 	})
 	return err
 }
@@ -537,12 +538,13 @@ func (c *Client) processValidCommand(cmds []string, tool Tool, channel, user, ti
 		if err2 != nil {
 			log.Error(err2)
 		}
-		uploadParams := slack.FileUploadParameters{
-			Channels: []string{channel},
+		uploadParams := slack.UploadFileV2Parameters{
+			Channel:  channel,
 			File:     tFile,
+			Filename: tFile,
 		}
 
-		if _, err := c.slackClient.UploadFile(uploadParams); err != nil {
+		if _, err := c.slackClient.UploadFileV2(uploadParams); err != nil {
 			log.Errorf("Unexpected error uploading file: %s", err)
 		}
 	} else {
@@ -565,12 +567,13 @@ func (c *Client) processValidCommand(cmds []string, tool Tool, channel, user, ti
 		if err2 != nil {
 			log.Error(err2)
 		}
-		uploadParams := slack.FileUploadParameters{
-			Channels: []string{c.cfg.Admins[0].LogChannelId},
+		uploadParams := slack.UploadFileV2Parameters{
+			Channel:  c.cfg.Admins[0].LogChannelId,
 			File:     tFile,
+			Filename: tFile,
 		}
 
-		if _, err := c.slackClient.UploadFile(uploadParams); err != nil {
+		if _, err := c.slackClient.UploadFileV2(uploadParams); err != nil {
 			log.Errorf("Unexpected error uploading file: %s", err)
 		}
 	}
