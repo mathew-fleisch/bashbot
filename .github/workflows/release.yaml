@@ -18,6 +18,10 @@ jobs:
     name: Release Bashbot
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
     steps:
       -
         name: Debug Secrets
@@ -123,7 +127,7 @@ jobs:
           token: ${{ secrets.GIT_TOKEN }}
           allowUpdates: true
           artifacts: "bin/*"
-          tag: bashbot-${{ env.RELEASE_VERSION }}
+          tag: ${{ env.RELEASE_VERSION }}
       - 
         name: Install Bashbot via asdf from release artifacts
         uses: asdf-vm/actions/install@v3
