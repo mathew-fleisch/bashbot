@@ -184,3 +184,5 @@ HELM_TOOL_VERSIONS?=$(PWD)/.tool-versions
 HELM_ENV?=${PWD}/.env
 ```
 
+
+<!-- CI Test: Verifying modernization of Go 1.22 and GitHub Actions -->
