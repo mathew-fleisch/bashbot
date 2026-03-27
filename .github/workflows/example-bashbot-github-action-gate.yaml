@@ -15,10 +15,10 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - 
         name: Install bashbot with asdf
-        uses: asdf-vm/actions/install@v2
+        uses: asdf-vm/actions/install@v3
         with:
           tool_versions: |
             bashbot 2.0.5
