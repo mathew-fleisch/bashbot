@@ -17,6 +17,8 @@ jobs:
     steps:
     - name: Checkout the code
       uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
     - name: Build the Docker image
       run: make docker-build
     - name: Run the Anchore scan action itself with GitHub Advanced Security code scanning integration enabled
@@ -46,6 +48,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
 
     - name: Install Golang via asdf
       uses: asdf-vm/actions/install@v3
@@ -72,6 +76,7 @@ jobs:
         name: Checkout
         uses: actions/checkout@v3
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
       - 
         name: Install stuff with asdf
@@ -116,6 +121,7 @@ jobs:
         name: Checkout
         uses: actions/checkout@v3
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
       -
         name: KinD Test
