@@ -32,8 +32,8 @@ jobs:
       -
         name: Set tag environment variable
         run: |
-          echo "RELEASE_VERSION=$(make version)" >> $GITHUB_ENV
-          echo "RELEASE_VERSION_NO_V=$(make version)" | sed -e 's/v//g' >> $GITHUB_ENV
+          echo "RELEASE_VERSION=$(make --no-print-directory version)" >> $GITHUB_ENV
+          echo "RELEASE_VERSION_NO_V=$(make --no-print-directory version)" | sed -e 's/v//g' >> $GITHUB_ENV
       -
         name: Build go-binaries
         run: |
