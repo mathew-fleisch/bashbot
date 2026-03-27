@@ -69,12 +69,18 @@ func loadConfigFile(filePath string) (*Config, error) {
 
 // Run runs the slack socketmode client on background.
 func (c *Client) Run() {
-	go c.socketClient.Run()
+	go func() {
+		if err := c.socketClient.Run(); err != nil {
+			log.WithError(err).Error("Problem running socket client")
+		}
+	}()
 
 	for event := range c.socketClient.Events {
 		switch event.Type {
 		case socketmode.EventTypeEventsAPI:
-			c.eventsAPIHandler(event)
+			if err := c.eventsAPIHandler(event); err != nil {
+				log.WithError(err).Error("Error handling Events API event")
+			}
 
 		case socketmode.EventTypeConnected:
 			log.Info("Bashbot is now connected to slack. Primary trigger: `" + c.cfg.Admins[0].Trigger + "`")
@@ -216,9 +222,10 @@ func (c *Client) SendMessageToUser(channel, user, msg string) {
 
 // SendFileToChannel sends a file to a slack channel.
 func (c *Client) SendFileToChannel(channel, filename string) error {
-	_, err := c.slackClient.UploadFile(slack.FileUploadParameters{
-		Channels: []string{channel},
+	_, err := c.slackClient.UploadFileV2(slack.UploadFileV2Parameters{
+		Channel:  channel,
 		File:     filename,
+		Filename: filename,
 	})
 	return err
 }
@@ -531,12 +538,13 @@ func (c *Client) processValidCommand(cmds []string, tool Tool, channel, user, ti
 		if err2 != nil {
 			log.Error(err2)
 		}
-		uploadParams := slack.FileUploadParameters{
-			Channels: []string{channel},
+		uploadParams := slack.UploadFileV2Parameters{
+			Channel:  channel,
 			File:     tFile,
+			Filename: tFile,
 		}
 
-		if _, err := c.slackClient.UploadFile(uploadParams); err != nil {
+		if _, err := c.slackClient.UploadFileV2(uploadParams); err != nil {
 			log.Errorf("Unexpected error uploading file: %s", err)
 		}
 	} else {
@@ -559,12 +567,13 @@ func (c *Client) processValidCommand(cmds []string, tool Tool, channel, user, ti
 		if err2 != nil {
 			log.Error(err2)
 		}
-		uploadParams := slack.FileUploadParameters{
-			Channels: []string{c.cfg.Admins[0].LogChannelId},
+		uploadParams := slack.UploadFileV2Parameters{
+			Channel:  c.cfg.Admins[0].LogChannelId,
 			File:     tFile,
+			Filename: tFile,
 		}
 
-		if _, err := c.slackClient.UploadFile(uploadParams); err != nil {
+		if _, err := c.slackClient.UploadFileV2(uploadParams); err != nil {
 			log.Errorf("Unexpected error uploading file: %s", err)
 		}
 	}

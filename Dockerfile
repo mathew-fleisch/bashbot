@@ -1,4 +1,7 @@
-FROM golang:1.19 as builder
+FROM golang:1.22.2-alpine as builder
+
+# Install build dependencies
+RUN apk add --no-cache make git wget
 
 # yq required to parse version from helm chart and inject into build
 RUN wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -q -O /usr/bin/yq \
@@ -6,7 +9,7 @@ RUN wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
 
 WORKDIR /bashbot
 COPY . .
-RUN make
+RUN make go-build
 
 FROM alpine:latest
 LABEL maintainer="Mathew Fleisch <mathew.fleisch@gmail.com>"
