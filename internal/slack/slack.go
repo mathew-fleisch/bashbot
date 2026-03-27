@@ -69,12 +69,18 @@ func loadConfigFile(filePath string) (*Config, error) {
 
 // Run runs the slack socketmode client on background.
 func (c *Client) Run() {
-	go c.socketClient.Run()
+	go func() {
+		if err := c.socketClient.Run(); err != nil {
+			log.WithError(err).Error("Problem running socket client")
+		}
+	}()
 
 	for event := range c.socketClient.Events {
 		switch event.Type {
 		case socketmode.EventTypeEventsAPI:
-			c.eventsAPIHandler(event)
+			if err := c.eventsAPIHandler(event); err != nil {
+				log.WithError(err).Error("Error handling Events API event")
+			}
 
 		case socketmode.EventTypeConnected:
 			log.Info("Bashbot is now connected to slack. Primary trigger: `" + c.cfg.Admins[0].Trigger + "`")

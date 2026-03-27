@@ -1,6 +1,6 @@
 module github.com/mathew-fleisch/bashbot
 
-go 1.19
+go 1.22
 
 require (
 	github.com/mitchellh/go-homedir v1.1.0
