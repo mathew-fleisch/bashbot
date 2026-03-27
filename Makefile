@@ -1,6 +1,6 @@
 GOOS?=$(shell go env GOOS)
 GOARCH?=$(shell go env GOARCH)
-VERSION?=$(shell make version)
+VERSION?=$(shell $(MAKE) --no-print-directory version)
 LATEST_VERSION?=$(shell curl -s https://api.github.com/repos/mathew-fleisch/bashbot/releases/latest | grep tag_name | cut -d '"' -f 4)
 BINARY?=bin/bashbot
 SRC_LOCATION?=main.go
@@ -45,16 +45,15 @@ version: ## get the current helm chart version
 
 .PHONY: bump-patch
 bump-patch: ## Bump-patch the semantic version of the helm chart using semver tool
-	sed -i 's/'$(shell make version)'/v'$(shell semver bump patch $(shell make version))'/g' charts/bashbot/Chart.yaml
+	sed -i 's/'$(shell $(MAKE) --no-print-directory version)'/v'$(shell semver bump patch $(shell $(MAKE) --no-print-directory version))'/g' charts/bashbot/Chart.yaml
 
 .PHONY: bump-minor
 bump-minor: ## Bump-minor the semantic version of the helm chart using semver tool
-	sed -i 's/'$(shell make version)'/v'$(shell semver bump minor $(shell make version))'/g' charts/bashbot/Chart.yaml
+	sed -i 's/'$(shell $(MAKE) --no-print-directory version)'/v'$(shell semver bump minor $(shell $(MAKE) --no-print-directory version))'/g' charts/bashbot/Chart.yaml
 
 .PHONY: bump-major
 bump-major: ## Bump-major the semantic version of the helm chart using semver tool
-	sed -i 's/'$(shell make version)'/v'$(shell semver bump major $(shell make version))'/g' charts/bashbot/Chart.yaml
-
+	sed -i 's/'$(shell $(MAKE) --no-print-directory version)'/v'$(shell semver bump major $(shell $(MAKE) --no-print-directory version))'/g' charts/bashbot/Chart.yaml
 .PHONY: install-latest
 install-latest: ## install the latest version of the bashbot binary to /usr/local/bin/bashbot with wget
 	wget -q -O /usr/local/bin/bashbot https://github.com/mathew-fleisch/bashbot/releases/download/$(LATEST_VERSION)/bashbot-$(GOOS)-$(GOARCH)
@@ -224,25 +223,25 @@ pod-get: ## with an existing pod bashbot pod running, use kubectl to get the pod
 
 .PHONY: pod-logs
 pod-logs: ## with an existing pod bashbot pod running, use kubectl to display the logs of the pod
-	kubectl -n $(NAMESPACE) logs -f $(shell make pod-get) \
+	kubectl -n $(NAMESPACE) logs -f $(shell $(MAKE) --no-print-directory pod-get) \
 		| sed -e 's/\\*\\n/\n/g'
 	
 .PHONY: pod-logs-json
 pod-logs-json: ## with an existing pod bashbot pod running, use kubectl to display the json logs of the pod and pipe to jq
-	kubectl -n $(NAMESPACE) logs -f $(shell make pod-get) \
+	kubectl -n $(NAMESPACE) logs -f $(shell $(MAKE) --no-print-directory pod-get) \
 		| jq -Rr '. as $$line | try (fromjson | .) catch $$line'
 
 .PHONY: pod-delete
 pod-delete: ## with an existing pod bashbot pod running, use kubectl to delete it
-	kubectl -n $(NAMESPACE) delete pod $(shell make pod-get) --ignore-not-found=true
+	kubectl -n $(NAMESPACE) delete pod $(shell $(MAKE) --no-print-directory pod-get) --ignore-not-found=true
 
 .PHONY: pod-exec
 pod-exec: ## with an existing pod bashbot pod running, use kubectl to exec into it 
-	kubectl -n $(NAMESPACE) exec -it $(shell make pod-get) -- bash
+	kubectl -n $(NAMESPACE) exec -it $(shell $(MAKE) --no-print-directory pod-get) -- bash
 
 .PHONY: pod-exec-test
 pod-exec-test: ## with an existing pod bashbot pod running, use kubectl to exec into it and run the test-suite
-	kubectl -n $(NAMESPACE) exec  $(shell make pod-get) -- \
+	kubectl -n $(NAMESPACE) exec  $(shell $(MAKE) --no-print-directory pod-get) -- \
 		bash -c '. /usr/asdf/asdf.sh && make test-run'
 
 
