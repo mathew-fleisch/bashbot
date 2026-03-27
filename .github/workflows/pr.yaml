@@ -30,7 +30,7 @@ jobs:
       with:
         image: "bashbot:local"
         fail-build: false
-        acs-report-enable: true
+        output-file: results.sarif
     - name: Upload Anchore Scan Report
       uses: github/codeql-action/upload-sarif@v3
       with:
