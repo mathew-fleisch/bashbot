@@ -67,7 +67,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GIT_TOKEN }}
       -
         name: Build and push to Docker Hub
         id: docker_build_dockerhub
@@ -131,13 +131,13 @@ jobs:
         name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
         env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_TOKEN: "${{ secrets.GIT_TOKEN }}"
           CR_SKIP_EXISTING: true
       -
         name: Cut Github Release
         uses: ncipollo/release-action@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GIT_TOKEN }}
           allowUpdates: true
           artifacts: "bin/*"
           tag: bashbot-${{ env.RELEASE_VERSION }}
