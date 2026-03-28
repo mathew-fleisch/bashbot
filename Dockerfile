@@ -13,6 +13,7 @@ RUN make go-build
 
 FROM alpine:latest
 LABEL maintainer="Mathew Fleisch <mathew.fleisch@gmail.com>"
+LABEL org.opencontainers.image.source="https://github.com/mathew-fleisch/bashbot"
 ENV BASHBOT_CONFIG_FILEPATH=/bashbot/config.yaml
 ENV BASHBOT_ENV_VARS_FILEPATH=""
 ENV LOG_LEVEL="info"
