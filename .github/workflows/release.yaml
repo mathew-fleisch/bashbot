@@ -77,7 +77,7 @@ jobs:
         with:
           registry: ghcr.io
           username: mathew-fleisch
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GIT_TOKEN }}
       -
         name: Build and push to Docker Hub
         id: docker_build_dockerhub
