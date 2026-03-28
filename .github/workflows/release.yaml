@@ -84,6 +84,7 @@ jobs:
       -
         name: Build and push to GHCR
         id: docker_build_ghcr
+        continue-on-error: true
         uses: docker/build-push-action@v6
         with:
           push: true
@@ -111,6 +112,7 @@ jobs:
       -
         name: Build and push root container to GHCR
         id: docker_build_root_ghcr
+        continue-on-error: true
         uses: docker/build-push-action@v6
         with:
           push: true
