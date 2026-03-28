@@ -76,7 +76,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.repository_owner }}
+          username: mathew-fleisch
           password: ${{ secrets.GITHUB_TOKEN }}
       -
         name: Build and push to Docker Hub
@@ -101,8 +101,8 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           tags: |
-            ghcr.io/${{ github.repository_owner }}/bashbot:latest
-            ghcr.io/${{ github.repository_owner }}/bashbot:${{ env.RELEASE_VERSION }}
+            ghcr.io/mathew-fleisch/bashbot:latest
+            ghcr.io/mathew-fleisch/bashbot:${{ env.RELEASE_VERSION }}
           cache-from: type=registry,ref=mathewfleisch/bashbot:latest
           cache-to: type=inline
       -
@@ -129,8 +129,8 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           tags: |
-            ghcr.io/${{ github.repository_owner }}/bashbot:latest-root
-            ghcr.io/${{ github.repository_owner }}/bashbot:${{ env.RELEASE_VERSION }}-root
+            ghcr.io/mathew-fleisch/bashbot:latest-root
+            ghcr.io/mathew-fleisch/bashbot:${{ env.RELEASE_VERSION }}-root
           cache-from: type=registry,ref=mathewfleisch/bashbot:latest
           cache-to: type=inline
           build-args: NRUSER=root

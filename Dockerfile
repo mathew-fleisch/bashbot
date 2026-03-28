@@ -1,4 +1,4 @@
-FROM golang:1.22.2-alpine as builder
+FROM golang:1.22.2-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache make git wget
@@ -14,11 +14,9 @@ RUN make go-build
 FROM alpine:latest
 LABEL maintainer="Mathew Fleisch <mathew.fleisch@gmail.com>"
 ENV BASHBOT_CONFIG_FILEPATH=/bashbot/config.yaml
-ENV BASHBOT_ENV_VARS_FILEPATH ""
-ENV SLACK_BOT_TOKEN ""
-ENV SLACK_APP_TOKEN ""
-ENV LOG_LEVEL "info"
-ENV LOG_FORMAT "text"
+ENV BASHBOT_ENV_VARS_FILEPATH=""
+ENV LOG_LEVEL="info"
+ENV LOG_FORMAT="text"
 ARG NRUSER=bb
 
 RUN apk add --update --no-cache bash curl git make jq yq \

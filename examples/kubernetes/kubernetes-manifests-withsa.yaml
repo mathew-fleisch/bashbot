@@ -493,10 +493,8 @@ data:
    dependencies:
      - name: Install Dependencies with asdf
        install:
-         - "mkdir -p /usr/asdf; "
-         - "git clone --depth 1 https://github.com/asdf-vm/asdf.git /usr/asdf --branch v0.8.1; "
-         - ". /usr/asdf/asdf.sh; "
-         - "cat /bashbot/.tool-versions "
+         - "if [ ! -f /usr/asdf/asdf.sh ]; then rm -rf /usr/asdf && git clone --depth 1 https://github.com/asdf-vm/asdf.git /usr/asdf --branch v0.14.1; fi; "
+         - ". /usr/asdf/asdf.sh; "         - "cat /bashbot/.tool-versions "
          - "| grep -vE '^#' "
          - "| awk '{print $1}' "
          - "| xargs -I {} asdf plugin add {}; "
