@@ -148,7 +148,7 @@ jobs:
         run: |
           asdf plugin add bashbot https://github.com/mathew-fleisch/asdf-bashbot.git || true
           asdf install bashbot ${{ env.RELEASE_VERSION_NO_V }}
-          asdf global bashbot ${{ env.RELEASE_VERSION_NO_V }}
+          asdf set -u bashbot ${{ env.RELEASE_VERSION_NO_V }}
           echo "$(asdf where bashbot)/bin" >> $GITHUB_PATH
       -
         name: Notify Release Channel
