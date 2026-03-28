@@ -3,6 +3,16 @@ entries:
   bashbot:
   - apiVersion: v2
     appVersion: v2.1.0
+    created: "2026-03-28T04:27:11.080324433Z"
+    description: Bashbot is a slack ChatOps tool for Infrastructure and DevOps teams.
+    digest: 4ab2ccd6e30b63047574d9003e1b40ffd1bc2e2274573236ee6ec40ac3c8cfd1
+    name: bashbot
+    type: application
+    urls:
+    - https://github.com/mathew-fleisch/bashbot/releases/download/bashbot-v2.1.5/bashbot-v2.1.5.tgz
+    version: v2.1.5
+  - apiVersion: v2
+    appVersion: v2.1.0
     created: "2026-03-28T04:20:36.757762872Z"
     description: Bashbot is a slack ChatOps tool for Infrastructure and DevOps teams.
     digest: deca7d3c3d03dc252a391587085880d0973128215929b985bf29a5be252b7671
@@ -91,4 +101,4 @@ entries:
     urls:
     - https://github.com/mathew-fleisch/bashbot/releases/download/bashbot-v2.0.0/bashbot-v2.0.0.tgz
     version: v2.0.0
-generated: "2026-03-28T04:20:36.757844103Z"
+generated: "2026-03-28T04:27:11.080363896Z"
