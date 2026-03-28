@@ -472,12 +472,15 @@ tools:
 dependencies:
   - name: Install Dependencies with asdf
     install:
-      - "if [ ! -f /usr/asdf/asdf.sh ]; then rm -rf /usr/asdf && git clone --depth 1 https://github.com/asdf-vm/asdf.git /usr/asdf --branch v0.14.1; fi; "
+      - "if [ ! -f /usr/asdf/asdf.sh ]; then "
+      - "  rm -rf /usr/asdf/.[!.]* /usr/asdf/..?* /usr/asdf/* 2>/dev/null || true; "
+      - "  git clone --depth 1 https://github.com/asdf-vm/asdf.git /usr/asdf --branch v0.14.1; "
+      - "fi; "
       - ". /usr/asdf/asdf.sh; "
       - "cat /bashbot/.tool-versions "
       - "| grep -vE '^#' "
       - "| awk '{print $1}' "
-      - "| xargs -I {} asdf plugin add {}; "
+      - "| xargs -I {} bash -c \"asdf plugin add {} || true\"; "
       - "asdf install; "
       - "echo 'asdf installed and configured!'; "
       - "echo 'Source asdf before command to use installed dependencies:'; "

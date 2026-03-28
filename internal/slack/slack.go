@@ -126,13 +126,8 @@ func (c *Client) InstallVendorDependencies() {
 	log.Debug("installing vendor dependencies")
 	for i := 0; i < len(c.cfg.Dependencies); i++ {
 		log.Info(c.cfg.Dependencies[i].Name)
-		words := strings.Fields(strings.Join(c.cfg.Dependencies[i].Install, " "))
-		var tcmd []string
-		for index, element := range words {
-			log.Debugf("%d: %s", index, element)
-			tcmd = append(tcmd, element)
-		}
-		cmd := []string{"bash", "-c", "pushd vendor && " + strings.Join(tcmd, " ") + " && popd"}
+		installCmd := strings.Join(c.cfg.Dependencies[i].Install, " ")
+		cmd := []string{"bash", "-c", "pushd vendor && " + installCmd + " && popd"}
 		log.Debug(strings.Join(cmd, " "))
 		log.Info(c.runShellCommands(cmd))
 	}
