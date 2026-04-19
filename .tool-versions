@@ -1,6 +1,6 @@
 golang 1.26.2
 helm 4.1.4
-kubectl 1.35.3
+kubectl 1.35.4
 kubectx 0.11.0
-yq 4.52.5
+yq 4.53.2
 golangci-lint 
