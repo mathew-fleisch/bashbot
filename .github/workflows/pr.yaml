@@ -56,7 +56,7 @@ jobs:
         ref: ${{ github.event.pull_request.head.sha }}
 
     - name: Install Golang via asdf
-      uses: asdf-vm/actions/install@v3
+      uses: asdf-vm/actions/install@v4
       with:
         tool_versions: golang 1.22.2
 
@@ -84,7 +84,7 @@ jobs:
           fetch-depth: 0
       - 
         name: Install stuff with asdf
-        uses: asdf-vm/actions/install@v3
+        uses: asdf-vm/actions/install@v4
         with:
           tool_versions: |
             action-validator 0.1.2
